@@ -3,7 +3,7 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: Network Broker pub / sub lib    *
 * ---------------------------------------- */
-;(function(){
+;(function($){
   var Gurilla = new Gurilla();
 
   if(!Gurilla.network){
@@ -11,18 +11,22 @@
   }
 
   Gurilla.network.Broker = function(){
-    Broker = function(){};
+    var Broker = function(){},
+        event_cache = [];
 
     Broker.fire = function(){
     
-    }
+    };
 
     Broker.register = function(){
     
-    }
+    };
 
     Broker.unregister = function(){
     
-    }
+    };
+
+    return Broker;
   };
-}).call(this);
+
+}).call(jQuery, this);

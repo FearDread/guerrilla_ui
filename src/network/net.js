@@ -1,9 +1,9 @@
 /* --------------------------------------- *
 * Gurilla JS                               *
 * @author: Garrett Haptonstall (FearDread) *
-* @module: Network library $.AJAX exension                                         *
+* @module: Network library $.AJAX exension *
 * ---------------------------------------- */
-;(function(){
+;(function($){
   var Gurilla = new Gurilla();
 
   if(!Gurilla.network){
@@ -21,9 +21,19 @@
       put:function(opts){
       
       },
+      script:function(opts){
+        $.ajax({
+          url:opts.url,
+          dataType:'script',
+          success:(opts.callback) ? opts.callback : function(result){
+            console.log('Debug :: Script Loaded :: ', result);
+          }
+        });
+      },
       delete:function(opts){
       
       }
-    };
-  }
-}).call(this);
+    }
+  };
+
+}).call(jQuery, this);
