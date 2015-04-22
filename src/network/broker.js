@@ -4,29 +4,25 @@
 * @module: Network Broker pub / sub lib    *
 * ---------------------------------------- */
 ;(function($){
-  var Gurilla = new Gurilla();
-
-  if(!Gurilla.network){
-    Gurilla.network = {};
+  if(!$.Gurilla.network){
+    $.Gurilla.network = {};
   }
 
-  Gurilla.network.Broker = function(){
-    var Broker = function(){},
-        event_cache = [];
+  $.Gurilla.network.Broker = function(){
+    var event_cache = [];
 
-    Broker.fire = function(){
-    
-    };
+    return {
+      fire = function(evnt){
+      
+      },
 
-    Broker.register = function(){
-    
-    };
+      register = function(evnt, callback){
+      
+      },
 
-    Broker.unregister = function(){
-    
-    };
-
-    return Broker;
+      unregister:function(handle){
+      
+      }
+    }
   };
-
-}).call(jQuery, this);
+}).call(jQuery);

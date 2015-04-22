@@ -1,24 +1,31 @@
 /* --------------------------------------- *
 * Gurilla JS                               *
 * @author: Garrett Haptonstall (FearDread) *
-* Gurilla Namespace Bootstrap              *
+* @license: The MIT License (MIT)           * 
+* Copyright (c) 2015 Garrett Haptonstall   *
 * ---------------------------------------- */
 ;(function($, window, document, undefined){
 
   var Guerilla, defaults;
-
+  /* --------------------------------------- *
+  * Gurilla JS Default Config                *
+  * ---------------------------------------- */
   defaults = {
     name:'core',
     debug:true,
     jquery:true
   };
-
+  /* --------------------------------------- *
+  * Gurilla JS Native Library                *
+  * ---------------------------------------- */
   Guerilla = function(options){
     this._config = $.extend({}, defaults, options);
 
     return this;
   };
-
+  /* --------------------------------------- *
+  * Gurilla JS jQuery Namespace              *
+  * ---------------------------------------- */
   $.Guerilla = function(){
 
     return {
@@ -34,7 +41,9 @@
       }
     };
   };
-
+  /* --------------------------------------- *
+  * Gurilla JS jQuery $.fn Wrapper           *
+  * ---------------------------------------- */
   $.fn.Guerilla = function(options){
     return this.each(function(){
         if(!$.data(this, 'guerilla')){

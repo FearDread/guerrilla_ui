@@ -9,16 +9,19 @@
   }
 
   $.Gurilla.network.Net = function(){
-    this = {
+    return {
       post:function(opts){
       
       },
+
       get:function(opts){
       
       },
+
       put:function(opts){
       
       },
+
       script:function(opts){
         $.ajax({
           url:opts.url,
@@ -28,12 +31,10 @@
           }
         });
       },
+
       delete:function(opts){
       
       }
     }
-
-    return this;
   };
-
 }).call(jQuery);
