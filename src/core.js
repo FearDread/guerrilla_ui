@@ -3,61 +3,37 @@
 * @author: Garrett Haptonstall (FearDread) *
 *                                          *
 * ---------------------------------------- */
-;(function($, window, undefined){
-  var Gurilla = {
-    init:function(opts, elem){
-      this.defaults = $.extend({}, this.defaults, opts);
+;(function($, window, document, undefined){
 
-      this.elem = elem;
-      this.$elem = $(elem);
+  var Guerilla, defaults;
 
-      this._build();
-    
-      return this;
-    },
-    defaults:{
-      debug:true,
-      config:{},
-      modules:['gui','network'],
-    },
-    _build:function(){
-    
-      this.$elem.html();
-    },
-    _methods:{
-    
-    },
+  Guerilla = function(){
+    return {};
   };
 
-  /* Public Methods */
-  Gurilla.prototype = {
-    loadModule:function(module){
-      this.modules.each(function(mod){
-      
-      });
-    }
+  $.Guerilla = function(){
+    return {
+      init:function(elem, options){
+        this._el = elem;
+        this._defaults = $.extend({}, defaults, options);
+
+        console.log('init :: ', this._defaults);
+      },
+      _build:{
+
+      }
+    }; 
   };
 
-  if(typeof Object.create !== 'function'){
-    Object.create = function(obj){
-      function func(){}
-
-      func.prototype = obj;
-
-      return new func();
-    };
-  }
-
-  $.fn.Gurilla = function(options){
-    if(this.length){
-      return this.each(function(){
-        var Gurilla = Object.create(Gurilla);
-
-        Gurilla.init(options, this); 
-  
-        $.data(this, 'gurilla', Gurilla);
-      });
-    }
+  $.fn.Guerilla = function(options){
+    return this.each(function(){
+        if(!$.data(this, 'guerilla')){
+          $.data(this, 'guerilla', new $.Guerilla().init(this, options))
+        }
+      }
+    );
   };
 
-})(jQuery, window);
+  return window.Guerilla = Guerilla; 
+
+})(jQuery, window, document);

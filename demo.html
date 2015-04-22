@@ -1,15 +1,28 @@
 <html>
   <head>
+    <link rel='stylesheet' src='css/styles.css' type='text/css'></link> 
 
   </head>
 
   <body>
 
-    <h1>Hello Gurilla!</h1>
+    <script src='libs/jquery/jquery.js' type='text/javascript'></script>
+    <script src='src/core.js' type='text/javascript'></script>
 
+    <script type='text/javascript'>
 
-    <script src='' type='text/javascript' />
+      var G = new Guerilla();
 
+      var $G = new $.Guerilla();
+
+      console.log('global :: ', G);
+      console.log('$ namespace :: ', $G);
+
+      $('body').Guerilla({
+        property:'testing'
+      });
+
+    </script>
   </body>
 
 </html>

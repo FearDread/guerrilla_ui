@@ -4,14 +4,12 @@
 * @module: Network library $.AJAX exension *
 * ---------------------------------------- */
 ;(function($){
-  var Gurilla = new Gurilla();
-
-  if(!Gurilla.network){
-    Gurilla.network = {};
+  if(!$.Gurilla.network){
+    $.Gurilla.network = {};
   }
 
-  Gurilla.network.Net = function(){
-    return this.prototype = {
+  $.Gurilla.network.Net = function(){
+    this = {
       post:function(opts){
       
       },
@@ -34,6 +32,8 @@
       
       }
     }
+
+    return this;
   };
 
-}).call(jQuery, this);
+}).call(jQuery);
