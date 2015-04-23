@@ -3,7 +3,7 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: Network Broker pub / sub lib    *
 * ---------------------------------------- */
-;(function($){
+;(function($, window, document, undefined){
   if(!$.Gurilla.network){
     $.Gurilla.network = {};
   }
@@ -25,4 +25,4 @@
       }
     }
   };
-}).call(jQuery);
+}).call(jQuery, window, document);

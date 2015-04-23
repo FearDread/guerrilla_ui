@@ -13,14 +13,14 @@
 
     <script type='text/javascript'>
 
-      var G = new Guerilla();
+      var G = new Guerrilla();
 
-      var $G = new $.Guerilla();
+      var $G = new $.Guerrilla();
 
-      console.log('global :: ', G);
-      console.log('$ namespace :: ', $G);
+      console.log('Window :: ', G);
+      console.log('$ jQuery :: ', $G);
 
-      $('body').Guerilla({
+      $('body').Guerrilla({
         property:'testing'
       });
 
