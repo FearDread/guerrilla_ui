@@ -13,87 +13,88 @@
   defaults = {
     name:'core',
     debug:true,
-    jquery:true
+    jquery:($) ? true : false 
   };
   /* --------------------------------------- *
   * Guerrilla JS Native Library              *
   * ---------------------------------------- */
   Guerrilla = function(options){
-    this._config = $.extend({}, defaults, options);
+    /* config via constructor */
+    this._config = this.extend({}, defaults, options);
 
+    /* Private Methods */
+    this._methods = {
+
+      /* Cover for $.extend if jQuery not available */
+      extend:function(){
+        var i, key, 
+            params = arguments,
+            argc = params.length;
+
+        for(i = 1; i < argc; i++){ 
+
+          for(key in params[i]){
+          
+            if(params[i].hasOwnProperty(key)){
+              params[0][key] = params[i][key];
+            }
+          }
+        }
+
+        return params[0];
+      },
+
+    };
+
+    /* Public Methods */
     this.prototype = {
+
+      /* Return private method extend if jQuery $.extend not available */
+      extend:function(){
+        return this._methods.extend();
+      },
+
       /* Uses guerrilla.util.Cookie library.  */ 
       /* Executes a function only once, even after the refresh of the page. */
       once:function(){
-        var func = arguments[0], 
-            argc = arguments.length, 
-            cname = arguments[argc - 2],
-            glob = (typeof arguments[argc - 1] === "string");
+        var params = arguments, 
+            callback = params[0], 
+            argc = params.length, 
+            cname = params[argc - 2],
+            glob = (typeof params[argc - 1] === "string");
 
         if(glob){ 
           argc++; 
         }
         if(argc < 3){ 
-          throw new TypeError("Error :: Guerrilla.once - not enough arguments"); 
+          throw new TypeError("Error :: guerrilla.core.once - not enough arguments"); 
         }
         if(typeof func !== "function"){ 
-          throw new TypeError("Error :: Guerrilla.once - first argument must be a function"); 
+          throw new TypeError("Error :: guerrilla.core.once - first argument must be a function"); 
         }
         if(!cname || /^(?:expires|max\-age|path|domain|secure)$/i.test(cname)){ 
-          throw new TypeError("Error :: Guerrilla.once - invalid identifier");
+          throw new TypeError("Error :: guerrilla.core.once - invalid identifier");
         }
 
-        if(decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) === "1"){ 
+        if(decodeURIComponent(
+          document.cookie.replace(
+            new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) === "1"){ 
+
           return false; 
         }
 
-        func.apply((argc > 3) ? arguments[1] : null, (argc > 4) ? [].slice.call(arguments, 2, argc - 2) : []);
+        values = (argc > 3) ? params[1] : null, (argc > 4) ? [].slice.call(params, 2, argc - 2) : [];
+
+        func.apply(values);
 
         document.cookie = encodeURIComponent(cname) + "=1; expires=Fri, 31 Dec 9999 23:59:59 GMT" + (glob || !arguments[argc - 1]) ? "; path=/" : "";
 
         return true;
-      }
+      },
+
     };
 
     return Object.create(this.prototype);
-  };
-
-  Guerrilla.prototype.once = function(){
-  };
-  /* --------------------------------------- *
-  * Guerrilla JS jQuery Namespace            *
-  * ---------------------------------------- */
-  $.Guerrilla = function(){
-
-    return {
-      init:function(elem, options){
-        this._el = $(elem);
-
-        this._defaults = $.extend({}, defaults, options);
-
-        this._build();
-      },
-      _defaults:defaults,
-      _build:function(){
-        console.log('init :: ', this._defaults);
-        this._el.html('<h1>Incomming guerrilla attacks ... </h1>');
-      }
-    };
-  };
-  /* --------------------------------------- *
-  * Guerrilla JS jQuery $.fn Wrapper         *
-  * ---------------------------------------- */
-  $.fn.Guerrilla = function(options){
-    return this.each(function(){
-        if(!$.data(this, 'guerilla')){
-
-          $.data(this, 'guerilla', new $.Guerrilla().init(this, options))
-
-        }else{
-          return new $.Guerrilla().init(this, options);
-        }
-      }
-    );
   };
 
   return window.Guerrilla = Guerrilla;

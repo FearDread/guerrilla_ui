@@ -3,7 +3,7 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: Util library Cookie wrapper     *
 * ---------------------------------------- */
-guerrilla.util.Cookie = (function(){
+Guerrilla.util.Cookie = (function(){
 
   return {
 
