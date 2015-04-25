@@ -19,11 +19,21 @@
   * Guerrilla JS Native Library              *
   * ---------------------------------------- */
   Guerrilla = function(options){
-    /* config via constructor */
-    this._config = this.extend({}, defaults, options);
-
     /* Private Methods */
     this._methods = {
+      /* Small console.log wrapper */
+      log:function(msg){
+        if(this._config.debug){
+          console.log('Debug ::', msg);
+        }
+      },
+
+      /* Small Throw wrapper */
+      error:function(msg){
+        if(this._config.debug){
+          throw new TypeError('Error ::', msg);
+        }
+      },
 
       /* Cover for $.extend if jQuery not available */
       extend:function(){
@@ -31,6 +41,9 @@
             params = arguments,
             argc = params.length;
 
+        if(argc === 0){
+          this.error('Guerrilla.core.extend - missing arguments.');
+        }
         for(i = 1; i < argc; i++){ 
 
           for(key in params[i]){
@@ -57,42 +70,48 @@
       /* Uses guerrilla.util.Cookie library.  */ 
       /* Executes a function only once, even after the refresh of the page. */
       once:function(){
-        var params = arguments, 
+        var values, 
+            params = arguments, 
             callback = params[0], 
             argc = params.length, 
             cname = params[argc - 2],
             glob = (typeof params[argc - 1] === "string");
 
+        var gjs_cookie = new guerrilla.util.Cookie();
+
         if(glob){ 
           argc++; 
         }
+
         if(argc < 3){ 
-          throw new TypeError("Error :: guerrilla.core.once - not enough arguments"); 
-        }
-        if(typeof func !== "function"){ 
-          throw new TypeError("Error :: guerrilla.core.once - first argument must be a function"); 
-        }
-        if(!cname || /^(?:expires|max\-age|path|domain|secure)$/i.test(cname)){ 
-          throw new TypeError("Error :: guerrilla.core.once - invalid identifier");
+          this.log("guerrilla.core.once - not enough arguments"); 
+          return false;
+
+        }else if(typeof func !== "function"){ 
+          this.log("guerrilla.core.once - first argument must be a function"); 
+          return false;
+
+        }else if(!cname || /^(?:expires|max\-age|path|domain|secure)$/i.test(cname)){ 
+          this.log("guerrilla.core.once - invalid identifier");
+          return false;
         }
 
-        if(decodeURIComponent(
-          document.cookie.replace(
-            new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) === "1"){ 
-
-          return false; 
+        if(gjs_cookie.has(cname)){
+          return false;
         }
 
         values = (argc > 3) ? params[1] : null, (argc > 4) ? [].slice.call(params, 2, argc - 2) : [];
 
         func.apply(values);
 
-        document.cookie = encodeURIComponent(cname) + "=1; expires=Fri, 31 Dec 9999 23:59:59 GMT" + (glob || !arguments[argc - 1]) ? "; path=/" : "";
+        gjs_cookie.set(cname, 1, 'Fri, 31 Dec 9999', '/', false);
 
         return true;
       },
 
     };
+    /* config via constructor */
+    this._config = this._methods.extend({}, defaults, options);
 
     return Object.create(this.prototype);
   };

@@ -1,42 +1,49 @@
 /* --------------------------------------- *
-* Guerrilla JS                               *
+* Guerrilla JS                             *
 * @author: Garrett Haptonstall (FearDread) *
-* @module: Util library Cookie wrapper     *
+* @module: Guerrilla.util.Cookie           *
 * ---------------------------------------- */
-Guerrilla.util.Cookie = (function(){
+var Cookie = (function(){
 
-  return {
+  this.prototype = {
 
+    /* Takes a string and returns URI encoded string */
     encode:function(string){
       return encodeURIComponent(string);
     },
 
+    /* Takes a string and returns URI decoded string */
     decode:function(string){
       return decodeURIComponent(string);
     },
 
+    /* Check for existing cookie with key "cname" */
     has:function(cname){
       if(!cname){ 
         return false; 
       }
 
       return (
+
         new RegExp("(?:^|;\\s*)" + this.encode(cname).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")
+
       ).test(document.cookie);
     },
 
+    /* return cookie with key "cname" */ 
     get:function(cname){
-       if(!cname){ 
-         return null; 
-       }
+      if(!cname){ 
+        return null; 
+      }
 
-       return this.decode(document.cookie.replace(
+      return this.decode(document.cookie.replace(
 
-           new RegExp("(?:(?:^|.*;)\\s*" + this.encode(cname).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"
+        new RegExp("(?:(?:^|.*;)\\s*" + this.encode(cname).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")
 
-         ), "$1")) || null;
+      ) || null;
     },
 
+    /* create new cookie string and attach to document.cookie with key "cname" */
     set:function(cname, cvalue, expires, cdomain, is_secure){
       if(!cname || /^(?:expires|max\-age|path|domain|secure)$/i.test(cname)){
         return false; 
@@ -64,6 +71,7 @@ Guerrilla.util.Cookie = (function(){
       return true;
     },
     
+    /* remove (delete) cookie with key "cname", path "cpath" and domain "cdomain" */
     remove:function(cname, cpath, cdomain){
       if(!this.has(cname)){ 
         return false; 
@@ -77,6 +85,7 @@ Guerrilla.util.Cookie = (function(){
       return true;
     },
 
+    /* return a list of all strings attached to document.cookie */
     list:function(){
       var index = 0,
           regex = /((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, 
@@ -91,7 +100,8 @@ Guerrilla.util.Cookie = (function(){
 
       return keys;
     }
+  };
 
-  }
+  return Object.create(this.prototype);
 
 }).call(this);

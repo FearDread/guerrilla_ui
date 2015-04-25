@@ -1,40 +1,44 @@
 /* --------------------------------------- *
 * Gurilla JS                               *
 * @author: Garrett Haptonstall (FearDread) *
-* @module: Network library $.AJAX exension *
+* @module: Guerrilla.network.Net           *
+* @jquery: True                            *
 * ---------------------------------------- */
-;(function($){
-  if(!$.Gurilla.network){
-    $.Gurilla.network = {};
+var Net = (function($){
+
+  if(!$){
+    throw new TypeError('Missing jQuery');
   }
 
-  $.Gurilla.network.Net = function(){
-    return {
-      post:function(opts){
-      
-      },
+  this.prototype = {
+    post:function(opts){
+    
+    },
 
-      get:function(opts){
-      
-      },
+    get:function(opts){
+    
+    },
 
-      put:function(opts){
-      
-      },
+    put:function(opts){
+    
+    },
 
-      script:function(opts){
-        $.ajax({
-          url:opts.url,
-          dataType:'script',
-          success:(opts.callback) ? opts.callback : function(result){
-            console.log('Debug :: Script Loaded :: ', result);
-          }
-        });
-      },
+    script:function(opts){
+      $.ajax({
+        url:opts.url,
+        dataType:'script',
+        success:(opts.callback) ? opts.callback : function(result){
+          console.log('Debug :: Script Loaded :: ', result);
+        }
+      });
+    },
 
-      delete:function(opts){
-      
-      }
+    delete:function(opts){
+    
     }
+  
   };
-}).call(jQuery);
+
+  return Object.create(this.prototype);
+
+}).call(jQuery)

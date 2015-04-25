@@ -9,19 +9,38 @@
   <body>
 
     <script src='libs/jquery/jquery.js' type='text/javascript'></script>
-    <script src='src/core.js' type='text/javascript'></script>
-
+    <script src='src/jquery/index.js' type='text/javascript'></script>
+    <script src='src/core/index.js' type='text/javascript'></script>
+    <script src='src/util/cookie.js' type='text/javascript'></script>
+    <script src='src/network/broker.js' type='text/javascript'></script>
     <script type='text/javascript'>
+      var gjs = new Guerrilla();
+      var $gjs = new $.Guerrilla();
 
-      var G = new Guerrilla();
-
-      var $G = new $.Guerrilla();
-
-      console.log('Window :: ', G);
-      console.log('$ jQuery :: ', $G);
-
+      console.log('Window :: ', gjs);
+      console.log('$ jQuery :: ', $gjs);
       $('body').Guerrilla({
         property:'testing'
+      });
+
+      /* cookies */
+      console.log('cookie :: ', Cookie);
+      var list = Cookie.list();
+      console.log('list = ', list);
+
+      /* broker */
+      console.log('broker :: ', Broker);
+      var handle = Broker.register('loaded', function(str){
+          console.log('triggered the "loaded" event ... with:', str);
+        }
+      );
+      console.log('handle = ', handle);
+
+      $(window).load(function(){
+        console.log('window');
+
+        Broker.fire('loaded', 'Hello World');
+        Broker.unregister(handle);
       });
 
     </script>

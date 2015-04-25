@@ -1,44 +1,46 @@
 /* --------------------------------------- *
 * guerrilla JS                             *
 * @author: Garrett Haptonstall (FearDread) *
-* @license: The MIT License (MIT)          * 
-* Copyright (c) 2015 Garrett Haptonstall   *
+* @module: $.Guerrilla jQuery namespace    * 
 * ---------------------------------------- */
 ;(function($, window, document, undefined){
+  var defaults = {};
   /* --------------------------------------- *
   * guerrilla JS jQuery Namespace            *
   * ---------------------------------------- */
-  $.guerrilla = function(){
+  $.Guerrilla = function(){
 
     return {
       init:function(elem, options){
         this._el = $(elem);
 
-        this._defaults = $.extend({}, defaults, options);
+        this._config = $.extend({}, defaults, options);
 
         this._build();
       },
+
       _defaults:defaults,
+
       _build:function(){
-        console.log('init :: ', this._defaults);
         this._el.html('<h1>Incomming guerrilla attacks ... </h1>');
+
+        console.log('init :: ', this._config);
       }
-    };
+    }
   };
   /* --------------------------------------- *
   * guerrilla JS jQuery $.fn Wrapper         *
   * ---------------------------------------- */
-  $.fn.guerrilla = function(options){
+  $.fn.Guerrilla = function(options){
     return this.each(function(){
-        if(!$.data(this, 'guerilla')){
+      if(!$.data(this, 'guerilla')){
 
-          $.data(this, 'guerilla', new $.guerrilla().init(this, options))
+        $.data(this, 'guerilla', new $.Guerrilla().init(this, options))
 
-        }else{
-          return new $.guerrilla().init(this, options);
-        }
+      }else{
+        return new $.Guerrilla().init(this, options);
       }
-    );
+    });
   };
 
 })(jQuery, window, document);

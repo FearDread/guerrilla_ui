@@ -1,28 +1,65 @@
 /* --------------------------------------- *
-* Gurilla JS                               *
+* Guerrilla JS                             *
 * @author: Garrett Haptonstall (FearDread) *
-* @module: Network Broker pub / sub lib    *
+* @module: Guerrilla.network.Broker        *
 * ---------------------------------------- */
-;(function($, window, document, undefined){
-  if(!$.Gurilla.network){
-    $.Gurilla.network = {};
-  }
+var Broker = (function(){
 
-  $.Gurilla.network.Broker = function(){
-    var event_cache = [];
+  /* Ram storage of events */
+  var cache = [];
 
-    return {
-      fire = function(evnt){
+  /* Public Methods */
+  this.prototype = {
+  
+    /* Fire (trigger) a registered event within Broker */
+    fire:function(handle, args){
+      if(cache[handle]){
+        var idx = 0,
+            params = args || [],
+            current_event = cache[handle],
+            length = current_event.length;
       
-      },
+        while(length--){
+          current_event[idx].call(this, params);
 
-      register = function(evnt, callback){
-      
-      },
+          idx++;
+        };
+      }
+    },
 
-      unregister:function(handle){
-      
+    /* Register (add) a new event and its callback */
+    register:function(handle, callback){
+      if(!cache[handle]){
+        cache[handle] = [];
+      }
+
+      cache[handle].push(callback);
+    
+      return {
+        event:handle,
+        callback:callback
+      }
+    },
+
+    /* unregister (remove) event from RAM storage event cache */
+    unregister:function(handle){
+      if(cache[handle.event]){
+        var idx = 0,
+            current_event = cache[handle.event],
+            length = current_event.length;
+
+        while(length--){
+        
+          if(current_event[idx] == handle.callback){
+            current_event.splice(idx, 1);
+          }
+
+          idx++;
+        }
       }
     }
   };
-}).call(jQuery, window, document);
+
+  return Object.create(this.prototype);
+
+}).call(this);
