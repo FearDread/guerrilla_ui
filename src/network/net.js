@@ -10,6 +10,7 @@ var Net = (function($){
     throw new TypeError('Missing jQuery');
   }
 
+  /* public API methids */
   this.prototype = {
     post:function(opts){
     
@@ -41,4 +42,4 @@ var Net = (function($){
 
   return Object.create(this.prototype);
 
-}).call(jQuery)
+}).call(this, jQuery)

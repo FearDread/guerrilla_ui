@@ -58,62 +58,15 @@
       },
 
     };
-
-    /* Public Methods */
-    this.prototype = {
-
-      /* Return private method extend if jQuery $.extend not available */
-      extend:function(){
-        return this._methods.extend();
-      },
-
-      /* Uses guerrilla.util.Cookie library.  */ 
-      /* Executes a function only once, even after the refresh of the page. */
-      once:function(){
-        var values, 
-            params = arguments, 
-            callback = params[0], 
-            argc = params.length, 
-            cname = params[argc - 2],
-            glob = (typeof params[argc - 1] === "string");
-
-        var gjs_cookie = new guerrilla.util.Cookie();
-
-        if(glob){ 
-          argc++; 
-        }
-
-        if(argc < 3){ 
-          this.log("guerrilla.core.once - not enough arguments"); 
-          return false;
-
-        }else if(typeof func !== "function"){ 
-          this.log("guerrilla.core.once - first argument must be a function"); 
-          return false;
-
-        }else if(!cname || /^(?:expires|max\-age|path|domain|secure)$/i.test(cname)){ 
-          this.log("guerrilla.core.once - invalid identifier");
-          return false;
-        }
-
-        if(gjs_cookie.has(cname)){
-          return false;
-        }
-
-        values = (argc > 3) ? params[1] : null, (argc > 4) ? [].slice.call(params, 2, argc - 2) : [];
-
-        func.apply(values);
-
-        gjs_cookie.set(cname, 1, 'Fri, 31 Dec 9999', '/', false);
-
-        return true;
-      },
-
-    };
     /* config via constructor */
     this._config = this._methods.extend({}, defaults, options);
 
-    return Object.create(this.prototype);
+    return {
+      extend:function(){
+        return this.extend();
+      },
+    
+    }
   };
 
   return window.Guerrilla = Guerrilla;
