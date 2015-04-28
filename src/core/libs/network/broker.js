@@ -18,9 +18,7 @@
 }(function(){
 
     /* name space */
-    if(!Guerrilla.network){
-      Guerrilla.network = {};
-    }
+    Guerrilla.network = (Guerrilla.network) ? Guerrilla.network : {};
 
     Guerrilla.network.broker = function(){
       /* Ram storage of events */

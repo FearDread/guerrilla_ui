@@ -18,17 +18,12 @@
 }(function(){
 
     /* name space */
-    if(!Guerrilla.util){
-      Guerrilla.util = {};
-    }
+    Guerrilla.util = (Guerrilla.util) ? Guerrilla.util : {}; 
 
     Guerrilla.util.cookie = function(){
-
       this._config = {};
-
       /* public API methids */
       this.prototype = {
-
         /* Takes a string and returns URI encoded string */
         encode:function(string){
           return encodeURIComponent(string);
