@@ -63,10 +63,10 @@
         /* create new cookie string and attach to document.cookie with key "cname" */
         set:function(cname, cvalue, opts){
           var params = arguments,
-              core = new Guerrilla();
+              _core = new Guerrilla();
 
           if(params.length > 1 && (typeof cvalue) !== 'function'){
-            options = core.extend({}, this._config, opts); 
+            options = _core.extend({}, this._config, opts); 
           
             if((typeof options.expires) === 'number'){
               var days = options.expires, 
