@@ -3,9 +3,6 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: Guerrilla.util.Cookie           *
 * ---------------------------------------- */
-if(!Guerrilla.util){
-  Guerrilla.util = {};
-}
 (function(factory){
 
   if(typeof define === 'function' && define.amd){
@@ -19,6 +16,11 @@ if(!Guerrilla.util){
   }
 
 }(function(){
+
+    /* name space */
+    if(!Guerrilla.util){
+      Guerrilla.util = {};
+    }
 
     Guerrilla.util.cookie = function(){
 
@@ -64,16 +66,32 @@ if(!Guerrilla.util){
         },
 
         /* create new cookie string and attach to document.cookie with key "cname" */
-        set:function(cname, cvalue, copts){
-          var core = new Guerrilla(), 
-              params = arguments;
+        set:function(cname, cvalue, opts){
+          var params = arguments,
+              core = new Guerrilla();
 
-          console.log('core = ', core);
           if(params.length > 1 && (typeof cvalue) !== 'function'){
-            options = core.extend({}, this._config, copts); 
+            options = core.extend({}, this._config, opts); 
           
+            if((typeof options.expires) === 'number'){
+              var days = options.expires, 
+                  time = options.expires = new Date();
+
+              time.setMilliseconds(
+                time.getMilliseconds() + days * 864e+5
+              );
+            }
           }
 
+          document.cookie = [
+            this.encode(cname), '=', this.encode(cvalue),
+            (options.expires) ? '; expires=' + options.expires.toUTCString() : '',
+            (options.path) ? '; path=' + options.path : '', 
+            (options.domain) ? '; domain=' + options.domain : '',
+            (options.secure) ? '; secure=' + options.secure : '' 
+          ].join('');
+
+          console.log('set cookie ::', document.cookie);
           return true;
         },
         

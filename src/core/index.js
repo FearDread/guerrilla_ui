@@ -19,8 +19,8 @@
   * Guerrilla JS Native Library              *
   * ---------------------------------------- */
   Guerrilla = function(options){
-    /* Private Methods */
-    this._methods = {
+    /* Public Methods */
+    this.prototype = {
       /* Small console.log wrapper */
       log:function(msg){
         if(this._config.debug){
@@ -59,14 +59,9 @@
 
     };
     /* config via constructor */
-    this._config = this._methods.extend({}, defaults, options);
+    this._config = this.prototype.extend({}, defaults, options);
 
-    return {
-      extend:function(){
-        return this.extend();
-      },
-    
-    }
+    return Object.create(this.prototype); 
   };
 
   return window.Guerrilla = Guerrilla;
