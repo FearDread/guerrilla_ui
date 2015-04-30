@@ -16,22 +16,20 @@
   }
 
 }(function(){
+  var defaults;
 
     /* name space */
     Guerrilla.ui = (Guerrilla.ui) ? Guerrilla.ui: {}; 
 
-    /* Defaults */
-    var defaults = {
-      media:'(max-width:1024)',
-      in:function(){
+    /* stored media query */
+    window.media_matches = new String; 
 
-      },
-      out:function(){
-      
-      },
-      both:function(){
-      
-      }
+    /* Defaults */
+    defaults = {
+      media:'(max-width:1024)',
+      in:null,
+      out:null,
+      both:null,
     };
 
     Guerrilla.ui.media = function(options){
@@ -61,7 +59,8 @@
         }, 
 
         add_listener:function(options){
-          var query = window.matches(options.media),
+          var self = this,
+              query = window.media_matches(options.media),
               query_cb = function(){
                 return self.media_change(query, options);
               },
@@ -80,8 +79,13 @@
 
       };
 
-      return this._methods.add_listener(options);
-
+      return function(){
+        if(window.media_matches){
+        
+        }else{
+        
+        }
+      };
     };
   })
 );
