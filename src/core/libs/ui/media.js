@@ -17,12 +17,11 @@
 
 }(function(){
   var defaults;
-
     /* name space */
     Guerrilla.ui = (Guerrilla.ui) ? Guerrilla.ui: {}; 
 
     /* stored media query */
-    window.media_matches = new String; 
+    window.media_matches;
 
     /* Defaults */
     defaults = {
@@ -33,11 +32,11 @@
     };
 
     Guerrilla.ui.media = function(options){
-      var _core = new Guerrilla(),
+      var self = this,
+          _core = new Guerrilla(),
           breaks, query_change, add_listener, matches;
 
       this._config = _core.extend({}, defaults, options);
-
       /* Private Methods */
       this._methods = {
 
@@ -58,6 +57,36 @@
           }
         }, 
 
+        get_pixels:function(width, unit){
+          var value;
+
+          switch(unit){
+            case "em":
+              value = this.convert_fontsize(width);
+              break;
+
+            default:
+              value = width;
+          }
+
+          return value;
+        },
+
+        covert_fontsize:function(value){
+          var px, elem = document.createElement('div');
+
+          elem.style.width = '1em';
+          elem.style.position = 'absolute';
+
+          document.body.appendChild(elem);
+
+          px = value * elem.offsetWidth;
+
+          document.body.removeChild(elem);
+
+          return px;
+        },
+
         add_listener:function(options){
           var self = this,
               query = window.media_matches(options.media),
@@ -75,15 +104,43 @@
           window.addEventListener("orientationchange", window_cb, false);
 
           return this.query_change(query, options);
+        },
+
+        media_listener:function(){
+          var matches, media, medias, parts, _i, _len;
+
+          medias = options.media.split(/\sand\s|,\s/);
+          matches = true;
+
+          for(_i = 0, _len = medias.length; _i < _len; i++){
+            media = medias[_i];
+            parts = media.match(/\((.*?)-(.*?):\s([\d\/]*)(\w*)\)/);
+
+            if (!checkQuery(parts)) {
+              matches = false;
+            }
+          }
+
+          var opts = {media:options.media, matches:matches};
+          return this.media_change(opts);
         }
 
       };
 
       return function(){
         if(window.media_matches){
+          return self._methods.add_listener();
         
         }else{
-        
+          if(window.addEventListener){
+            window.addEventListener("resize", self._methods.media_listener);
+          }else{
+            if(window.attachEvent){
+              window.attachEvent("onresize", self._methods.media_listener);
+            }
+          }
+
+          return self._methods.media_listener();
         }
       };
     };
