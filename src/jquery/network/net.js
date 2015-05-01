@@ -6,11 +6,6 @@
 * ---------------------------------------- */
 var Net = (function($){
 
-  if(!$){
-    throw new TypeError('Missing jQuery');
-  }
-
-  /* public API methids */
   this.prototype = {
     post:function(opts){
     

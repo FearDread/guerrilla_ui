@@ -16,20 +16,14 @@
   }
 
 }(function(){
-  var defaults;
-    /* name space */
-    Guerrilla.ui = (Guerrilla.ui) ? Guerrilla.ui: {}; 
-
-    /* stored media query */
-    window.media_matches;
-
-    /* Defaults */
-    defaults = {
-      media:'(max-width:1024)',
-      in:null,
-      out:null,
-      both:null,
+  var defaults = {
+        media:'(max-width:1024)',
+        in:null,
+        out:null,
+        both:null,
     };
+
+    Guerrilla.ui = (Guerrilla.ui) ? Guerrilla.ui: {}; 
 
     Guerrilla.ui.media = function(options){
       var self = this,
@@ -104,7 +98,9 @@
         }else{
           if(window.addEventListener){
             window.addEventListener("resize", self._methods.media_listener);
+
           }else{
+
             if(window.attachEvent){
               window.attachEvent("onresize", self._methods.media_listener);
             }

@@ -6,36 +6,33 @@
 * ---------------------------------------- */
 ;(function($, window, document, undefined){
 
-  var Guerrilla, defaults;
-  /* --------------------------------------- *
-  * Guerrilla JS Default Config              *
-  * ---------------------------------------- */
-  defaults = {
-    name:'core',
-    debug:true,
-    jquery:($) ? true : false 
-  };
+  var Guerrilla,
+      defaults = {
+        name:'core',
+        debug:true,
+        jquery:($) ? true : false 
+      };
+
   /* --------------------------------------- *
   * Guerrilla JS Native Library              *
   * ---------------------------------------- */
   Guerrilla = function(options){
-    /* Public Methods */
+    this._config = this.prototype.extend({}, defaults, options);
+
     this.prototype = {
-      /* Small console.log wrapper */
+
       log:function(msg){
         if(this._config.debug){
           console.log('Debug ::', msg);
         }
       },
 
-      /* Small Throw wrapper */
       error:function(msg){
         if(this._config.debug){
           throw new TypeError('Error ::', msg);
         }
       },
 
-      /* Cover for $.extend if jQuery not available */
       extend:function(){
         var i, key, 
             params = arguments,
@@ -56,10 +53,7 @@
 
         return params[0];
       },
-
     };
-    /* config via constructor */
-    this._config = this.prototype.extend({}, defaults, options);
 
     return Object.create(this.prototype); 
   };

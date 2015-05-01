@@ -16,11 +16,16 @@
   }
 
 }(function(){
+  var defaults = {
 
-    /* name space */
+    };
+
     Guerrilla.ui = (Guerrilla.ui) ? Guerrilla.ui: {}; 
 
-    Guerrilla.ui.gui = function(){
+    Guerrilla.ui.gui = function(options){
+      var _core = new Guerrilla();
+
+      this._config = _core.extend({}, defaults, options);
 
       this.prototype = {
 
@@ -33,6 +38,7 @@
               break;
 
             case "pt":
+              value = this.convert_pt(width);
               break;
 
             default:

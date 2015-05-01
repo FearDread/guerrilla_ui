@@ -17,24 +17,22 @@
 
 }(function(){
 
-    /* name space */
     Guerrilla.util = (Guerrilla.util) ? Guerrilla.util : {}; 
 
     Guerrilla.util.cookie = function(){
+      var _core = new Guerrilla();
+
       this._config = {};
-      /* public API methids */
+
       this.prototype = {
-        /* Takes a string and returns URI encoded string */
         encode:function(string){
           return encodeURIComponent(string);
         },
 
-        /* Takes a string and returns URI decoded string */
         decode:function(string){
           return decodeURIComponent(string);
         },
 
-        /* Check for existing cookie with key "cname" */
         has:function(cname){
           if(!cname){ 
             return false; 
@@ -47,7 +45,6 @@
           ).test(document.cookie);
         },
 
-        /* return cookie with key "cname" */ 
         get:function(cname){
           if(!cname){ 
             return null; 
@@ -60,7 +57,6 @@
           ) || null;
         },
 
-        /* create new cookie string and attach to document.cookie with key "cname" */
         set:function(cname, cvalue, opts){
           var params = arguments,
               _core = new Guerrilla();
@@ -90,7 +86,6 @@
           return true;
         },
         
-        /* remove (delete) cookie with key "cname", path "cpath" and domain "cdomain" */
         remove:function(cname, cpath, cdomain){
           if(!this.has(cname)){ 
             return false; 
@@ -104,7 +99,6 @@
           return true;
         },
 
-        /* return a list of all strings attached to document.cookie */
         list:function(){
           var index = 0,
               regex = /((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, 
@@ -120,7 +114,6 @@
           return keys;
         },
 
-        /* Executes a function only once, even after the refresh of the page. */
         once:function(){
           var values, 
               params = arguments, 
