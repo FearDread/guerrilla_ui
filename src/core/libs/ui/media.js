@@ -57,36 +57,6 @@
           }
         }, 
 
-        get_pixels:function(width, unit){
-          var value;
-
-          switch(unit){
-            case "em":
-              value = this.convert_fontsize(width);
-              break;
-
-            default:
-              value = width;
-          }
-
-          return value;
-        },
-
-        covert_fontsize:function(value){
-          var px, elem = document.createElement('div');
-
-          elem.style.width = '1em';
-          elem.style.position = 'absolute';
-
-          document.body.appendChild(elem);
-
-          px = value * elem.offsetWidth;
-
-          document.body.removeChild(elem);
-
-          return px;
-        },
-
         add_listener:function(options){
           var self = this,
               query = window.media_matches(options.media),
@@ -116,7 +86,7 @@
             media = medias[_i];
             parts = media.match(/\((.*?)-(.*?):\s([\d\/]*)(\w*)\)/);
 
-            if (!checkQuery(parts)) {
+            if (!this.check_query(parts)) {
               matches = false;
             }
           }
