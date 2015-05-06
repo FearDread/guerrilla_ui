@@ -7,6 +7,9 @@
   </head>
 
   <body>
+    <h1>Guerrilla JS</h1>
+    <button class='btn build'>Build Library</button>
+    <div class='guerrilla-container'></div>
 
     <script src='libs/jquery/jquery.js' type='text/javascript'></script>
     <script src='src/jquery/core/index.js' type='text/javascript'></script>
@@ -20,7 +23,7 @@
 
       console.log('Window :: ', X);
       console.log('$ jQuery :: ', $X);
-      $('body').Guerrilla({
+      $('.guerrilla-container').Guerrilla({
         property:'testing'
       });
 
