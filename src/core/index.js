@@ -21,7 +21,6 @@
   * Guerrilla JS Native Library              *
   * ---------------------------------------- */
   Guerrilla = function(options){
-    this._config = this.prototype.extend({}, defaults, options);
 
     this.prototype = {
 
@@ -58,6 +57,8 @@
         return params[0];
       },
     };
+
+    this._config = this.prototype.extend({}, defaults, options);
 
     return Object.create(this.prototype); 
   };
