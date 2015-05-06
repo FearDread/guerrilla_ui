@@ -1,10 +1,14 @@
-/* --------------------------------------- *
-* Guerrilla JS                             *
+/* --------------------------------------- * 
+* * Guerrilla JS                           *
 * @author: Garrett Haptonstall (FearDread) *
 * @license: The MIT License (MIT)          * 
 * Copyright (c) 2015 Garrett Haptonstall   *
 * ---------------------------------------- */
 ;(function($, window, document, undefined){
+  if((typeof $) == 'undefined' || (typeof jQuery) == 'undefined'){
+    console.log('Error :: Guerrilla JS Library requires jQuery');
+    return;
+  }
 
   var Guerrilla,
       defaults = {
