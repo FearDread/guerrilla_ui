@@ -58,8 +58,6 @@
       },
     };
 
-    this._config = this.prototype.extend({}, defaults, options);
-
     return Object.create(this.prototype); 
   };
 

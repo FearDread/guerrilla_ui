@@ -8,25 +8,40 @@
   /* --------------------------------------- *
   * guerrilla JS jQuery Namespace            *
   * ---------------------------------------- */
-  $.Guerrilla = function(){
+  $.Guerrilla = function(context, options){
+    this._config = $.extend({}, defaults, options);
+    console.log('init guerrilla namespace ... ');
 
-    return {
-      init:function(elem, options){
+    this.prototype = {
+      log:function(msg){
+        if(this._config.debug){
+          console.log('Debug ::', msg);
+        }
+      },
+
+      error:function(msg){
+        if(this._config.debug){
+          throw new TypeError('Error ::', msg);
+        }
+      },
+    
+    };
+
+    this.plugin = {
+      init:function(elem, opts){
         this._el = $(elem);
-
-        this._config = $.extend({}, defaults, options);
 
         this._build();
       },
-
       _defaults:defaults,
-
       _build:function(){
         this._el.html('<h1>Incomming guerrilla attacks ... </h1>');
 
-        console.log('init :: ', this._config);
+        console.log('init :: ', this._defaults);
       }
-    }
+    };
+
+    return this.plugin.init(context, options);
   };
   /* --------------------------------------- *
   * guerrilla JS jQuery $.fn Wrapper         *
@@ -35,10 +50,10 @@
     return this.each(function(){
       if(!$.data(this, 'guerilla')){
 
-        $.data(this, 'guerilla', new $.Guerrilla().init(this, options))
+        $.data(this, 'guerilla', new $.Guerrilla(this, options));
 
       }else{
-        return new $.Guerrilla().init(this, options);
+        return new $.Guerrilla(this, options);
       }
     });
   };
