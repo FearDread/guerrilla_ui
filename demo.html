@@ -2,7 +2,7 @@
 <html lang='en'>
   <head>
     <meta charset="utf-8"/>
-    <link rel='stylesheet' src='css/styles.css' type='text/css'></link> 
+    <link rel='stylesheet' href='css/demo.css' type='text/css'></link> 
 
   </head>
 
@@ -31,10 +31,10 @@
             this.log('window loaded ::', this);
             this.log('broker loaded ::', this.broker);
 
-            this.constellation($('.canvas')[0]);
-            //$('.canvas').GUI().constellation();
-
-            $('.guerrilla-container').html('<h1>Incomming guerrilla attacks!</h1>');
+            $('.canvas').GUI().constellation();
+          },
+          ready:function(){
+            this.log('document ready!');
           },
           myMethod:function(){
           

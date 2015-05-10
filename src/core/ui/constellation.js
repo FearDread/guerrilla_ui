@@ -1,5 +1,5 @@
-
-function Constellation(canvas, options){
+/* Constellation library */
+var Constellation = function(canvas, options){
   if(!canvas.getContext){
     console.log('Must pass canvas to Constellation');
     return false;
@@ -146,10 +146,6 @@ function Constellation(canvas, options){
   };
 
   this.bind = function () {
-    /*$canvas.on('mousemove', function(e){
-      config.position.x = e.pageX - $canvas.offset().left;
-      config.position.y = e.pageY - $canvas.offset().top;
-    });*/
     $(document).on('mousemove', function(e){
       config.position.x = e.pageX - $canvas.offset().left;
       config.position.y = e.pageY - $canvas.offset().top;

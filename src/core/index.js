@@ -11,8 +11,8 @@
 
     this.prototype.broker = new Broker();
 
-    this.prototype.constellation = function(canvas){
-      new Constellation(canvas, App).init();
+    $.fn.constellation = function(opts){
+      return new Constellation(this[0], opts).init();
     }
 
     if(App){
@@ -24,7 +24,7 @@
 
       if(App.ready){
         $(document).ready(
-          App.load.call(this.prototype)
+          App.ready.call(this.prototype)
         );
       }
     }
