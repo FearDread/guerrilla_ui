@@ -29,12 +29,16 @@
       $.GUI({
           load:function(){
               this._super();
-
               this.log('window loaded ::', this);
 
-              this.log('broker loaded ::', this.broker);
+              this.log('broker :: ', this.broker);
+              this.broker.register('example', function(){
+                console.log('fired example');
+              });
 
               $('.canvas').GUI().constellation();
+
+              $('.build').click(this.broker.fire('example'));
           },
           ready:function(){
               this._super();
