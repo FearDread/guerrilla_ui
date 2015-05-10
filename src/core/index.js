@@ -1,66 +1,74 @@
-/* --------------------------------------- * 
-* * Guerrilla JS                           *
+/* --------------------------------------- *
+* guerrilla JS                             *
 * @author: Garrett Haptonstall (FearDread) *
-* @license: The MIT License (MIT)          * 
-* Copyright (c) 2015 Garrett Haptonstall   *
+* @module: $.Guerrilla jQuery namespace    * 
 * ---------------------------------------- */
 ;(function($, window, document, undefined){
-  if((typeof $) == 'undefined' || (typeof jQuery) == 'undefined'){
-    console.log('Error :: Guerrilla JS Library requires jQuery');
-    return;
-  }
+  var _core = {
+    _config:{
+      debug:true,
+    },
 
-  var Guerrilla,
-      defaults = {
-        name:'core',
-        debug:true,
-        jquery:($) ? true : false 
-      };
+    _model:{},
 
-  /* --------------------------------------- *
-  * Guerrilla JS Native Library              *
-  * ---------------------------------------- */
-  Guerrilla = function(options){
-
-    this.prototype = {
-
-      log:function(msg){
-        if(this._config.debug){
-          console.log('Debug ::', msg);
+    log:function(){
+      var args = arguments;
+      if(this._config.debug){
+        if(args.length == 1){
+          console.log('Debug ::', args[0]);
+        }else if(args.length == 2){
+          console.log('Debug :: ' + args[0], args[1]);
         }
-      },
+      }
+    },
 
-      error:function(msg){
-        if(this._config.debug){
-          throw new TypeError('Error ::', msg);
-        }
-      },
-
-      extend:function(){
-        var i, key, 
-            params = arguments,
-            argc = params.length;
-
-        if(argc === 0){
-          this.error('Guerrilla.core.extend - missing arguments.');
-        }
-        for(i = 1; i < argc; i++){ 
-
-          for(key in params[i]){
-          
-            if(params[i].hasOwnProperty(key)){
-              params[0][key] = params[i][key];
-            }
-          }
-        }
-
-        return params[0];
-      },
-    };
-
-    return Object.create(this.prototype); 
+    error:function(msg){
+      if(this._config.debug){
+        throw new TypeError('Error ::', msg);
+      }
+    },
+  
   };
+  /* --------------------------------------- *
+  * guerrilla JS jQuery Namespace            *
+  * ---------------------------------------- */
+  $.GUI = function(app){
+    console.log('init gui :: ', app);
 
-  return window.Guerrilla = Guerrilla;
+    this.prototype = $.extend(_core, app);
+
+    this.prototype.broker = new Broker();
+
+    if(app){
+      if(app.load){
+        $(window).load(
+          app.load.call(this.prototype)
+        );
+      }
+
+      if(app.ready){
+        $(document).ready(
+          app.load.call(this.prototype)
+        );
+      }
+    }
+    
+    return Object.create(this.prototype);
+  };
+  /* --------------------------------------- *
+  * guerrilla JS jQuery $.fn Wrapper         *
+  * ---------------------------------------- */
+  $.fn.GUI = function(opts){
+    return this.each(function(){
+      if(!$.data(this, 'guerrilla')){
+
+        $.data(this, 'guerrilla', new $.GUI(this));
+
+      }else{
+
+        return new $.GUI(this);
+      }
+    });
+  };
 
 })(jQuery, window, document);

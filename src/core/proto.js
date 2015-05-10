@@ -1,5 +1,5 @@
 /* Extend Native Super Types */
-Array.prototype.contains = function(value){
+Array.prototype.has = function(value){
   var index = 0,
       length = this.length;
 
