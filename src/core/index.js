@@ -9,7 +9,13 @@
 
     this.prototype = $.extend(Guerrilla, App);
 
+    this.prototype._super = function(){
+      console.log('called _super method');
+    }
+
     this.prototype.broker = new Broker();
+
+    this.prototype.media = new Media();
 
     $.fn.constellation = function(opts){
       return new Constellation(this[0], opts).init();
