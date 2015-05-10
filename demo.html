@@ -16,44 +16,25 @@
     </div>
 
     <script src='libs/jquery/jquery.js' type='text/javascript'></script>
-    <script src='src/jquery/core/index.js' type='text/javascript'></script>
-    <script src='src/core/index.js' type='text/javascript'></script>
-    <script src='src/core/libs/util/cookie.js' type='text/javascript'></script>
+
     <script src='src/core/libs/network/broker.js' type='text/javascript'></script>
 
+    <script src='src/jquery/core/index.js' type='text/javascript'></script>
+
     <script type='text/javascript'>
-      var X = new Guerrilla();
-      var $X = new $.Guerrilla();
 
-      console.log('Window :: ', X);
-      console.log('$ jQuery :: ', $X);
-      $('.guerrilla-container').Guerrilla({
-        property:'testing'
-      });
+      $.GUI({
+          load:function(){
+            this.log('window loaded ::', this);
+            this.log('broker loaded ::', this.broker);
 
-      /* cookies */
-      var GC = new Guerrilla.util.cookie();
-      var opts = {
-        expires:new Date(),
-        domain:null,
-        secure:false
-      };
-      GC.set('tmp_cookie','tmp_value', opts);
+            $('body').GUI();
 
-      var list = GC.list();
-      console.log('list = ', list);
-
-      /* broker */
-      var GB = new Guerrilla.network.broker();
-      var handle = GB.register('loaded', function(str){
-          console.log('triggered the "loaded" event ... with:', str);
-        }
-      );
-      console.log('broker :: ', GB);
-
-      $(window).load(function(){
-        GB.fire('loaded', 'Hello World');
-        GB.unregister(handle);
+            $('.guerrilla-container').html('<h1>Incomming guerrilla attacks!</h1>');
+          },
+          myMethod:function(){
+          
+          }
       });
 
     </script>
