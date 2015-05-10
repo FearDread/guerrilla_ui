@@ -1,72 +1,46 @@
 /* --------------------------------------- *
-* guerrilla JS                             *
+* Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
-* @module: $.Guerrilla jQuery namespace    * 
+* @module: $.GUI jQuery namespace          * 
 * ---------------------------------------- */
 ;(function($, window, document, undefined){
-  var _core = {
-    _config:{
-      debug:true,
-    },
 
-    _model:{},
+  $.GUI = function(App, options){
 
-    log:function(){
-      var args = arguments;
-      if(this._config.debug){
-        if(args.length == 1){
-          console.log('Debug ::', args[0]);
-        }else if(args.length == 2){
-          console.log('Debug :: ' + args[0], args[1]);
-        }
-      }
-    },
-
-    error:function(msg){
-      if(this._config.debug){
-        throw new TypeError('Error ::', msg);
-      }
-    },
-  
-  };
-  /* --------------------------------------- *
-  * guerrilla JS jQuery Namespace            *
-  * ---------------------------------------- */
-  $.GUI = function(app){
-    console.log('init gui :: ', app);
-
-    this.prototype = $.extend(_core, app);
+    this.prototype = $.extend(Guerrilla, App);
 
     this.prototype.broker = new Broker();
 
-    if(app){
-      if(app.load){
+    this.prototype.constellation = function(canvas){
+      new Constellation(canvas, App).init();
+    }
+
+    if(App){
+      if(App.load){
         $(window).load(
-          app.load.call(this.prototype)
+          App.load.call(this.prototype)
         );
       }
 
-      if(app.ready){
+      if(App.ready){
         $(document).ready(
-          app.load.call(this.prototype)
+          App.load.call(this.prototype)
         );
       }
     }
     
     return Object.create(this.prototype);
   };
-  /* --------------------------------------- *
-  * guerrilla JS jQuery $.fn Wrapper         *
-  * ---------------------------------------- */
-  $.fn.GUI = function(opts){
+
+  $.fn.GUI = function(options){
     return this.each(function(){
       if(!$.data(this, 'guerrilla')){
 
-        $.data(this, 'guerrilla', new $.GUI(this));
+        $.data(this, 'guerrilla', new $.GUI(this, options));
 
       }else{
 
-        return new $.GUI(this);
+        return new $.GUI(this, options);
       }
     });
   };

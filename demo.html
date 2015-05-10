@@ -10,14 +10,17 @@
     <h1>Guerrilla JS</h1>
     <button class='btn build'>Build Library</button>
     <div class='guerrilla-container'></div>
-    <div class='canvas-container'>
+    <canvas class='canvas'>
     
-      <canvas></canvas>
-    </div>
+    </canvas>
 
     <script src='libs/jquery/jquery.js' type='text/javascript'></script>
 
     <script src='src/core/network/broker.js' type='text/javascript'></script>
+
+    <script src='src/core/ui/constellation.js' type='text/javascript'></script>
+
+    <script src='src/core/core.js' type='text/javascript'></script>
 
     <script src='src/core/index.js' type='text/javascript'></script>
 
@@ -28,7 +31,8 @@
             this.log('window loaded ::', this);
             this.log('broker loaded ::', this.broker);
 
-            $('body').GUI();
+            this.constellation($('.canvas')[0]);
+            //$('.canvas').GUI().constellation();
 
             $('.guerrilla-container').html('<h1>Incomming guerrilla attacks!</h1>');
           },
