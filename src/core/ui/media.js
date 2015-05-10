@@ -86,7 +86,6 @@ var Media = function(options){
           media = medias[_i];
           parts = media.match(/\((.*?)-(.*?):\s([\d\/]*)(\w*)\)/);
 
-          console.log('this = ', self);
           if (!self.prototype.check_query(parts)) {
             matches = false;
           }

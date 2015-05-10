@@ -10,9 +10,7 @@
     <h1>Guerrilla UI</h1>
     <button class='btn build'>Build Library</button>
     <div class='guerrilla-container'></div>
-    <canvas class='canvas'>
-    
-    </canvas>
+    <canvas class='canvas'></canvas>
 
     <script src='libs/jquery/jquery.js' type='text/javascript'></script>
 
@@ -33,6 +31,7 @@
               this._super();
 
               this.log('window loaded ::', this);
+
               this.log('broker loaded ::', this.broker);
 
               $('.canvas').GUI().constellation();
@@ -62,5 +61,4 @@
 
     </script>
   </body>
-
 </html>
