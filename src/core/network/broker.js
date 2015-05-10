@@ -52,8 +52,9 @@ var Broker = function(){
           }
         }
       }
-    };
+
+  };
 
   return Object.create(this.prototype);
 
-};
+}
