@@ -7,7 +7,9 @@
 
   $.GUI = function(App, options){
 
-    this.prototype = $.extend(Guerrilla, App);
+    var Core = new Guerrilla();
+
+    this.prototype = $.extend(Core, App);
 
     this.prototype._super = function(){
       console.log('called _super method');
