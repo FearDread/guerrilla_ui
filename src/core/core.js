@@ -4,6 +4,10 @@ var Guerrilla = function(){
     return {
         _config:{
             debug:true,
+            plugins:[
+              'test'
+            
+            ]
         },
 
         _model:{},
@@ -25,6 +29,14 @@ var Guerrilla = function(){
                     console.log('Debug :: ' + arguments[0], arguments[1]);
                 }
             }
+        },
+
+        loadPlugins:function(){
+            this._config.plugins.forEach(function(plugin){
+                $.fn[plugin] = function(opts){
+                    return new plugin(this, opts).init();
+                }
+            });
         },
 
         get_pixels:function(width, unit){

@@ -1,7 +1,7 @@
-/* Constellation library */
-var Constellation = function(canvas, options){
+/* Stargaze library */
+var Stargaze = function(canvas, options){
   if(!canvas.getContext){
-    console.log('Must pass canvas to Constellation');
+    console.log('Must pass canvas to Stargaze');
     return false;
   }
   var $canvas = $(canvas),

@@ -9,30 +9,33 @@
 
     var Core = new Guerrilla();
 
-    this.prototype = $.extend(Core, App);
+    this.prototype = $.extend(Core, App, {
+        _super:function(){
+            console.log('called _super method');
+        },
 
-    this.prototype._super = function(){
-      console.log('called _super method');
-    }
+        broker: new Broker(),
 
-    this.prototype.broker = new Broker();
+        media: new Media(),
 
-    this.prototype.media = new Media();
+    });
 
-    $.fn.constellation = function(opts){
-      return new Constellation(this[0], opts).init();
+    Core.loadPlugins();
+
+    $.fn.stargaze = function(opts){
+      return new Stargaze(this[0], opts).init();
     }
 
     if(App){
       if(App.load){
         $(window).load(
-          App.load.call(this.prototype)
+          App.load.call($.extend(this.prototype, $))
         );
       }
 
       if(App.ready){
         $(document).ready(
-          App.ready.call(this.prototype)
+          App.ready.call($.extend(this.prototype, $))
         );
       }
     }
