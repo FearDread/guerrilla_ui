@@ -96,7 +96,7 @@
     <script src='../src/core/core.js' type='text/javascript'></script>
     <script src='../src/core/network/broker.js' type='text/javascript'></script>
 
-    <script src='../src/core/ui/constellation.js' type='text/javascript'></script>
+    <script src='../src/core/ui/stargaze.js' type='text/javascript'></script>
     <script src='../src/core/ui/media.js' type='text/javascript'></script>
 
     <script src='../src/core/index.js' type='text/javascript'></script>
@@ -107,6 +107,7 @@
           model:{},
           load:function(){
               this._super();
+              console.log('this after super = ', this);
 
               this.log('window loaded ::', this);
               this.log('broker :: ', this.broker);
@@ -115,11 +116,11 @@
                 console.log('fired example');
               });
 
-              $('.canvas').GUI().constellation();
-
+              $('.canvas').GUI().stargaze();
           },
           ready:function(){
               this._super();
+              console.log('this after super = ', this);
 
               this.log('document ready!', this);
 
