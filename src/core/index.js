@@ -6,10 +6,9 @@
 ;(function($, window, document, undefined){
 
   $.GUI = function(App, options){
+    var core = new Guerrilla();
 
-    var Core = new Guerrilla();
-
-    this.prototype = $.extend(Core, App, {
+    this.prototype = $.extend(App, core, this, {
         _super:function(){
             console.log('called _super method');
         },
@@ -18,9 +17,8 @@
 
         media: new Media(),
 
+        pop: new Pop()
     });
-
-    Core.loadPlugins();
 
     $.fn.stargaze = function(opts){
       return new Stargaze(this[0], opts).init();
@@ -29,13 +27,13 @@
     if(App){
       if(App.load){
         $(window).load(
-          App.load.call($.extend(this.prototype, $))
+          App.load.call(this.prototype)
         );
       }
 
       if(App.ready){
         $(document).ready(
-          App.ready.call($.extend(this.prototype, $))
+          App.ready.call(this.prototype)
         );
       }
     }
