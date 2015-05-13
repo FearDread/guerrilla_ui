@@ -11,6 +11,7 @@
     this.prototype = $.extend(App, core, this, {
         _super:function(){
             console.log('called _super method');
+            return false;
         },
 
         broker: new Broker(),
@@ -31,9 +32,9 @@
         );
       }
 
-      if(App.ready){
+      if(App.dom){
         $(document).ready(
-          App.ready.call(this.prototype)
+          App.dom.call(this.prototype)
         );
       }
     }
