@@ -3,10 +3,12 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: $.GUI jQuery namespace          * 
 * ---------------------------------------- */
-;(function($, undefined){
+;(function($){
 
     $.GUI = function(){
-        var core = new Guerrilla(),
+      console.log('g = ', Guerrilla);
+
+        var core = Guerrilla,
             argc = [].slice.call(arguments),
             sandbox = (argc[0] instanceof Object) ? argc[0] : null;
 
