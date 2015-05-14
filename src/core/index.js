@@ -3,56 +3,59 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: $.GUI jQuery namespace          * 
 * ---------------------------------------- */
-;(function($, window, document, undefined){
+;(function($, undefined){
 
-  $.GUI = function(App, options){
-    var core = new Guerrilla();
+    $.GUI = function(){
+        var core = new Guerrilla(),
+            argc = [].slice.call(arguments),
+            sandbox = (argc[0] instanceof Object) ? argc[0] : null;
 
-    this.prototype = $.extend(App, core, this, {
-        _super:function(){
-            console.log('called _super method');
-            return false;
-        },
+        this.prototype = $.extend(sandbox, core, {
+            _super:function(){
+              this.log('_super()');
+              return false;
+            },
 
-        broker: new Broker(),
+            broker: new Broker(),
 
-        media: new Media(),
+            media: new Media(),
 
-        pop: new Pop()
-    });
+            pop: new Pop()
+        });
 
-    $.fn.stargaze = function(opts){
-      return new Stargaze(this[0], opts).init();
-    }
+        $.fn.stargaze = function(opts){
+          return new Stargaze(this[0], opts).init();
+        }
 
-    if(App){
-      if(App.load){
-        $(window).load(
-          App.load.call(this.prototype)
-        );
-      }
+        if(sandbox){
 
-      if(App.dom){
-        $(document).ready(
-          App.dom.call(this.prototype)
-        );
-      }
-    }
+          if(sandbox.load){
+            $(window).load(
+              sandbox.load.call(this.prototype)
+            );
+          }
+
+          if(sandbox.dom){
+            $(document).ready(
+              sandbox.dom.call(this.prototype)
+            );
+          }
+        }
     
-    return Object.create(this.prototype);
-  };
+        return Object.create(this.prototype);
+    };
 
-  $.fn.GUI = function(options){
-    return this.each(function(){
-      if(!$.data(this, 'guerrilla')){
+    $.fn.GUI = function(options){
+        return this.each(function(){
 
-        $.data(this, 'guerrilla', new $.GUI(this, options));
+            if(!$.data(this, 'guerrilla')){
+                $.data(this, 'guerrilla', new $.GUI(this, options));
 
-      }else{
+            }else{
 
-        return new $.GUI(this, options);
-      }
-    });
-  };
+                return new $.GUI(this, options);
+            }
+        });
+    };
 
-})(jQuery, window, document);
+})(jQuery);

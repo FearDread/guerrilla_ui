@@ -6,7 +6,6 @@ var Guerrilla = function(){
             debug:true,
             plugins:[
               'test'
-            
             ]
         },
 
@@ -19,14 +18,14 @@ var Guerrilla = function(){
         },
 
         log:function(){
+            var argc = [].slice.call(arguments);
+
             if(this._config.debug){
+                if(argc.length == 1){
+                    console.log('Debug ::', argc[0]);
 
-                if(arguments.length == 1){
-                    console.log('Debug ::', arguments[0]);
-
-                }else if(arguments.length == 2){
-
-                    console.log('Debug :: ' + arguments[0], arguments[1]);
+                }else if(argc.length == 2){
+                    console.log('Debug :: ' + argc[0], argc[1]);
                 }
             }
         },
@@ -39,16 +38,16 @@ var Guerrilla = function(){
             });
         },
 
-        get_pixels:function(width, unit){
+        getPixels:function(width, unit){
             var value;
 
             switch(unit){
                 case "em":
-                    value = this.convert_em(width);
+                    value = this.convertToEm(width);
                     break;
 
                 case "pt":
-                    value = this.convert_pt(width);
+                    value = this.convertToPt(width);
                     break;
 
                 default:
@@ -58,17 +57,17 @@ var Guerrilla = function(){
             return value;
         },
 
-        get_fontsize:function(elem){
+        getFontsize:function(elem){
             return parseFloat(
                 getComputedStyle(elem || document.documentElement).fontSize
             );
         },
 
-        convert_em:function(value){
-            return value * this.get_fontsize();
+        convertToEm:function(value){
+            return value * this.getFontsize();
         },
 
-        convert_base:function(){
+        convertBase:function(){
             var pixels, 
                 elem = document.documentElement,
                 style = elem.getAttribute('style');
