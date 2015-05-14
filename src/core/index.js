@@ -6,40 +6,49 @@
 ;(function($){
 
     $.GUI = function(){
-
         var core = Guerrilla,
             argc = [].slice.call(arguments),
-            sandbox = (argc[0] instanceof Object) ? argc[0] : null;
+            app = (argc[0] instanceof Object) ? argc[0] : null;
 
-        this.prototype = $.extend(sandbox, core, {
+        this.prototype = $.extend(app, core, {
+            _loaded:false,
             _super:function(){
-              this.log('_super()');
-              core.startAll();
+                this.log('_super()');
+
+                if(!this._loaded){
+
+                    core.startAll();
+                    this._loaded = true;
+                }else{
+
+                    return true;
+                }
+
               return false;
             },
-
             broker: new Broker(),
 
             //media: new Media(),
 
             pop: new Pop()
+
         });
 
         $.fn.stargaze = function(opts){
           return new Stargaze(this[0], opts).init();
         }
 
-        if(sandbox){
+        if(app){
 
-          if(sandbox.load){
+          if(app.load){
             $(window).load(
-              sandbox.load.call(this.prototype)
+              app.load.call(this.prototype)
             );
           }
 
-          if(sandbox.dom){
+          if(app.dom){
             $(document).ready(
-              sandbox.dom.call(this.prototype)
+              app.dom.call(this.prototype)
             );
           }
         }

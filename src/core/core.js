@@ -1,9 +1,11 @@
 /* Core Object */
 ;var Guerrilla = (function($){
+
     if(typeof jQuery === 'undefined' || typeof $ === 'undefined'){
       console.log('Guerrilla UI Requires jQuery.');
       return;
     }
+
     var Sandbox = {
         create:function(core, module_selector){ 
             var CONTAINER = $('#' + module_selector);

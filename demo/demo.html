@@ -113,10 +113,6 @@
 
               this.log('window loaded!', this);
 
-              this.broker.register('example', function(){
-                console.log('fired example');
-              });
-
               $('.canvas').GUI().stargaze();
           },
           dom:function(){
@@ -138,24 +134,12 @@
                   }
               });
               */
-            
-              this.pop.init();
           },
           bind:function(){
-              this._super();
 
-              $('.build').click(this.broker.fire('example'));
           },
           myPostMethod:function(){
-            var gui = this, 
-                url = '/contact',
-                $form = $('.contact-form'),
-                vals = $form.serialize(),
-                post_cb = function(result){
-                  $.log('post result = ', result);
-                };
-          
-            this.post({url:url, data:vals, success:post_cb});
+
           }
       });
 
