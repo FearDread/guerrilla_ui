@@ -77,13 +77,12 @@
                 </div>
             </div>
         </section>
-        
-        <section id="download" class="content-section text-center">
-            <div class="download-section">
-                <div class="container">
-                    <div class="col-lg-8 col-lg-offset-2">
-                        <h2>Download GUI</h2>
-                    </div>
+
+        <section id="output" class="container content-section text-center">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 pop bounceIn">
+                    <h3>Console Output</h3>
+                    <textarea class="output-terminal" readonly></textarea>
                 </div>
             </div>
         </section>
@@ -111,7 +110,7 @@
           load:function(){
               this._super();
 
-              this.log('window loaded! ', this);
+              this.log('window loaded!', this);
 
               this.broker.register('example', function(){
                 console.log('fired example');
@@ -122,7 +121,7 @@
           dom:function(){
               this._super();
 
-              this.log('document ready! ', this);
+              this.log('document ready!');
 
               this.media({
                   media:'(max-width: 1024)',
@@ -136,14 +135,13 @@
                       console.log('media both');
                   }
               });
-
+            
               this.pop.init();
           },
           bind:function(){
               this._super();
 
               $('.build').click(this.broker.fire('example'));
-          
           },
           myPostMethod:function(){
             var gui = this, 
