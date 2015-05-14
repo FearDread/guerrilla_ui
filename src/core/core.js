@@ -6,9 +6,12 @@
     }
     var Sandbox = {
         create:function(core, module_selector){ 
-            var CONTAINER = core.dom.query('#' + module_selector); 
+            var CONTAINER = $('#' + module_selector);
 
             return { 
+                log:function(){
+                    core.log(arguments);
+                },
                 find:function(selector){
                 
                 },
@@ -42,7 +45,7 @@
                 if(typeof module === 'string' && typeof method === 'function'){
                     temp = method(Sandbox.create(this, module));
 
-                    if(temp.load && temp.unload && typeof temp.init === 'function'){
+                    if(temp.load && temp.unload && typeof temp.load === 'function'){
                         moduleData[module] = {
                             create:method,
                             instance:null
@@ -50,7 +53,7 @@
 
                         temp = null;
                     }else{
-                        this.log('Missing module register :: ', module);
+                        this.log('Missing module :: ', module);
                     }
                 }
             },

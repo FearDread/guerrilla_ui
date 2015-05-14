@@ -6,7 +6,6 @@
 ;(function($){
 
     $.GUI = function(){
-      console.log('g = ', Guerrilla);
 
         var core = Guerrilla,
             argc = [].slice.call(arguments),
@@ -15,12 +14,13 @@
         this.prototype = $.extend(sandbox, core, {
             _super:function(){
               this.log('_super()');
+              core.startAll();
               return false;
             },
 
             broker: new Broker(),
 
-            media: new Media(),
+            //media: new Media(),
 
             pop: new Pop()
         });
