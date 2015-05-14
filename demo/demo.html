@@ -73,7 +73,7 @@
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 pop bounceIn">
                   <h3>About Guerrilla UI</h3>
-
+                  <button class='btn'>Build GUI</button>
                 </div>
             </div>
         </section>
@@ -108,18 +108,17 @@
 
       $.GUI({
           model:{},
+          doc:function(){
+              this._super();
+
+              this.log('document ready!', this);
+
+              $('.canvas').GUI().stargaze();
+          },
           load:function(){
               this._super();
 
               this.log('window loaded!', this);
-
-              $('.canvas').GUI().stargaze();
-          },
-          dom:function(){
-              this._super();
-
-              this.log('document ready!');
-
               /*
               this.media({
                   media:'(max-width: 1024)',
@@ -134,14 +133,35 @@
                   }
               });
               */
-          },
-          bind:function(){
-
-          },
-          myPostMethod:function(){
-
           }
       });
+
+      $.GUI().create('node', function(GUI){
+          console.log('Module :: ', GUI);
+          
+          return {
+              load:function(){
+                  var btn = GUI.dom.query('.btn');
+
+                  GUI.log('working node');
+              
+                  GUI.sub('custom_event', function(){
+                      GUI.log('fired custom event');
+                  });
+
+                  GUI.dom.event.add(btn, 'click', this.myMethod);
+              },
+              unload:function(){
+              
+              },
+              myMethod:function(){
+                  GUI.pub('custom_event');
+              
+              }
+          }
+      });
+
+      $.GUI().run();
 
     </script>
   </body>

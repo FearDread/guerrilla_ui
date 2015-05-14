@@ -8,28 +8,71 @@
 
     var Sandbox = {
         create:function(core, module_selector){ 
-            var CONTAINER = $('#' + module_selector);
+            var CONTAINER = core.dom.query('#' + module_selector);
 
             return { 
+                dom:core.dom,
+
                 log:function(){
                     core.log(arguments);
                 },
+
                 find:function(selector){
-                
+                    return CONTAINER.query(selector);
                 },
-                fire:function(evnt){
-                  if(core.isObj(evnt) && evnt.type){
-                      core.trigger(evnt);
-                  }
-                },
-                listen:function(events){
-                    if(core.isObj(events)){
-                        core.register(events, module_selector);
+
+                pub:function(evnt, argc){
+                    if(core.isObj(evnt) && core.isArr(argc)){
+                        core.publish(evnt, argc);
                     }
                 },
+
+                sub:function(handle, func){
+                    if(typeof handle === 'string'){
+                        core.subscribe(handle, func);
+                    }
+                },
+
+                unsub:function(handle){
+                    if(typeof handle === 'object'){
+                        core.unsubscribe(handle);
+                    }
+                },
+
+                getInPixels:function(width, unit){
+                    var value;
+
+                    switch(unit){
+                        case "em":
+                            value = core.convertToEm(width);
+                            break;
+
+                        case "pt":
+                            value = core.convertToPt(width);
+                            break;
+
+                        default:
+                            value = width;
+                    }
+
+                    return value;
+                },
+
+                notify:function(evnt){
+                    if(core.isObj(evnt) && evnt.type){
+                        core.trigger(evnt);
+                    }
+                },
+
+                listen:function(events){
+                    if(core.isObj(events)){
+                        core.registerEvents(events, module_selector);
+                    }
+                },
+
                 ignore:function(events){
                     if(core.isArr(events)){
-                      core.remove(events, module_selector);
+                        core.removeEvents(events, module_selector);
                     }
                 }
             }
@@ -37,26 +80,97 @@
     },
 
     Core = (function(){
-        var moduleData = {},
-            debug = true;
+        var events = [],
+            moduleData = {},
+            config = {
+              debug:true
+            };
     
         return {
-            create:function(module, method){
+            win:window,
+            dom:{
+                doc:document,
+                elem:document.documentElement,
+                query:function(selector, context){
+                    var $el, 
+                        _ret = {},
+                        _this = this;
+
+                    if(context && context.find){
+                        $el = context.find(selector);
+
+                    }else{
+                        $el = $(selector);
+                    }
+
+                    _ret = $el.get();
+                    _ret.length = $el.length;
+                    _ret.query = function(sel){
+                        return _this.query(sel, $el);
+                    };
+
+                    return _ret;
+                },
+                create:function(el){
+                    return this.doc.createElement(el);
+                },
+                apply:function(el, attrs){
+                    if(core.isObj(attrs)){
+                        $(el).attr(attrs);
+                    }
+                },
+                event:{
+                    add:function(elem, evnt, func){
+                        if(elem && evnt){
+                            if(typeof evnt === 'function'){
+                                func = evnt;
+                                evnt = 'click';
+                            }
+
+                            $(elem).on(evnt, this, func);
+
+                        }else{
+                            this.log('Wrong Number of Arguments.');
+                        }
+                    },
+
+                    remove:function(elem, evnt, func){
+                        if(elem && evnt){
+                            if(typeof evnt === 'function'){
+                                func = evnt;
+                                evnt = 'click';
+                            }
+
+                            $(elem).off(evnt, func);
+
+                        }else{
+                            this.log('Wrong Number of Arguments.');
+                        }
+                    }
+                }
+            },
+            create:function(module, func){
                 var temp;
 
-                if(typeof module === 'string' && typeof method === 'function'){
-                    temp = method(Sandbox.create(this, module));
+                if(typeof module === 'string' && typeof func === 'function'){
+                    temp = func(Sandbox.create(this, module));
 
-                    if(temp.load && temp.unload && typeof temp.load === 'function'){
-                        moduleData[module] = {
-                            create:method,
-                            instance:null
-                        };
-
-                        temp = null;
+                    if(temp.load && temp.unload){
+    
+                        if(typeof temp.load === 'function'){
+                            moduleData[module] = {
+                                create:func,
+                                instance:null
+                            };
+    
+                            temp = null;
+                        }
                     }else{
                         this.log('Missing module :: ', module);
                     }
+                }else{
+                
+                    Sandbox.create(this, '');
                 }
             },
 
@@ -67,16 +181,6 @@
                     mod.instance = mod.create(Sandbox.create(this, module));
                     mod.instance.load();
                 }
-            },
-
-            startAll:function(){
-              var module;
-
-              for(module in moduleData){
-                  if(moduleData.hasOwnProperty(module)){
-                      this.start(module);
-                  }
-              }
             },
 
             stop:function(module){
@@ -91,12 +195,28 @@
                 }
             },
 
-            stopAll:function(){
-            
+            run:function(){
+              var module;
+
+              for(module in moduleData){
+                  if(moduleData.hasOwnProperty(module)){
+                      this.start(module);
+                  }
+              }
+            },
+
+            destroy:function(){
+                var module;
+
+                for(module in moduleData){
+                    if(moduleData.hasOwnProperty(module)){
+                        this.stop(module);
+                    }
+                }
             },
 
             error:function(){
-                if(debug){
+                if(config.debug){
                     throw new TypeError('Error ::', arguments[0]);
                 }
             },
@@ -104,7 +224,7 @@
             log:function(){
                 var argc = [].slice.call(arguments);
 
-                if(debug){
+                if(config.debug){
                     if(argc.length == 1){
                         console.log('Debug ::', argc[0]);
 
@@ -114,36 +234,114 @@
                 }
             },
 
+            publish:function(handle, argc){
+                if(events[handle]){
+                    var idx = 0,
+                        handler = events[handle],
+                        length = handler.length;
+
+                    while(length--){
+                        handler[idx].call(this, argc);
+                        idx++;
+                    }
+                }
+            },
+
+            subscribe:function(handle, callback){
+                if(!events[handle]){
+                    events[handle] = [];
+                }
+
+                events[handle].push(callback);
+              
+                return {
+                  event:handle,
+                  callback:callback
+                }
+            },
+
+            unsubscribe:function(handle){
+                if(events[handle.event]){
+                    var idx = 0,
+                        handler = events[handle.event],
+                        length = handler.length;
+
+                    while(length--){
+                  
+                        if(handler[idx] == handle.callback){
+                            handler.splice(idx, 1);
+                        }
+
+                        idx++;
+                    }
+                }
+            },
+
+            trigger:function(event){
+                var module;
+
+                for(module in moduleData){
+                    if(moduleData.hasOwnProperty(module)){
+                        module = moduleData[module];
+
+                        if(module.events && module.events[event.type]){
+                            module.events[event.type].call(event.data);
+                        }
+                    }
+                }
+            },
+
+            registerEvents:function(events, module){
+                if(this.isObj(events) && module){
+
+                    if(moduleData[module]){
+                        moduleData[module].events = events;
+
+                    }else{
+                        this.log('Error');
+                    }
+                }else{
+                    this.log('Error');
+                }
+            },
+
+            removeEvents:function(events, module){
+                var i = 0,
+                    event;
+
+                if(this.isArr(events) && module){
+                    if(module = moduleData[module] && module.events){
+
+                        while(event = events[i++]){
+                            delete module.events[event];
+                        }
+                    }else{
+                        this.log('Error');
+                    }
+                }else{
+                    this.log('Error');
+                }
+            },
+
             loadPlugins:function(){
-                this._config.plugins.forEach(function(plugin){
+                config.plugins.forEach(function(plugin){
                     $.fn[plugin] = function(opts){
                         return new plugin(this, opts).init();
                     }
                 });
             },
 
-            getPixels:function(width, unit){
-                var value;
+            isObj:function(obj){
+                return $.isPlainObject(obj);
+            },
 
-                switch(unit){
-                    case "em":
-                        value = this.convertToEm(width);
-                        break;
-
-                    case "pt":
-                        value = this.convertToPt(width);
-                        break;
-
-                    default:
-                        value = width;
-                }
-
-                return value;
+            isArr:function(arr){
+                return $.isArray(arr);
             },
 
             getFontsize:function(elem){
                 return parseFloat(
-                    getComputedStyle(elem || document.documentElement).fontSize
+                    getComputedStyle(elem || this.dom.elem).fontSize
                 );
             },
 
@@ -151,14 +349,18 @@
                 return value * this.getFontsize();
             },
 
+            convertToPt:function(value){
+            
+            },
+
             convertBase:function(){
                 var pixels, 
-                    elem = document.documentElement,
+                    elem = this.dom.elem,
                     style = elem.getAttribute('style');
 
                 elem.setAttribute('style', style + ';font-size:1em !important');
 
-                base = this.get_fontsize();
+                base = this.getFontsize();
 
                 elem.setAttribute('style', style);
 

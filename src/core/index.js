@@ -14,14 +14,11 @@
             _loaded:false,
             _super:function(){
                 this.log('_super()');
-
                 if(!this._loaded){
 
-                    core.startAll();
-                    this._loaded = true;
-                }else{
+                    core.run();
 
-                    return true;
+                    this._loaded = true;
                 }
 
               return false;
@@ -35,22 +32,22 @@
         });
 
         $.fn.stargaze = function(opts){
-          return new Stargaze(this[0], opts).init();
+            return new Stargaze(this[0], opts).init();
         }
 
         if(app){
 
-          if(app.load){
-            $(window).load(
-              app.load.call(this.prototype)
-            );
-          }
+            if(app.doc){
+                $(document).ready(
+                    app.doc.call(this.prototype)
+                );
+            }
 
-          if(app.dom){
-            $(document).ready(
-              app.dom.call(this.prototype)
-            );
-          }
+            if(app.load){
+                $(window).load(
+                    app.load.call(this.prototype)
+                );
+            }
         }
     
         return Object.create(this.prototype);
@@ -58,13 +55,11 @@
 
     $.fn.GUI = function(options){
         return this.each(function(){
-
             if(!$.data(this, 'guerrilla')){
-                $.data(this, 'guerrilla', new $.GUI(this, options));
 
+                $.data(this, 'guerrilla', new $.GUI().create(this, options));
             }else{
-
-                return new $.GUI(this, options);
+                return new $.GUI().create(this, options);
             }
         });
     };

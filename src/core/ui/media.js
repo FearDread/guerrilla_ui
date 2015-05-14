@@ -3,11 +3,11 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: Guerrilla.ui GUI Core           *
 * ---------------------------------------- */
-$.GUI().create('media', function($GUI){
+$.GUI().create('media', function(GUI){
   
     return {
         load:function(){
-            $GUI.log('working module');
+            GUI.log('working module');
         },
         unload:function(){
         
