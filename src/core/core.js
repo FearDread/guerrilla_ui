@@ -21,19 +21,19 @@
                     return CONTAINER.query(selector);
                 },
 
-                pub:function(evnt, argc){
-                    if(core.isObj(evnt) && core.isArr(argc)){
+                publish:function(evnt, argc){
+                    if(typeof evnt === 'string'){
                         core.publish(evnt, argc);
                     }
                 },
 
-                sub:function(handle, func){
+                scribe:function(handle, func){
                     if(typeof handle === 'string'){
                         core.subscribe(handle, func);
                     }
                 },
 
-                unsub:function(handle){
+                unscribe:function(handle){
                     if(typeof handle === 'object'){
                         core.unsubscribe(handle);
                     }
@@ -149,6 +149,7 @@
                     }
                 }
             },
+
             create:function(module, func){
                 var temp;
 
@@ -168,10 +169,17 @@
                     }else{
                         this.log('Missing module :: ', module);
                     }
-                }else{
-                
-                    Sandbox.create(this, '');
                 }
+            },
+
+            use:function(module, func){
+                var temp;
+
+                if(moduleData[module]){
+                    temp = func(Sandbox.create(this, moduleData[module]));
+
+                }
+                return this.create(module, func);
             },
 
             start:function(module){

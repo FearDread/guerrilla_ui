@@ -107,9 +107,9 @@
     <script type='text/javascript'>
 
       $.GUI({
-          model:{},
-          doc:function(){
-              this._super();
+          model:{}, 
+          doc:function(){ 
+              this._super(); 
 
               this.log('document ready!', this);
 
@@ -119,24 +119,10 @@
               this._super();
 
               this.log('window loaded!', this);
-              /*
-              this.media({
-                  media:'(max-width: 1024)',
-                  in:function(){
-                      console.log('media in');
-                  },
-                  out:function(){
-                      console.log('media out');
-                  },
-                  both:function(){
-                      console.log('media both');
-                  }
-              });
-              */
           }
       });
 
-      $.GUI().create('node', function(GUI){
+      $.GUI().use('core', function(GUI){
           console.log('Module :: ', GUI);
           
           return {
@@ -145,17 +131,18 @@
 
                   GUI.log('working node');
               
-                  GUI.sub('custom_event', function(){
+                  GUI.scribe('custom_event', function(){
                       GUI.log('fired custom event');
                   });
 
                   GUI.dom.event.add(btn, 'click', this.myMethod);
               },
               unload:function(){
+                  GUI.unscribe('custom_event');
               
               },
               myMethod:function(){
-                  GUI.pub('custom_event');
+                  GUI.publish('custom_event');
               
               }
           }
