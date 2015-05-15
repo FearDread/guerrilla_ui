@@ -12,32 +12,28 @@
             var CONTAINER = core.dom.query('#' + module_selector);
 
             return { 
-                dom:core.dom,
-
                 log:function(){
                     core.log(arguments);
                 },
 
-                find:function(selector){
-                    return CONTAINER.query(selector);
+                create:function(elem){
+                    return core.dom.create(elem);
                 },
 
-                publish:function(evnt, argc){
-                    if(typeof evnt === 'string'){
-                        core.publish(evnt, argc);
-                    }
+                find:function(selector){
+                    return core.dom.query(selector);
+                },
+
+                fire:function(evnt, argc){
+                    return core.publish(evnt, argc);
                 },
 
                 scribe:function(handle, func){
-                    if(typeof handle === 'string'){
-                        core.subscribe(handle, func);
-                    }
+                    core.subscribe(handle, func);
                 },
 
                 unscribe:function(handle){
-                    if(typeof handle === 'object'){
-                        core.unsubscribe(handle);
-                    }
+                    core.unsubscribe(handle);
                 },
 
                 getInPixels:function(width, unit){
@@ -60,21 +56,15 @@
                 },
 
                 notify:function(evnt){
-                    if(core.isObj(evnt) && evnt.type){
-                        core.trigger(evnt);
-                    }
+                    return core.trigger(evnt);
                 },
 
                 listen:function(events){
-                    if(core.isObj(events)){
-                        core.registerEvents(events, module_selector);
-                    }
+                    core.registerEvents(events, module_selector);
                 },
 
                 ignore:function(events){
-                    if(core.isArr(events)){
-                        core.removeEvents(events, module_selector);
-                    }
+                    core.removeEvents(events, module_selector);
                 }
             }
         }

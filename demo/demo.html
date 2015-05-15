@@ -96,13 +96,17 @@
     <script src='../libs/jquery/jquery.js' type='text/javascript'></script>
 
     <script src='../src/core/core.js' type='text/javascript'></script>
+    
     <script src='../src/core/network/broker.js' type='text/javascript'></script>
 
     <script src='../src/core/ui/stargaze.js' type='text/javascript'></script>
+    
     <script src='../src/core/ui/pop.js' type='text/javascript'></script>
     
     <script src='../src/core/init.js' type='text/javascript'></script>
+    
     <script src='../src/core/ui/media.js' type='text/javascript'></script>
+    
     <script src='../src/core/ui/slider.js' type='text/javascript'></script>
 
 
@@ -113,7 +117,7 @@
           
           return {
               load:function(){
-                  var btn = GUI.dom.query('.btn');
+                  var btn = GUI.find('.btn');
 
                   GUI.log('working node :', btn);
               
@@ -130,7 +134,7 @@
               
               },
               myMethod:function(){
-                  GUI.publish('custom_event');
+                  GUI.fire('custom_event');
               
               }
           }
