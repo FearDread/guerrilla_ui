@@ -1,5 +1,7 @@
 /* Core Object */
 ;var Guerrilla = (function($){
+    var _config = {},
+        _GUI_config = _config || {};
 
     if(typeof jQuery === 'undefined' || typeof $ === 'undefined'){
       console.log('Guerrilla UI Requires jQuery.');
@@ -15,6 +17,8 @@
                 log:function(){
                     core.log(arguments);
                 },
+
+                event:core.dom.event,
 
                 create:function(elem){
                     return core.dom.create(elem);
@@ -142,11 +146,22 @@
                 }
             },
 
+            hitch:function(func){
+                var argc = [].slice.call(arguments).splice(1);
+
+                return function(){
+                    var all = argc.concat([].slice.call(arguments));
+
+                    return func.apply(this, all);
+                }
+            },
+
             create:function(module, func){
-                var temp;
+                var temp,
+                    GUI = this;
 
                 if(typeof module === 'string' && typeof func === 'function'){
-                    temp = func(Sandbox.create(this, module));
+                    temp = func(Sandbox.create(this, module)); 
 
                     if(temp.load && temp.unload){
     
@@ -162,29 +177,47 @@
                         this.log('Missing module :: ', module);
                     }
                 }
+
+                return GUI;
             },
 
-            use:function(module, func){
+            use:function(){
+                var idx = 0,
+                    GUI = this, 
+                    argc = [].slice.call(arguments, 0),
+                    func = argc.pop(),
+                    module = (typeof argc[0] === 'string') ? argc[0] : null;
+
                 if(module === 'core'){
-                    return this.create(module, func);
-                }else{
-                
-                    if(moduleData[module]){
-                        this.start(module);
+                    GUI.create(module, func);
+                    GUI.run();
+
+                }else if(module instanceof Array){
+                    
+                    for(m in module){
+                        if(typeof m == 'string'){
+                            GUI.start(module);
+                        }
                     }
                 }
+
+                return GUI;
             },
 
             start:function(module){
-                var mod = moduleData[module];
+                var GUI = this, 
+                    mod = moduleData[module];
 
-                if(mod){
-                    mod.instance = mod.create(Sandbox.create(this, module));
+                if(mod && typeof mod === 'object'){
 
-                    $(document).ready(function(){
+                    if(!mod.loaded){
+                        mod.instance = mod.create(Sandbox.create(this, module));
                         mod.instance.load();
-                    });
+                        mod.loaded = true;
+                    }
                 }
+
+                return GUI;
             },
 
             stop:function(module){

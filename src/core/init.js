@@ -14,21 +14,14 @@
             _loaded:false,
             _super:function(){
                 this.log('_super()');
+
                 if(!this._loaded){
-
                     core.run();
-
                     this._loaded = true;
                 }
 
               return false;
-            },
-            broker: new Broker(),
-
-            //media: new Media(),
-
-            pop: new Pop()
-
+            }
         });
 
         $.fn.stargaze = function(opts){
@@ -36,7 +29,6 @@
         }
 
         if(app){
-
             if(app.doc){
                 $(document).ready(
                     app.doc.call(this.prototype)
