@@ -1,9 +1,9 @@
 /* Slider using GUI Extension */
-$.GUI().create('slider', function($GUI){
+$.GUI().create('slider', function(GUI){
   
     return {
         load:function(){
-            $GUI.log('working slider');
+            GUI.log('working slider');
         },
         unload:function(){
         

@@ -6,6 +6,7 @@
       return;
     }
 
+    /* Public API */
     var Sandbox = {
         create:function(core, module_selector){ 
             var CONTAINER = core.dom.query('#' + module_selector);
@@ -79,6 +80,7 @@
         }
     },
 
+    /* Private Core */
     Core = (function(){
         var events = [],
             moduleData = {},
@@ -173,13 +175,14 @@
             },
 
             use:function(module, func){
-                var temp;
-
-                if(moduleData[module]){
-                    temp = func(Sandbox.create(this, moduleData[module]));
-
+                if(module === 'core'){
+                    return this.create(module, func);
+                }else{
+                
+                    if(moduleData[module]){
+                        this.start(module);
+                    }
                 }
-                return this.create(module, func);
             },
 
             start:function(module){
@@ -187,7 +190,10 @@
 
                 if(mod){
                     mod.instance = mod.create(Sandbox.create(this, module));
-                    mod.instance.load();
+
+                    $(document).ready(function(){
+                        mod.instance.load();
+                    });
                 }
             },
 
@@ -204,13 +210,13 @@
             },
 
             run:function(){
-              var module;
+                var module;
 
-              for(module in moduleData){
-                  if(moduleData.hasOwnProperty(module)){
-                      this.start(module);
-                  }
-              }
+                for(module in moduleData){
+                    if(moduleData.hasOwnProperty(module)){
+                        this.start(module);
+                    }
+                }
             },
 
             destroy:function(){

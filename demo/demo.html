@@ -60,7 +60,7 @@
                             <h1 class="brand-heading">Guerrilla UI</h1>
                             <hr />
                             <p class="intro-text data-pop-duration=1s">A free, front-end jQuery framework.</p>
-                            <a href="#about" class="btn btn-circle page-scroll">
+                            <a id="about" class="btn btn-circle page-scroll">
                                 <i class="fa fa-angle-double-down animated"></i>
                             </a>
                         </div>
@@ -86,9 +86,10 @@
                 </div>
             </div>
         </section>
+        
         <footer>
             <div class="container text-center pop fadeInDown">
-                <p>Copyright &copy; GuerrillaUI 2014-2015</p>
+                <p>Copyright &copy; Guerrilla UI 2014 - 2015</p>
             </div>
         </footer>
 
@@ -99,43 +100,30 @@
 
     <script src='../src/core/ui/stargaze.js' type='text/javascript'></script>
     <script src='../src/core/ui/pop.js' type='text/javascript'></script>
-    <script src='../src/core/index.js' type='text/javascript'></script>
+    
+    <script src='../src/core/init.js' type='text/javascript'></script>
     <script src='../src/core/ui/media.js' type='text/javascript'></script>
     <script src='../src/core/ui/slider.js' type='text/javascript'></script>
 
 
     <script type='text/javascript'>
 
-      $.GUI({
-          model:{}, 
-          doc:function(){ 
-              this._super(); 
-
-              this.log('document ready!', this);
-
-              $('.canvas').GUI().stargaze();
-          },
-          load:function(){
-              this._super();
-
-              this.log('window loaded!', this);
-          }
-      });
-
       $.GUI().use('core', function(GUI){
-          console.log('Module :: ', GUI);
+          console.log('GUI Sandbox :: ', GUI);
           
           return {
               load:function(){
                   var btn = GUI.dom.query('.btn');
 
-                  GUI.log('working node');
+                  GUI.log('working node :', btn);
               
                   GUI.scribe('custom_event', function(){
                       GUI.log('fired custom event');
                   });
 
                   GUI.dom.event.add(btn, 'click', this.myMethod);
+                  
+                  $('.canvas').GUI().stargaze();
               },
               unload:function(){
                   GUI.unscribe('custom_event');
