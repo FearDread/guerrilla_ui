@@ -111,6 +111,19 @@
 
 
     <script type='text/javascript'>
+      $.GUI().create('myApp', function(GUI){
+          
+                     return {
+                     
+                        load:function(){
+                            GUI.log('myCustomModule loaded');
+                     
+                        },
+                        unload:function(){
+                     
+                        }
+                     }
+      });
 
       $.GUI().use('core', function(GUI){
 
@@ -123,17 +136,21 @@
                   var btn = GUI.find('.btn'),
                       canvas = GUI.find('.canvas');
 
+                  printVersion();
+                  
                   GUI.log('working node :', btn);
               
                   GUI.scribe('custom_event', function(){
                       GUI.log('fired custom event');
                   });
-
-                  btn.on('click', this.myMethod);
-                  GUI.event.on(btn, this.myMethod);
-
+                  
+                  /* Plugin Usage */
                   canvas.stargaze();
-                  printVersion();
+                  
+                  /* jquery Equivilants */
+                  btn.on('click', this.myMethod);
+                  
+                  GUI.event.on(btn, this.myMethod);
               },
               unload:function(){
                   GUI.unscribe('custom_event');
