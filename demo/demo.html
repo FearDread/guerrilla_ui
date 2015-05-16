@@ -96,6 +96,8 @@
     <script src='../libs/jquery/jquery.js' type='text/javascript'></script>
 
     <script src='../src/core/core.js' type='text/javascript'></script>
+    
+    <script src='../src/core/instance.js' type='text/javascript'></script>
 
     <script src='../src/core/ui/stargaze.js' type='text/javascript'></script>
     
@@ -111,7 +113,10 @@
     <script type='text/javascript'>
 
       $.GUI().use('core', function(GUI){
-          console.log('GUI Sandbox :: ', GUI);
+
+          function printVersion(){
+              return GUI.log('GUI :: Version ::', GUI.version);
+          }
           
           return {
               load:function(){
@@ -124,10 +129,11 @@
                       GUI.log('fired custom event');
                   });
 
-                  GUI.event.add(btn, 'click', this.myMethod);
                   btn.on('click', this.myMethod);
+                  GUI.event.on(btn, this.myMethod);
 
                   canvas.stargaze();
+                  printVersion();
               },
               unload:function(){
                   GUI.unscribe('custom_event');
