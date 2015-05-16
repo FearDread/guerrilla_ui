@@ -115,7 +115,8 @@
           
           return {
               load:function(){
-                  var btn = GUI.find('.btn');
+                  var btn = GUI.find('.btn'),
+                      canvas = GUI.find('.canvas');
 
                   GUI.log('working node :', btn);
               
@@ -124,8 +125,9 @@
                   });
 
                   GUI.event.add(btn, 'click', this.myMethod);
-                  
-                  $('.canvas').GUI().stargaze();
+                  btn.on('click', this.myMethod);
+
+                  canvas.stargaze();
               },
               unload:function(){
                   GUI.unscribe('custom_event');

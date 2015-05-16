@@ -99,7 +99,7 @@
                         $el = $(selector);
                     }
 
-                    _ret = $el.get();
+                    _ret = $el;
                     _ret.length = $el.length;
                     _ret.query = function(sel){
                         return _this.query(sel, $el);
@@ -116,21 +116,21 @@
                     }
                 },
                 event:{
-                    add:function(elem, evnt, func){
+                    on:function($elem, evnt, func){
                         if(elem && evnt){
                             if(typeof evnt === 'function'){
                                 func = evnt;
                                 evnt = 'click';
                             }
 
-                            $(elem).on(evnt, this, func);
+                            $elem.on(evnt, this, func);
 
                         }else{
                             this.log('Wrong Number of Arguments.');
                         }
                     },
 
-                    remove:function(elem, evnt, func){
+                    off:function(elem, evnt, func){
                         if(elem && evnt){
                             if(typeof evnt === 'function'){
                                 func = evnt;
@@ -360,8 +360,10 @@
                 }
             },
 
-            loadPlugins:function(){
-                config.plugins.forEach(function(plugin){
+            plugins:function(){
+                var GUI = this;
+
+                GUI.plugins.forEach(function(plugin){
                     $.fn[plugin] = function(opts){
                         return new plugin(this, opts).init();
                     }
