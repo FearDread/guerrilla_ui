@@ -6,6 +6,9 @@ GUI._instance = (function(){
 
             return { 
                 version:core.config.version,
+
+                media:core.media,
+
                 log:function(){
                     core.log(arguments);
                 },

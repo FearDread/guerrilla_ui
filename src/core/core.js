@@ -65,7 +65,7 @@ var Guerrilla = GUI = (function($){
                         return this.doc.createElement(el);
                     },
                     attr:function($el, attrs){
-                        if(core.isObj(attrs)){
+                        if(Core.isObj(attrs)){
                             $(el).attr(attrs);
                         }
                     },
@@ -98,6 +98,10 @@ var Guerrilla = GUI = (function($){
                     }
                 },
 
+                _attach:function(){
+
+                },
+
                 hitch:function(func){
                     var argc = [].slice.call(arguments).splice(1);
 
@@ -126,6 +130,9 @@ var Guerrilla = GUI = (function($){
                                 temp = null;
                             }
                         }else{
+                            GUI[module] = temp; 
+                            console.log('Missing', this);
+                            GUI.start(module);
                             this.log('Missing module :: ', module);
                         }
                     }
@@ -263,8 +270,8 @@ var Guerrilla = GUI = (function($){
 
                             idx++;
                         }
-                        }
-                    },
+                    }
+                },
 
                     trigger:function(event){
                         var module;
@@ -356,6 +363,20 @@ var Guerrilla = GUI = (function($){
                         elem.setAttribute('style', style);
 
                         return base;
+                    },
+
+                    init:function(opts){
+                        if(opts){
+                            this.config.pluginOpts = opts;
+                        }
+                        return this;
+                    },
+
+                    media:function(){
+                        if(moduleData['media']){
+                            console.log('media = ', moduleData.media);
+                            moduleData['media'].instance.call(this, arguments);
+                        }
                     }
                 }
 

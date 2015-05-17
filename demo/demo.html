@@ -151,6 +151,21 @@
                   btn.on('click', this.myMethod);
                   
                   GUI.event.on(btn, this.myMethod);
+
+                  /* Library Plugins */
+                  console.log('GUI = ', GUI);
+                  GUI.media({
+                      media:'(max-width: 1024px)', 
+                      in:function(){
+                          GUI.log('media in');
+                      },
+                      out:function(){
+                          GUI.log('media out');
+                      },
+                      both:function(){
+                          GUI.log('media change');
+                      }
+                  });
               },
               unload:function(){
                   GUI.unscribe('custom_event');
