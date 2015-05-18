@@ -1,19 +1,19 @@
 /* Utilities */
-$.GUI().create('util', function(GUI){
-    var Utils = {
-        merge:function(){
-            $.extend(arguments);
-        },
+$.GUI().create('Util', function(GUI){
 
-    }
+    GUI.Array = new Array();
 
     return {
         load:function(){
-            return Utils;
+            return {
+                merge:function(){
+                    $.extend(arguments);
+                },
+            
+            }
         },
         unload:function(){
-            GUI.log('unload util');
-            return true;
+            GUI.log('unload utils');
         }
     }
 });

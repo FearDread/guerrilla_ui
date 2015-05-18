@@ -33,19 +33,28 @@ var Guerrilla = function(){
                 }
             }
 
-            var temp;
-            for(idx = 0; idx < imports.length; idx++){
+            var temp,
+                idx = 0,
+                length = imports.length;
 
+            do {
                 module = imports[idx];
-                temp = func(new _GUI_Instance().create(this, module));
 
-                if(temp.load && temp.unload){
-                    this.modules[module] = {
-                        create:func,
-                        instance:temp 
+                if(module){
+                    temp = func(new _GUI_Instance().create(this, module));
+
+                    if(temp.load && temp.unload){
+                        this.modules[module] = {
+                            create:func,
+                            instance:temp 
+                        }
                     }
                 }
-            }
+            
+                idx++;
+            } while(--length);
+
+            return GUI;
         },
         win:window,
         dom:{
