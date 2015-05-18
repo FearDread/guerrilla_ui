@@ -95,9 +95,9 @@
 
     <script src='../libs/jquery/jquery.js' type='text/javascript'></script>
 
-    <script src='../src/core/core.js' type='text/javascript'></script>
-    
     <script src='../src/core/instance.js' type='text/javascript'></script>
+
+    <script src='../src/core/core.js' type='text/javascript'></script>
 
     <script src='../src/core/ui/stargaze.js' type='text/javascript'></script>
     
@@ -113,22 +113,22 @@
     <script type='text/javascript'>
       $.GUI().create('myApp', function(GUI){
           
-                     return {
-                     
-                        load:function(){
-                            GUI.log('myCustomModule loaded');
-                     
-                        },
-                        unload:function(){
-                     
-                        }
-                     }
+           return {
+           
+              load:function(){
+                  GUI.log('myCustomModule loaded');
+           
+              },
+              unload:function(){
+           
+              }
+           }
       });
 
       $.GUI().use('core', function(GUI){
 
           function printVersion(){
-              return GUI.log('GUI :: Version ::', GUI.version);
+              return GUI.log('GUI :: ', GUI);
           }
           
           return {
@@ -178,7 +178,7 @@
           }
       });
 
-      $.GUI().run();
+      //$.GUI().run();
 
     </script>
   </body>
