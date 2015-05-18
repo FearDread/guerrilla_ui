@@ -55,7 +55,7 @@ $.GUI().create('media', function(GUI){
             dimension = parts[2];
 
             if(parts[4]){
-              value = getPXValue(parseInt(parts[3], 10), parts[4]);
+              value = GUI.getInPixels(parseInt(parts[3], 10), parts[4]); 
 
             }else{
               value = parts[3];
@@ -124,23 +124,13 @@ $.GUI().create('media', function(GUI){
   
     return {
         load:function(){
-        
-            return new Media(arguments);
-        }
-    
-    }
-    
-    /*
-    {
-        plugin:true,
-        load:function(){
-            GUI.log('working module ', arguments);
-            GUI.log('working media ', Media);
-            return new Media(arguments);
+            var argc = arguments[0],
+                media = new Media();
+
+            return media(argc);
         },
         unload:function(){
         
         }
     }
-    */
 });
