@@ -123,7 +123,7 @@ var Guerrilla = function(){
             }
         },
 
-        use:function(){
+        load:function(){
             var idx = 0,
                 GUI = this, 
                 argc = [].slice.call(arguments, 0),
