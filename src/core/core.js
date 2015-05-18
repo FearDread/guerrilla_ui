@@ -17,6 +17,7 @@ var Guerrilla = function(){
         config:_GUI_config,
         create:function(){
             var idx,
+                GUI = this,
                 argc = [].slice.call(arguments),
                 func = argc.pop(),
                 imports = (argc[0] && typeof argc[0] === 'string') ? argc : argc[0];
@@ -24,21 +25,19 @@ var Guerrilla = function(){
             if(!imports || imports === 'core'){
                 imports = [];
 
-                for(module in this){
+                for(module in GUI.modules){
 
-                    if(this.hasOwnProperty(module)){
+                    if(GUI.modules.hasOwnProperty(module)){
                         imports.push(module);
                     }
-                
                 }
-            
             }
 
             var temp;
             for(idx = 0; idx < imports.length; idx++){
 
                 module = imports[idx];
-                temp = func(new Instance().create(this, module));
+                temp = func(new _GUI_Instance().create(this, module));
 
                 if(temp.load && temp.unload){
                     this.modules[module] = {
@@ -113,6 +112,10 @@ var Guerrilla = function(){
 
         },
 
+        _store:function(){
+        
+        },
+
         hitch:function(func){
             var argc = [].slice.call(arguments).splice(1);
 
@@ -154,7 +157,7 @@ var Guerrilla = function(){
                 G[mod] = mod;
 
                 if(!mod.isLoaded){
-                    mod.instance = mod.create(new Instance().create(this, module));
+                    mod.instance = mod.create(new _GUI_Instance().create(this, module));
                     mod.instance.load();
 
                     mod.isLoaded = true;
@@ -181,6 +184,7 @@ var Guerrilla = function(){
 
             for(module in this.modules){
                 if(this.modules.hasOwnProperty(module)){
+                    console.log('mod = ', module);
                     this.start(module);
                 }
             }
@@ -348,13 +352,6 @@ var Guerrilla = function(){
             elem.setAttribute('style', style);
 
             return base;
-        },
-
-        init:function(opts){
-            if(opts){
-                this.config.pluginOpts = opts;
-            }
-            return this;
         }
     }
 };

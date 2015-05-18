@@ -114,9 +114,7 @@
       $.GUI().create('myApp', function(GUI){
           
            return {
-           
               load:function(){
-                  GUI.log('myCustomModule loaded');
            
               },
               unload:function(){
@@ -125,10 +123,10 @@
            }
       });
 
-      $.GUI().load('core', function(GUI){
+      $.GUI().create('custom', function(GUI){
 
           function printVersion(){
-              return GUI.log('GUI :: ', GUI);
+              return GUI.log('GUI :: ', GUI.config.version);
           }
           
           return {
@@ -138,8 +136,6 @@
 
                   printVersion();
                   
-                  GUI.log('working node :', btn);
-              
                   GUI.scribe('custom_event', function(){
                       GUI.log('fired custom event');
                   });
@@ -153,7 +149,6 @@
                   GUI.event.on(btn, this.myMethod);
 
                   /* Library Plugins */
-                  console.log('GUI = ', GUI);
                   GUI.media({
                       media:'(max-width: 1024px)', 
                       in:function(){
@@ -169,16 +164,18 @@
               },
               unload:function(){
                   GUI.unscribe('custom_event');
-              
+
               },
               myMethod:function(){
+                  console.log('this with jquery', this);
+                  console.log('this with GUI ', GUI);
                   GUI.fire('custom_event');
-              
+
               }
           }
       });
 
-      //$.GUI().run();
+      $.GUI().run();
 
     </script>
   </body>

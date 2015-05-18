@@ -1,11 +1,12 @@
 /* Public API Using Guerrilla Core */
-function Instance(){
+function _GUI_Instance(){
 
     return {
         create:function(core, module_selector){
             var CONTAINER = core.dom.query('#' + module_selector);
 
             proto = { 
+                config:core.config,
                 log:function(){
                     core.log(arguments);
                 },
