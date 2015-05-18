@@ -6,7 +6,7 @@
 ;(function($){
 
     $.GUI = function(){
-        var core = Guerrilla.init(arguments),
+        var core = Guerrilla,
             argc = [].slice.call(arguments),
             app = (argc[0] instanceof Object) ? argc[0] : null;
 

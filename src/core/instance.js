@@ -1,14 +1,11 @@
 /* Public API Using Guerrilla Core */
-GUI._instance = (function(){
-    var SB = {
+function Instance(){
+
+    return {
         create:function(core, module_selector){
             var CONTAINER = core.dom.query('#' + module_selector);
 
-            return { 
-                version:core.config.version,
-
-                media:core.media,
-
+            proto = { 
                 log:function(){
                     core.log(arguments);
                 },
@@ -65,10 +62,14 @@ GUI._instance = (function(){
                 ignore:function(events){
                     core.removeEvents(events, module_selector);
                 }
+            };
+
+            for(var i in core.modules){
+              var mod = core.modules[i];
+              proto[i] = mod.instance.load;
             }
+
+            return proto;
         }
     }
-
-    return SB; 
-
-})();
+};
