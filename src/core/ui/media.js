@@ -57,7 +57,7 @@ $.GUI().create('Media', function(GUI){
                 dimension = parts[2];
 
                 if(parts[4]){
-                    value = GUI.getInPixels(parseInt(parts[3], 10), parts[4]); 
+                    value = GUI.getPxValue(parseInt(parts[3], 10), parts[4]); 
 
                 }else{
                     value = parts[3];
