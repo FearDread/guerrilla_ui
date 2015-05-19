@@ -5,6 +5,7 @@ var GuerrillaUI = function(){
             debug:true,
             version:'0.0.1'
         },
+        DELIM = '__';
         events = [];
 
     if(!(_GUI instanceof GuerrillaUI)){
@@ -146,8 +147,18 @@ var GuerrillaUI = function(){
             }
         },
 
-        _cache:function(){
-        
+        _cache:function(source, cache, refetch){
+            cache || (cache = {});
+
+            return function(arg){
+                var key = arguments.length > 1 ? [].join.call(arguments, DELIM) : String(arg);
+                    
+                if(!(key in cache) || (refetch && cache[key] == refetch)){
+                    cache[key] = source.apply(source, arguments);
+                }
+                    
+                return cache[key];
+            }
         },
 
         hitch:function(func){
