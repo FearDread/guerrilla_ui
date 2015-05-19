@@ -13,7 +13,11 @@ module.exports = function(grunt){
               separator: ';'
           },
           dist: {
-              src: ['src/core/init.js'],
+              src: [
+                  'src/core/instance.js',
+                  'src/core/core.js',
+                  'src/core/init.js'
+              ],
               dest: 'dist/<%= pkg.name %>.js'
            }
       },
@@ -29,8 +33,8 @@ module.exports = function(grunt){
       }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
   
-  grunt.registerTask('default', ['uglify']);
+  grunt.registerTask('default', ['concat','uglify']);
 };
