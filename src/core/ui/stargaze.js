@@ -167,13 +167,11 @@ $.GUI().create('Stargaze', function(GUI){
 
     return {
         fn:function(){
-            console.log('here', arguments);
             var argc = arguments[0],
                 $elem = argc[0],
                 opts = argc[1];
 
-            var sg = new Stargaze($elem, opts);
-            return sg.init();
+            return new Stargaze($elem, opts).init();
         }
     }
 });
