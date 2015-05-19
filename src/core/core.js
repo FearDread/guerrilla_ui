@@ -1,6 +1,6 @@
 /* Core Object */
 
-var Guerrilla = function(){
+var Guerrilla = function(opts){
     var _GUI = this,
         _GUI_config = {
             debug:true,
@@ -13,6 +13,7 @@ var Guerrilla = function(){
     }
 
     return {
+        win:window,
         modules:{},
         config:_GUI_config,
         create:function(){
@@ -48,6 +49,10 @@ var Guerrilla = function(){
                             create:func,
                             instance:temp 
                         }
+                    }else if(temp.fn){
+                        $.fn[module.toLowerCase()] = function(opts){
+                            return new temp.fn(this, opts);
+                        } 
                     }
                 }
             
@@ -56,7 +61,6 @@ var Guerrilla = function(){
 
             return GUI;
         },
-        win:window,
         dom:{
             doc:document,
             elem:document.documentElement,
@@ -119,6 +123,10 @@ var Guerrilla = function(){
 
         _attach:function(){
 
+            
+            $.fn.stargaze = function(opts){
+                return new Stargaze(this[0], opts).init();
+            }
         },
 
         _store:function(){

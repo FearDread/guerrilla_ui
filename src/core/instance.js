@@ -33,7 +33,7 @@ function _GUI_Instance(){
                     core.unsubscribe(handle);
                 },
 
-                getInPixels:function(width, unit){
+                getPxValue:function(width, unit){
                     var value;
 
                     switch(unit){
