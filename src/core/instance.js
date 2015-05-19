@@ -1,11 +1,21 @@
 /* Public API Using Guerrilla Core */
 function _GUI_Instance(){
-
     return {
         create:function(core, module_selector){
-            var CONTAINER = core.dom.query('#' + module_selector),
+            var proto,
+                _attach = function(){
+                    var i, mod;
 
-            proto = { 
+                    for(i in core.modules){
+
+                        if(core.modules.hasOwnProperty(i)){
+                            mod = core.modules[i];
+                            proto[i] = mod.instance.load;
+                        }
+                    }
+                };
+
+            proto = Object.create({
                 config:core.config,
 
                 docElem:core.dom.elem,
@@ -68,14 +78,11 @@ function _GUI_Instance(){
                 ignore:function(events){
                     core.removeEvents(events, module_selector);
                 }
-            };
+            });
 
-            for(var i in core.modules){
-              var mod = core.modules[i];
-              proto[i] = mod.instance.load;
-            }
+            _attach();
 
-            return proto;
+            return proto; 
         }
     }
 };
