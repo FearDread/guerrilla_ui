@@ -7,11 +7,10 @@
 
     $.GUI = function(){
         var argc = [].slice.call(arguments),
-            app = (argc[0] instanceof Object) ? argc[0] : null;
+            app = (argc[0] instanceof Object) ? argc[0] : null,
+            proto = $.extend(app, GUI);
 
-        this.proto = $.extend(app, GUI); 
-
-        return Object.create(this.proto);
+        return Object.create(proto);
     };
 
     $.fn.GUI = function(options){

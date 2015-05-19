@@ -1,5 +1,5 @@
 /* Core Object */
-var Guerrilla_UI = function(){
+var GuerrillaUI = function(){
     var _GUI = this,
         _GUI_config = {
             debug:true,
@@ -7,8 +7,8 @@ var Guerrilla_UI = function(){
         },
         events = [];
 
-    if(!(_GUI instanceof Guerrilla_UI)){
-        _GUI = new Guerrilla_UI();
+    if(!(_GUI instanceof GuerrillaUI)){
+        _GUI = new GuerrillaUI();
     }
 
     return {
@@ -49,9 +49,7 @@ var Guerrilla_UI = function(){
                             instance:temp 
                         }
                     }else if(temp.fn){
-                        $.fn[module.toLowerCase()] = function(opts){
-                            return new temp.fn(this, opts);
-                        } 
+                        this._plugin(temp);
                     }
                 }
             
@@ -120,15 +118,35 @@ var Guerrilla_UI = function(){
             }
         },
 
-        _attach:function(){
+        _attach:function(instance){
+            var i, mod;
 
-            
-            $.fn.stargaze = function(opts){
-                return new Stargaze(this[0], opts).init();
+            for(i in this.modules){
+
+                if(this.modules.hasOwnProperty(i)){
+                    mod = this.modules[i];
+
+                    instance[i] = mod.instance.load;
+                }
+            }
+
+            return instance;
+        },
+
+        _plugin:function(plugin){
+            var GUI = this;
+
+            if(plugin.fn && typeof plugin.fn === 'function'){
+
+                $.fn[module.toLowerCase()] = function(opts){
+                    return new plugin.fn(this, opts);
+                } 
+            }else{
+                GUI.log('Error :: Missing ' + plugin + ' fn() method.');
             }
         },
 
-        _store:function(){
+        _cache:function(){
         
         },
 
@@ -167,10 +185,10 @@ var Guerrilla_UI = function(){
 
         start:function(module){
             var mod = this.modules[module],
-                G = this;
+                GUI = this;
 
             if(mod && typeof mod === 'object'){
-                G[mod] = mod;
+                GUI[mod] = mod;
 
                 if(!mod.isLoaded){
                     mod.instance = mod.create(new _GUI_Instance().create(this, module));
@@ -180,7 +198,7 @@ var Guerrilla_UI = function(){
                 }
             }
 
-            return G;
+            return GUI;
         },
 
         stop:function(module){
@@ -214,6 +232,10 @@ var Guerrilla_UI = function(){
                     this.stop(module);
                 }
             }
+        },
+
+        clobber:function(){
+        
         },
 
         error:function(){
@@ -324,16 +346,6 @@ var Guerrilla_UI = function(){
             }
         },
 
-        plugins:function(){
-            var GUI = this;
-
-            GUI.plugins.forEach(function(plugin){
-                $.fn[plugin] = function(opts){
-                    return new plugin(this, opts).init();
-                }
-            });
-        },
-
         isObj:function(obj){
             return $.isPlainObject(obj);
         },
@@ -372,5 +384,5 @@ var Guerrilla_UI = function(){
     }
 },
 /* Initialize Core object */
-GUI = new Guerrilla_UI();
+GUI = new GuerrillaUI();
 

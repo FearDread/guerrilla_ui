@@ -2,18 +2,7 @@
 function _GUI_Instance(){
     return {
         create:function(core, module_selector){
-            var proto,
-                _attach = function(){
-                    var i, mod;
-
-                    for(i in core.modules){
-
-                        if(core.modules.hasOwnProperty(i)){
-                            mod = core.modules[i];
-                            proto[i] = mod.instance.load;
-                        }
-                    }
-                };
+            var proto;
 
             proto = Object.create({
                 config:core.config,
@@ -80,7 +69,8 @@ function _GUI_Instance(){
                 }
             });
 
-            _attach();
+            /* attach modules to GUI Instance */
+            core._attach(proto);
 
             return proto; 
         }
