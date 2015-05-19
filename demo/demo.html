@@ -114,7 +114,7 @@
 
 
     <script type='text/javascript'>
-      $.GUI().create('myApp', function(GUI){
+      $.GUI().create('myModule', function(GUI){
           
            return {
               load:function(){
@@ -126,7 +126,8 @@
            }
       });
 
-      $.GUI().create('custom', function(GUI){
+      $.GUI().create('myApp', function(GUI){
+          /* myModule available on GUI Instance */
 
           function printVersion(){
               return GUI.log('GUI :: Version :: ', GUI.config.version);
