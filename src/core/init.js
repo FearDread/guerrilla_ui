@@ -6,8 +6,7 @@
 ;(function($){
 
     $.GUI = function(){
-        var GUI = Guerrilla,
-            argc = [].slice.call(arguments),
+        var argc = [].slice.call(arguments),
             app = (argc[0] instanceof Object) ? argc[0] : null;
 
         this.proto = $.extend(app, GUI); 

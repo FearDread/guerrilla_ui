@@ -3,10 +3,15 @@ function _GUI_Instance(){
 
     return {
         create:function(core, module_selector){
-            var CONTAINER = core.dom.query('#' + module_selector);
+            var CONTAINER = core.dom.query('#' + module_selector),
 
             proto = { 
                 config:core.config,
+
+                docElem:core.dom.elem,
+
+                win:core.win,
+
                 log:function(){
                     core.log(arguments);
                 },

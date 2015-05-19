@@ -1,6 +1,5 @@
 /* Core Object */
-
-var Guerrilla = function(opts){
+var Guerrilla_UI = function(){
     var _GUI = this,
         _GUI_config = {
             debug:true,
@@ -8,8 +7,8 @@ var Guerrilla = function(opts){
         },
         events = [];
 
-    if(!(_GUI instanceof Guerrilla)){
-        _GUI = new Guerrilla();
+    if(!(_GUI instanceof Guerrilla_UI)){
+        _GUI = new Guerrilla_UI();
     }
 
     return {
@@ -102,7 +101,7 @@ var Guerrilla = function(opts){
 
                         $elem.on(evnt, this, func);
                     }else{
-                        this.log('Wrong Number of Arguments.');
+                        GUI.log('Wrong Number of Arguments.');
                     }
                 },
 
@@ -371,7 +370,7 @@ var Guerrilla = function(opts){
             return base;
         }
     }
-};
-
-Guerrilla = new Guerrilla();
+},
+/* Initialize Core object */
+GUI = new Guerrilla_UI();
 
