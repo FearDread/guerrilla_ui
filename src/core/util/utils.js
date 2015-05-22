@@ -1,7 +1,6 @@
 /* Utilities */
-
 $.GUI().create('Util', function(GUI){
-    var proto = {
+    var utils = {
         merge:function(){
             $.extend(arguments);
         },
@@ -10,11 +9,11 @@ $.GUI().create('Util', function(GUI){
 
             switch(unit){
                 case "em":
-                    value = core.convertToEm(width);
+                    value = this.convertToEm(width);
                     break;
 
                 case "pt":
-                    value = core.convertToPt(width);
+                    value = this.convertToPt(width);
                     break;
 
                 default:
@@ -22,10 +21,39 @@ $.GUI().create('Util', function(GUI){
             }
 
             return value;
+        },
+        getFontsize:function(elem){
+            return parseFloat(
+                getComputedStyle(elem || this.dom.elem).fontSize
+            );
+        },
+
+        convertToEm:function(value){
+            return value * this.getFontsize();
+        },
+
+        convertToPt:function(value){
+        
+        },
+
+        convertBase:function(){
+            var pixels, 
+                elem = this.dom.elem,
+                style = elem.getAttribute('style');
+
+            elem.setAttribute('style', style + ';font-size:1em !important');
+
+            base = this.getFontsize();
+
+            elem.setAttribute('style', style);
+
+            return base;
         }
-    }
+
+    };
+
     return {
-        load:proto,
+        load:utils,
         unload:function(){}
     }
 });

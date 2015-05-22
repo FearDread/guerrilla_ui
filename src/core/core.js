@@ -6,7 +6,7 @@ var GuerrillaUI = function(){
             version:'0.0.1'
         },
         DELIM = '__';
-        events = [];
+        _GUI_events = [];
 
     if(!(_GUI instanceof GuerrillaUI)){
         _GUI = new GuerrillaUI();
@@ -277,35 +277,37 @@ var GuerrillaUI = function(){
         },
 
         publish:function(handle, argc){
-            if(events[handle]){
+            var GUI = this;
+
+            if(_GUI_events[handle]){
                 var idx = 0,
-                    handler = events[handle],
+                    handler = _GUI_events[handle],
                     length = handler.length;
 
                 while(length--){
-                    handler[idx].call(this, argc);
+                    handler[idx].call(GUI, argc);
                     idx++;
                 }
             }else{
-              /* check module events */
-              for(module in this.modules){
-                  if(this.modules.hasOwnProperty(module)){
-                      module = this.modules[module];
+                /* check module events */
+                for(module in GUI.modules){
+                    if(GUI.modules.hasOwnProperty(module)){
+                        module = GUI.modules[module];
 
-                      if(module.events && module.events[handle.type]){
-                          module.events[handle.type].call(handle.data);
-                      }
-                  }
-              }
+                        if(module.events && module.events[handle.type]){
+                            module.events[handle.type].call(handle.data);
+                        }
+                    }
+                }
             }
         },
 
         subscribe:function(handle, callback){
-            if(!events[handle]){
-                events[handle] = [];
+            if(!_GUI_events[handle]){
+                _GUI_events[handle] = [];
             }
 
-            events[handle].push(callback);
+            _GUI_events[handle].push(callback);
           
             return {
               event:handle,
@@ -314,9 +316,9 @@ var GuerrillaUI = function(){
         },
 
         unsubscribe:function(handle){
-            if(events[handle.event]){
+            if(_GUI_events[handle.event]){
                 var idx = 0,
-                    handler = events[handle.event],
+                    handler = _GUI_events[handle.event],
                     length = handler.length;
 
                 while(length--){
@@ -389,34 +391,6 @@ var GuerrillaUI = function(){
 
         isArr:function(arr){
             return $.isArray(arr);
-        },
-
-        getFontsize:function(elem){
-            return parseFloat(
-                getComputedStyle(elem || this.dom.elem).fontSize
-            );
-        },
-
-        convertToEm:function(value){
-            return value * this.getFontsize();
-        },
-
-        convertToPt:function(value){
-        
-        },
-
-        convertBase:function(){
-            var pixels, 
-                elem = this.dom.elem,
-                style = elem.getAttribute('style');
-
-            elem.setAttribute('style', style + ';font-size:1em !important');
-
-            base = this.getFontsize();
-
-            elem.setAttribute('style', style);
-
-            return base;
         }
     }
 },

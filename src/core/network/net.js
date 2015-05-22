@@ -1,12 +1,10 @@
-
+/* Net module with ajax helper functions */
+/* step: stores all returned ajax data in Model Class */
 $.GUI().create('Net', function(GUI){
 
-    return {
-        load:Net,
-        unload:_unload
-    }
+    var Model = GUI.Model,
+        Net = {
 
-    var Net = {
         post:function(){
 
         },
@@ -28,6 +26,14 @@ $.GUI().create('Net', function(GUI){
         }
     };
 
-    function _unload(){}
+    function _unload(){
+        GUI.log('Resetting Module Class');
+        GUI.Model.reset();
+    }
+
+    return {
+        load:Net,
+        unload:_unload
+    }
 
 });
