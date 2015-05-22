@@ -126,8 +126,14 @@ var GuerrillaUI = function(){
 
                 if(this.modules.hasOwnProperty(i)){
                     mod = this.modules[i];
+                    temp = mod.instance.load;
 
-                    instance[i] = mod.instance.load;
+                    if(typeof temp === 'object'){
+                      instance[i] = temp;
+
+                    }else if(typeof temp === 'function'){
+                      instance[i] = mod.instance.load;
+                    }
                 }
             }
 
@@ -203,8 +209,10 @@ var GuerrillaUI = function(){
 
                 if(!mod.isLoaded){
                     mod.instance = mod.create(new _GUI_Instance().create(this, module));
-                    mod.instance.load();
 
+                    if(typeof mod.instance.load === 'function'){
+                        mod.instance.load();
+                    }
                     mod.isLoaded = true;
                 }
             }
@@ -278,6 +286,17 @@ var GuerrillaUI = function(){
                     handler[idx].call(this, argc);
                     idx++;
                 }
+            }else{
+              /* check module events */
+              for(module in this.modules){
+                  if(this.modules.hasOwnProperty(module)){
+                      module = this.modules[module];
+
+                      if(module.events && module.events[handle.type]){
+                          module.events[handle.type].call(handle.data);
+                      }
+                  }
+              }
             }
         },
 

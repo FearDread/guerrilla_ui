@@ -19,7 +19,7 @@ function _GUI_Instance(){
 
                 event:core.dom.event,
 
-                create:function(elem){
+                el:function(elem){
                     return core.dom.create(elem);
                 },
 
@@ -31,9 +31,7 @@ function _GUI_Instance(){
 
                 isArr:core.isArr,
 
-                merge:core.merge,
-
-                fire:function(evnt, argc){
+                emit:function(evnt, argc){
                     return core.publish(evnt, argc);
                 },
 
@@ -45,29 +43,6 @@ function _GUI_Instance(){
                     core.unsubscribe(handle);
                 },
 
-                getPxValue:function(width, unit){
-                    var value;
-
-                    switch(unit){
-                        case "em":
-                            value = core.convertToEm(width);
-                            break;
-
-                        case "pt":
-                            value = core.convertToPt(width);
-                            break;
-
-                        default:
-                            value = width;
-                    }
-
-                    return value;
-                },
-
-                notify:function(evnt){
-                    return core.trigger(evnt);
-                },
-
                 listen:function(events){
                     core.registerEvents(events, module_selector);
                 },
@@ -76,7 +51,6 @@ function _GUI_Instance(){
                     core.removeEvents(events, module_selector);
                 }
             });
-
             /* attach modules to GUI Instance */
             core._attach(proto);
 
