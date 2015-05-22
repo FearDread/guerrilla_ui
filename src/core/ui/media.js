@@ -57,7 +57,7 @@ $.GUI().create('Media', function(GUI){
                 dimension = parts[2];
 
                 if(parts[4]){
-                    value = GUI.getPxValue(parseInt(parts[3], 10), parts[4]); 
+                    value = GUI.Util.getPxValue(parseInt(parts[3], 10), parts[4]); 
 
                 }else{
                     value = parts[3];
@@ -106,8 +106,6 @@ $.GUI().create('Media', function(GUI){
         };
 
         return function(){
-            var win = GUI.win;
-
             options = arguments[0] || {};
 
             if(GUI.win.media_matches){

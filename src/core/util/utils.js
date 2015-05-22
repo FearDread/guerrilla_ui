@@ -1,19 +1,31 @@
 /* Utilities */
+
 $.GUI().create('Util', function(GUI){
-
-    GUI.Array = new Array();
-
-    return {
-        load:function(){
-            return {
-                merge:function(){
-                    $.extend(arguments);
-                },
-            
-            }
+    var proto = {
+        merge:function(){
+            $.extend(arguments);
         },
-        unload:function(){
-            GUI.log('unload utils');
+        getPxValue:function(width, unit){
+            var value;
+
+            switch(unit){
+                case "em":
+                    value = core.convertToEm(width);
+                    break;
+
+                case "pt":
+                    value = core.convertToPt(width);
+                    break;
+
+                default:
+                    value = width;
+            }
+
+            return value;
         }
+    }
+    return {
+        load:proto,
+        unload:function(){}
     }
 });
