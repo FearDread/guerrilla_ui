@@ -7,9 +7,11 @@ function _GUI_Instance(){
             proto = Object.create({
                 config:core.config,
 
-                docElem:core.dom.elem,
+                elem:core.dom.elem,
 
                 win:core.win,
+
+                doc:core.dom.doc,
 
                 log:function(){
                     core.log(arguments);
@@ -21,9 +23,15 @@ function _GUI_Instance(){
                     return core.dom.create(elem);
                 },
 
-                find:function(selector){
+                query:function(selector){
                     return core.dom.query(selector);
                 },
+
+                isObj:core.isObj,
+
+                isArr:core.isArr,
+
+                merge:core.merge,
 
                 fire:function(evnt, argc){
                     return core.publish(evnt, argc);
@@ -83,6 +91,7 @@ var GuerrillaUI = function(){
             debug:true,
             version:'0.0.1'
         },
+        DELIM = '__';
         events = [];
 
     if(!(_GUI instanceof GuerrillaUI)){
@@ -163,7 +172,7 @@ var GuerrillaUI = function(){
                 return this.doc.createElement(el);
             },
             attr:function($el, attrs){
-                if(Core.isObj(attrs)){
+                if(_GUI.isObj(attrs)){
                     $(el).attr(attrs);
                 }
             },
@@ -224,8 +233,18 @@ var GuerrillaUI = function(){
             }
         },
 
-        _cache:function(){
-        
+        _cache:function(source, cache, refetch){
+            cache || (cache = {});
+
+            return function(arg){
+                var key = arguments.length > 1 ? [].join.call(arguments, DELIM) : String(arg);
+                    
+                if(!(key in cache) || (refetch && cache[key] == refetch)){
+                    cache[key] = source.apply(source, arguments);
+                }
+                    
+                return cache[key];
+            }
         },
 
         hitch:function(func){
@@ -265,7 +284,7 @@ var GuerrillaUI = function(){
             var mod = this.modules[module],
                 GUI = this;
 
-            if(mod && typeof mod === 'object'){
+            if(mod && this.isObj(mod)){
                 GUI[mod] = mod;
 
                 if(!mod.isLoaded){
@@ -378,12 +397,13 @@ var GuerrillaUI = function(){
             }
         },
 
+        /* module specific event trigger */
         trigger:function(event){
             var module;
 
-            for(module in moduleData){
-                if(moduleData.hasOwnProperty(module)){
-                    module = moduleData[module];
+            for(module in this.modules){
+                if(this.modules.hasOwnProperty(module)){
+                    module = this.modules[module];
 
                     if(module.events && module.events[event.type]){
                         module.events[event.type].call(event.data);
@@ -395,14 +415,15 @@ var GuerrillaUI = function(){
         registerEvents:function(events, module){
             if(this.isObj(events) && module){
 
-                if(moduleData[module]){
-                    moduleData[module].events = events;
+                if(this.modules[module]){
+                    this.modules[module].events = events;
 
                 }else{
-                    this.log('Error');
+                    this.log('Module not found.');
                 }
+
             }else{
-                this.log('Error');
+                this.log('Missing Arguments');
             }
         },
 
@@ -411,17 +432,22 @@ var GuerrillaUI = function(){
                 event;
 
             if(this.isArr(events) && module){
-                if(module = moduleData[module] && module.events){
+                if(module = this.modules[module] && module.events){
 
                     while(event = events[i++]){
                         delete module.events[event];
                     }
                 }else{
-                    this.log('Error');
+                    this.log('Module not found.');
                 }
+
             }else{
-                this.log('Error');
+                this.log('Missing Arguments');
             }
+        },
+
+        merge:function(){
+            return $.extend(arguments);
         },
 
         isObj:function(obj){
@@ -491,3 +517,335 @@ GUI = new GuerrillaUI();
     };
 
 })(jQuery);
+;/* --------------------------------------- *
+* Guerrilla JS                             *
+* @author: Garrett Haptonstall (FearDread) *
+* @module: Guerrilla.ui GUI Core           *
+* ---------------------------------------- */
+$.GUI().create('Media', function(GUI){
+
+    var Media = function(options){
+        var self = this,
+            breaks, media_change, add_listener, matches,
+            hasMatch = GUI.win.media_matches !== undefined && !!GUI.win.media_matches('!').add_listener,
+
+        proto = {
+
+            media_change:function(query, options){
+                if(query.matches){
+
+                    if((typeof options.in) === 'function'){
+                        options.in(query);
+                    }
+                }else{
+            
+                    if((typeof options.out) === 'function'){
+                        options.out(query);
+                    }
+                }
+
+                if((typeof options.both) === 'function'){
+
+                    return options.both(query);
+                }
+            }, 
+
+            add_listener:function(options){
+                var self = this,
+                    query = GUI.win.media_matches(options.media),
+                    query_cb = function(){
+                        return proto.media_change(query, options);
+                    },
+                    window_cb = function(){
+                        var q = GUI.win.matches(options.media);
+
+                        return proto.media_change(q, options);
+                    };
+
+                query.addListener(query_cb);
+
+                GUI.win.addEventListener("orientationchange", window_cb, false);
+
+                return proto.media_change(query, options);
+            },
+
+            check_query:function(parts){
+                var constraint, dimension, matches, ratio, value, windowHeight, windowWidth;
+
+                constraint = parts[1];
+                dimension = parts[2];
+
+                if(parts[4]){
+                    value = GUI.getPxValue(parseInt(parts[3], 10), parts[4]); 
+
+                }else{
+                    value = parts[3];
+                }
+
+                windowWidth = window.innerWidth || GUI.docElem.clientWidth;
+                windowHeight = window.innerHeight || GUI.docElem.clientHeight;
+
+                if(dimension === 'width'){
+                    matches = constraint === "max" && value > windowWidth || constraint === "min" && value < windowWidth;
+
+                }else if(dimension === 'height'){
+                    matches = constraint === "max" && value > windowHeight || constraint === "min" && value < windowHeight;
+
+                }else if(dimension === 'aspect-ratio'){
+                    ratio = windowWidth / windowHeight;
+
+                    matches = constraint === "max" && eval(ratio) < eval(value) || constraint === "min" && eval(ratio) > eval(value);
+                }
+
+                return matches;
+            },
+
+            media_listener:function(){
+                var opts, matches, media, medias, parts, _i, _len;
+
+                medias = (options.media) ? options.media.split(/\sand\s|,\s/) : null;
+
+                if(medias){
+                    matches = true;
+
+                    for(_i = 0, _len = medias.length; _i < _len; _i++){
+                        media = medias[_i];
+                        parts = media.match(/\((.*?)-(.*?):\s([\d\/]*)(\w*)\)/);
+
+                        if (!proto.check_query(parts)) {
+                            matches = false;
+                        }
+                    }
+
+                    opts = {media:options.media, matches:matches};
+
+                    return proto.media_change(opts, options);
+                }
+            }
+        };
+
+        return function(){
+            var win = GUI.win;
+
+            options = arguments[0] || {};
+
+            if(GUI.win.media_matches){
+                return proto.add_listener();
+            
+            }else{
+                if(GUI.win.addEventListener){
+                    GUI.win.addEventListener("resize", proto.media_listener);
+
+                }else{
+
+                    if(GUI.win.attachEvent){
+                        GUI.win.attachEvent("onresize", proto.media_listener);
+                    }
+                }
+
+                return proto.media_listener();
+            }
+        } 
+    };
+  
+    return {
+        load:function(){
+            var argc = arguments[0],
+                media = new Media();
+
+            return media(argc);
+        },
+        unload:function(){
+            GUI.cleanup();
+        }
+    }
+});
+;/* Slider using GUI Extension */
+$.GUI().create('Slider', function(GUI){
+  
+    return {
+        load:function(){
+
+        },
+        unload:function(){
+        
+        }
+    }
+});
+;
+/* Stargaze library */
+
+$.GUI().create('Stargaze', function(GUI){
+
+    var Stargaze = function(canvas, options){
+
+        var $canvas = GUI.find(canvas) || null,
+            context = (canvas) ? canvas.getContext('2d') : null,
+            defaults = {
+                star: {
+                    color: 'rgba(255, 255, 255, .7)',
+                    width: 1
+                },
+                line: {
+                    color: 'rgba(255, 255, 255, .7)',
+                    width: 0.2
+                },
+                position: {
+                    x: 0, 
+                    y: 0 
+                },
+                width: window.innerWidth,
+                height: window.innerHeight,
+                velocity: 0.1,
+                length: 100,
+                distance: 100,
+                radius: 150,
+                stars: []
+            },
+            config = $.extend(true, {}, defaults, options);
+
+        function Star (){
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+
+            this.vx = (config.velocity - (Math.random() * 0.5));
+            this.vy = (config.velocity - (Math.random() * 0.5));
+
+            this.radius = Math.random() * config.star.width;
+        }
+
+        Star.prototype = {
+
+            create: function(){
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                context.fill();
+            },
+
+            animate: function(){
+                var i;
+
+                for(i = 0; i < config.length; i++){
+                    var star = config.stars[i];
+
+                    if(star.y < 0 || star.y > canvas.height){
+                        star.vx = star.vx;
+                        star.vy = - star.vy;
+
+                    }else if (star.x < 0 || star.x > canvas.width){
+                        star.vx = - star.vx;
+                        star.vy = star.vy;
+                    }
+
+                    star.x += star.vx;
+                    star.y += star.vy;
+                }
+            },
+
+            line:function(){
+                var length = config.length,
+                    iStar,
+                    jStar,
+                    i,
+                    j;
+
+                for(i = 0; i < length; i++){
+                    for(j = 0; j < length; j++){
+                        iStar = config.stars[i];
+                        jStar = config.stars[j];
+
+                        if (
+                            (iStar.x - jStar.x) < config.distance &&
+                            (iStar.y - jStar.y) < config.distance &&
+                            (iStar.x - jStar.x) > - config.distance &&
+                            (iStar.y - jStar.y) > - config.distance
+                        ) {
+                            if (
+                                (iStar.x - config.position.x) < config.radius &&
+                                (iStar.y - config.position.y) < config.radius &&
+                                (iStar.x - config.position.x) > - config.radius &&
+                                (iStar.y - config.position.y) > - config.radius
+                            ) {
+                                context.beginPath();
+                                context.moveTo(iStar.x, iStar.y);
+                                context.lineTo(jStar.x, jStar.y);
+                                context.stroke();
+                                context.closePath();
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        this.createStars = function(){
+            var length = config.length,
+                star, i;
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            for(i = 0; i < length; i++){
+                config.stars.push(new Star());
+
+                star = config.stars[i];
+                star.create();
+            }
+
+            star.line();
+            star.animate();
+        };
+
+        this.setCanvas = function(){
+            canvas.width = config.width;
+            canvas.height = config.height;
+        };
+
+        this.setContext = function(){
+            context.fillStyle = config.star.color;
+            context.strokeStyle = config.line.color;
+            context.lineWidth = config.line.width;
+        };
+
+        this.setInitialPosition = function(){
+            if(!options || !options.hasOwnProperty('position')){
+                config.position = {
+                    x: canvas.width * 0.5,
+                    y: canvas.height * 0.5
+                };
+            }
+        };
+
+        this.loop = function(callback){
+            callback();
+
+            window.requestAnimationFrame(function(){
+                this.loop(callback);
+            }.bind(this));
+        };
+
+        this.bind = function(){
+            $(document).on('mousemove', function(e){
+                config.position.x = e.pageX - $canvas.offset().left;
+                config.position.y = e.pageY - $canvas.offset().top;
+            });
+        };
+
+        this.init = function(){
+            this.setCanvas();
+            this.setContext();
+            this.setInitialPosition();
+            this.loop(this.createStars);
+            this.bind();
+        };
+    }
+
+    return {
+        fn:function(){
+            var argc = arguments[0],
+                $elem = argc[0],
+                opts = argc[1];
+
+            return new Stargaze($elem, opts).init();
+        }
+    }
+});

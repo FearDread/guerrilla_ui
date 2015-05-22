@@ -16,7 +16,10 @@ module.exports = function(grunt){
               src: [
                   'src/core/instance.js',
                   'src/core/core.js',
-                  'src/core/init.js'
+                  'src/core/init.js',
+                  'src/core/ui/media.js',
+                  'src/core/ui/slider.js',
+                  'src/core/ui/stargaze.js'
               ],
               dest: 'dist/<%= pkg.name %>.js'
            }
