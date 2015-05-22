@@ -86,7 +86,7 @@ var GuerrillaUI = function(){
                 return this.doc.createElement(el);
             },
             attr:function($el, attrs){
-                if(Core.isObj(attrs)){
+                if(_GUI.isObj(attrs)){
                     $(el).attr(attrs);
                 }
             },
@@ -198,7 +198,7 @@ var GuerrillaUI = function(){
             var mod = this.modules[module],
                 GUI = this;
 
-            if(mod && typeof mod === 'object'){
+            if(mod && this.isObj(mod)){
                 GUI[mod] = mod;
 
                 if(!mod.isLoaded){
@@ -311,12 +311,13 @@ var GuerrillaUI = function(){
             }
         },
 
+        /* module specific event trigger */
         trigger:function(event){
             var module;
 
-            for(module in moduleData){
-                if(moduleData.hasOwnProperty(module)){
-                    module = moduleData[module];
+            for(module in this.modules){
+                if(this.modules.hasOwnProperty(module)){
+                    module = this.modules[module];
 
                     if(module.events && module.events[event.type]){
                         module.events[event.type].call(event.data);
@@ -328,14 +329,15 @@ var GuerrillaUI = function(){
         registerEvents:function(events, module){
             if(this.isObj(events) && module){
 
-                if(moduleData[module]){
-                    moduleData[module].events = events;
+                if(this.modules[module]){
+                    this.modules[module].events = events;
 
                 }else{
-                    this.log('Error');
+                    this.log('Module not found.');
                 }
+
             }else{
-                this.log('Error');
+                this.log('Missing Arguments');
             }
         },
 
@@ -344,17 +346,22 @@ var GuerrillaUI = function(){
                 event;
 
             if(this.isArr(events) && module){
-                if(module = moduleData[module] && module.events){
+                if(module = this.modules[module] && module.events){
 
                     while(event = events[i++]){
                         delete module.events[event];
                     }
                 }else{
-                    this.log('Error');
+                    this.log('Module not found.');
                 }
+
             }else{
-                this.log('Error');
+                this.log('Missing Arguments');
             }
+        },
+
+        merge:function(){
+            return $.extend(arguments);
         },
 
         isObj:function(obj){

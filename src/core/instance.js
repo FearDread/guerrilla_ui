@@ -7,9 +7,11 @@ function _GUI_Instance(){
             proto = Object.create({
                 config:core.config,
 
-                docElem:core.dom.elem,
+                elem:core.dom.elem,
 
                 win:core.win,
+
+                doc:core.dom.doc,
 
                 log:function(){
                     core.log(arguments);
@@ -21,9 +23,15 @@ function _GUI_Instance(){
                     return core.dom.create(elem);
                 },
 
-                find:function(selector){
+                query:function(selector){
                     return core.dom.query(selector);
                 },
+
+                isObj:core.isObj,
+
+                isArr:core.isArr,
+
+                merge:core.merge,
 
                 fire:function(evnt, argc){
                     return core.publish(evnt, argc);
