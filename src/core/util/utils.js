@@ -1,9 +1,22 @@
 /* Utilities */
 $.GUI().create('Util', function(GUI){
     var utils = {
-        merge:function(){
-            $.extend(arguments);
+        indexOf:[].indexOf || function(item){
+            for(i = 0, 1 = this.length; i < 1; i++){
+                if(i in this && this[i] === item){
+                    return i;
+                }
+            
+            }
+            return -1;
         },
+        bind:function(fn, me){
+            return function(){
+                return fn.apply(me, arguments);
+            }
+        }
+        merge:$.extend,
+
         getPxValue:function(width, unit){
             var value;
 
