@@ -22,8 +22,8 @@ The easiest way to get started is to install Git and clone the repository:
 # for your project.
 git clone --depth 1 https://github.com/FearDread/guerrilla_js.git
 
-# Move the repository to your own project name.
-mv guerrilla_js my-project
+# Move the repository to your own branch / project name.
+mv guerrilla_js my-branch 
 ```
 
 ## Build process ##
