@@ -1,108 +1,128 @@
 
 $.GUI().create('Pop', function(GUI){
                
-    this.WOW = (function(){
+    var WOW = (function(){
 
-    	WOW.prototype.defaults = {
-      		boxClass: 'wow',
-      		animateClass: 'animated',
-      		offset: 0,
-      		mobile: true,
-      		live: true,
-      		callback: null
-    	};
+        WOW.prototype.defaults = {
+            boxClass: 'wow',
+            animateClass: 'animated',
+            offset: 0,
+            mobile: true,
+            live: true,
+            callback: null
+        };
 
-      function WOW(options){
-          if(options == null){
-              options = {};
-          }
-
-          this.scrollCallback = GUI.bind(this.scrollCallback, this);
-          this.scrollHandler = GUI.bind(this.scrollHandler, this);
-          this.resetAnimation = GUI.bind(this.resetAnimation, this);
-          this.start = bind(this.start, this);
-          this.scrolled = true;
-          this.config = GUI.extend(options, this.defaults);
-          this.animationNameCache = new WeakMap();
-          this.wowEvent = this.util().createEvent(this.config.boxClass);
-    }
-
-    WOW.prototype.init = function() {
-      var ref;
-      this.element = window.document.documentElement;
-      if ((ref = document.readyState) === "interactive" || ref === "complete") {
-        this.start();
-      } else {
-        this.util().addEvent(document, 'DOMContentLoaded', this.start);
-      }
-      return this.finished = [];
-    };
-
-    WOW.prototype.start = function() {
-      var box, j, len, ref;
-      this.stopped = false;
-      this.boxes = (function() {
-        var j, len, ref, results;
-        ref = this.element.querySelectorAll("." + this.config.boxClass);
-        results = [];
-        for (j = 0, len = ref.length; j < len; j++) {
-          box = ref[j];
-          results.push(box);
-        }
-        return results;
-      }).call(this);
-      this.all = (function() {
-        var j, len, ref, results;
-        ref = this.boxes;
-        results = [];
-        for (j = 0, len = ref.length; j < len; j++) {
-          box = ref[j];
-          results.push(box);
-        }
-        return results;
-      }).call(this);
-      if (this.boxes.length) {
-        if (this.disabled()) {
-          this.resetStyle();
-        } else {
-          ref = this.boxes;
-          for (j = 0, len = ref.length; j < len; j++) {
-            box = ref[j];
-            this.applyStyle(box, true);
-          }
-        }
-      }
-      if (!this.disabled()) {
-        this.util().addEvent(window, 'scroll', this.scrollHandler);
-        this.util().addEvent(window, 'resize', this.scrollHandler);
-        this.interval = setInterval(this.scrollCallback, 50);
-      }
-      if (this.config.live) {
-        return new MutationObserver((function(_this) {
-          return function(records) {
-            var k, len1, node, record, results;
-            results = [];
-            for (k = 0, len1 = records.length; k < len1; k++) {
-              record = records[k];
-              results.push((function() {
-                var l, len2, ref1, results1;
-                ref1 = record.addedNodes || [];
-                results1 = [];
-                for (l = 0, len2 = ref1.length; l < len2; l++) {
-                  node = ref1[l];
-                  results1.push(this.doSync(node));
-                }
-                return results1;
-              }).call(_this));
+        function WOW(options){
+            if(options == null){
+                options = {};
             }
-            return results;
-          };
-        })(this)).observe(document.body, {
-          childList: true,
-          subtree: true
-        });
-      }
-    };
+
+            this.scrollCallback = GUI.bind(this.scrollCallback, this);
+            this.scrollHandler = GUI.bind(this.scrollHandler, this);
+            this.resetAnimation = GUI.bind(this.resetAnimation, this);
+            this.start = bind(this.start, this);
+            this.scrolled = true;
+            this.config = GUI.extend(options, this.defaults);
+            this.animationNameCache = new WeakMap();
+            this.wowEvent = this.util().createEvent(this.config.boxClass);
+        }
+
+        WOW.prototype.init = function() {
+            var ref;
+            this.element = window.document.documentElement;
+
+            if((ref = document.readyState) === "interactive" || ref === "complete"){
+                this.start();
+            }else{
+                this.util().addEvent(document, 'DOMContentLoaded', this.start);
+            }
+
+            return this.finished = [];
+        };
+
+        WOW.prototype.start = function() {
+            var box, j, len, ref;
+            this.stopped = false;
+            this.boxes = (function(){
+                var j, len, ref, results;
+
+                ref = this.element.querySelectorAll("." + this.config.boxClass);
+                results = [];
+
+                for(j = 0, len = ref.length; j < len; j++){
+                    box = ref[j];
+                    results.push(box);
+                }
+
+                return results;
+            }).call(this);
+
+            this.all = (function(){
+                var j, len, ref, results;
+
+                ref = this.boxes;
+                results = [];
+
+                for (j = 0, len = ref.length; j < len; j++) {
+                  box = ref[j];
+                  results.push(box);
+                }
+
+                return results;
+            }).call(this);
+
+            if(this.boxes.length){
+                if(this.disabled()){
+
+                    this.resetStyle();
+                }else{
+                    ref = this.boxes;
+
+                    for(j = 0, len = ref.length; j < len; j++){
+                        box = ref[j];
+                        this.applyStyle(box, true);
+                    }
+                }
+            }
+
+            if(!this.disabled()){
+                this.util().addEvent(window, 'scroll', this.scrollHandler);
+                this.util().addEvent(window, 'resize', this.scrollHandler);
+                this.interval = setInterval(this.scrollCallback, 50);
+            }
+
+            if(this.config.live){
+                return new MutationObserver((function(_this){
+                    return function(records){
+                        var k, len1, node, record, results;
+
+                        results = [];
+                        for(k = 0, len1 = records.length; k < len1; k++){
+                            record = records[k];
+                            results.push((function(){
+                                var l, len2, ref1, results1;
+
+                                ref1 = record.addedNodes || [];
+                                results1 = [];
+
+                                for(l = 0, len2 = ref1.length; l < len2; l++){
+                                    node = ref1[l];
+                                    results1.push(this.doSync(node));
+                                }
+
+                                return results1;
+
+                            }).call(_this));
+                        }
+
+                        return results;
+                    };
+                })(this)).observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+        };
 
     WOW.prototype.stop = function() {
       this.stopped = true;
@@ -352,5 +372,10 @@ $.GUI().create('Pop', function(GUI){
 
   })();
          
+  return {
+      load:function(){
+      
+      }
+  }
                
 });
