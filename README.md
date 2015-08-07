@@ -47,3 +47,5 @@ Select 'Launch App'
 Copyright © 2014 Garrett Haptonstall (@FearDread)  
 Licensed under the MIT license.
 
+...
+
