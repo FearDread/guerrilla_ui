@@ -2,7 +2,7 @@
 $.GUI().create('Util', function(GUI){
     var utils = {
         indexOf:[].indexOf || function(item){
-            for(i = 0, 1 = this.length; i < 1; i++){
+            for(var i = 0, i = this.length; i < 1; i++){
                 if(i in this && this[i] === item){
                     return i;
                 }
@@ -14,7 +14,7 @@ $.GUI().create('Util', function(GUI){
             return function(){
                 return fn.apply(me, arguments);
             }
-        }
+        },
         merge:$.extend,
 
         getPxValue:function(width, unit){
@@ -67,6 +67,8 @@ $.GUI().create('Util', function(GUI){
 
     return {
         load:utils,
-        unload:function(){}
+        unload:function(){
+	    GUI.cleanup();
+	}
     }
 });
