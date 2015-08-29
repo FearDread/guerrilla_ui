@@ -1,3 +1,4 @@
+Build Status :: [![Build Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js)
 Guerrilla JS jQuery Framework
 =============================
 Front End application framework and plugin library using jQuery.
@@ -49,3 +50,10 @@ Licensed under the MIT license.
 
 ...
 
+## About Author ##
+Garrett Haptonstall (@FearDread)
+
+# Social
+  - [Facebook](https://www.facebook.com/ghaptonstall)
+  - [Twitter](https://twitter.com/G_HAP)
+  - [Instagram](https://instagram.com/ghap205)

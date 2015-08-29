@@ -5,7 +5,7 @@
 * ---------------------------------------- */
 ;(function($){
 
-    $.GUI = function(){
+    $.GUI = function() {
         var argc = [].slice.call(arguments),
             app = (argc[0] instanceof Object) ? argc[0] : null,
             proto = $.extend(app, GUI);

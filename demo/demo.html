@@ -159,7 +159,7 @@
                   canvas.stargaze();
                   
                   /* jquery Equivilants */
-                  btn.on('click', this.myMethod);
+                  // btn.on('click', this.myMethod);
                   
                   GUI.event.on(btn, this.myMethod);
 
@@ -182,7 +182,7 @@
 
               },
               myMethod:function(){
-                  GUI.fire('custom_event');
+                  GUI.emit('custom_event');
 
               }
           }
