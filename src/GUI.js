@@ -34,6 +34,10 @@ GUI = (function() {
 
                 return this;
             };
+
+	    this.prototype._instance = function(module, opts, callback) {
+
+            };
         }
 
         /** 
