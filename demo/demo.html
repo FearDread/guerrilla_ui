@@ -112,7 +112,10 @@
 
 
     <script type='text/javascript'>
+      var g = $.GUI();
+      console.log(g.utils);
       $.GUI().create('myModule', function(GUI){
+           console.log('inside module');
           
            return {
               load:function(){
