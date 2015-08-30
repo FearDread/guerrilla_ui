@@ -10,16 +10,15 @@ Broker = (function() {
         this.channels = {};
 
 	if (utils.isObj) {
+        console.log('wtf', this);
 	    this.attach(obj);
 
 	}else if (obj) {
 	    this.cascade = true;
 	}
+        
     }
-
-
-    return {
-        register: function(handle, callback) {
+        Broker.prototype.register = function(handle, callback) {
             if(!this.channels[handle]){
 
                 this.channels[handle] = [];
@@ -31,9 +30,9 @@ Broker = (function() {
                 event:handle,
                 callback:callback
             }
-	},
+	};
 
-	destroy: function(handle) {
+	Broker.prototype.destroy = function(handle) {
             if(this.channels[handle.event]) {
                 var idx = 0,
                     current = this.channels[handle.event],
@@ -48,9 +47,9 @@ Broker = (function() {
                     idx++;
                 }
             }
-	},
+	};
         
-        fire: function(channel, data) {
+        Broker.prototype.fire = function(channel, data) {
             var idx = 0,
                 params = (data) ? data : [],
                 event = this.channels[channel],
@@ -65,8 +64,8 @@ Broker = (function() {
                     idx++;
                 }
             }
-	},
-        attach: function(obj, forced) {
+	};
+        Broker.prototype.attach = function(obj, forced) {
 	    var key, value
 
 	    if (utils.isObj(obj)) {
@@ -87,7 +86,8 @@ Broker = (function() {
             }
 
 	    return this;
-	}
-    }
+        };
+
+    return Broker;
 
 })(this);

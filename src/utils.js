@@ -1,5 +1,4 @@
 
-(function() {
     var utils;
 
     utils = {
@@ -50,7 +49,7 @@
         * @return boolean
         **/
         isStr: function(str) {
-            return angular.isString(str);
+            return (typeof str === 'string');
         },
 
         bind: function(fn, me) {
@@ -174,6 +173,3 @@
         }
     };
 
-    return utils;
-
-})(this);
