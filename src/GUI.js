@@ -40,183 +40,190 @@ GUI = (function() {
         }
     }
 
-        /** 
-         * Logging 
-        **/
-        GUI.prototype.log = {
-            log: function() {},
-            info: function() {},
-            warn: function() {},
-            error: function() {},
-            enable: function() {}
-        };
+    /** 
+     * Logging 
+    **/
+    GUI.prototype.log = {
+        log: function() {},
+        info: function() {},
+        warn: function() {},
+        error: function() {},
+        enable: function() {}
+    };
 
-	/* Private Methods */
-        /** 
-         * Called when starting module fails 
-         *
-         *
-        **/
-	GUI.prototype._fail = function(ev, callback) {
-            this.log.error(ev);
+    /* Private Methods */
+    /** 
+      * Called when starting module fails 
+      *
+      *
+    **/
+    GUI.prototype._fail = function(ev, callback) {
+        this.log.error(ev);
 
-	    callback(new Error("could not start module: " + ev.message));
+	callback(new Error("could not start module: " + ev.message));
 
-	    return this;
-        };
+	return this;
+    };
 
-        /** 
-         * Run all modules with optional options obj 
-         *
-         *
-        **/
-	GUI.prototype._run = function(ev, sandbox, callback) {
-	    var plugin, tasks;
+    /** 
+      * Run all modules with optional options obj 
+      *
+      *
+    **/
+    GUI.prototype._run = function(ev, sandbox, callback) {
+        var plugin, tasks;
 
-	    tasks = (function() {
-	      var i = 0, length, ref, newRef, results;
+	tasks = (function() {
+	    var i = 0, length, ref, newRef, results;
 
-	      results = [];
-	      ref = this._plugins;
-	      length = ref.length;
-
-	      do {
-		  plugin = ref[i];
-
-		  if (typeof ((newRef = plugin.plugin) != null ? newRef[ev] : void 0) === "function") {
-		      results.push((function(p) {
-		          var fn;
-
-		          fn = p.plugin[ev];
-
-		          return function(next) {
-		              if (utils.hasArgs(fn, 3)) {
-			          return fn(sandbox, p.options, next);
-		              } else {
-			          fn(sandbox, p.options);
-			          return next();
-		              }
-		          };
-		      })(plugin));
-		  }
-
-	          i++;
-	      } while (--length);
-
-	      return results;
-
-	    }).call(this);
-
-	    return util.runSeries(tasks, cb, true);
-
-	};
-
-        /** 
-         * Create new instance and apply to modules and plugins 
-         *
-         *
-        **/
-	GUI.prototype._instance = function(module, opts, callback) {
-	    var Sandbox, instanecOpts, id, i = 0, key, length, mod, obj, options, ref, sb, val;
-
-	    id = opts.instance || module;
-	    options = opts.options;
-	    mod = this._modules[module];
-
-	    if (this._instances[module]) {
-	      return callback(this._instances[module]);
-	    }
-
-	    instanceOpts = {};
-	    ref = [mod.options, options];
+	    results = [];
+	    ref = this._plugins;
 	    length = ref.length;
 
 	    do {
-	        obj = ref[i];
+                plugin = ref[i];
 
-	        if (obj) {
-		    for (key in obj) {
-		        val = obj[key];
-			
-			if (instanceOpts[key] === null) {
-		            instanceOpts[key] = val;
-		        }
-		    }
-	        }
+		if (typeof ((newRef = plugin.plugin) != null ? newRef[ev] : void 0) === "function") {
+		    results.push((function(p) {
+		        var fn;
+
+		        fn = p.plugin[ev];
+
+		        return function(next) {
+		            if (utils.hasArgs(fn, 3)) {
+			        return fn(sandbox, p.options, next);
+		            } else {
+			        fn(sandbox, p.options);
+			        return next();
+		            }
+		        };
+		    })(plugin));
+                }
 
 	        i++;
 	    } while (--length);
 
-	    Sandbox = (utils.isFunc(opts.sandbox)) ? opts.sandbox : this.sandbox;
-	    sb = new Sandbox(this, id, instanceOpts, module);
+	    return results;
 
-	    return this._plugins('load', sb, (function(_this) {
-	        return function(err) {
-		    var instance;
-		
-		    instance = new module.creator(sb);
-		    if (typeof instance.load !== "function") {
-		        return callback(new Error("Module has no 'load' method"));
+        }).call(this);
+
+        return util.runSeries(tasks, cb, true);
+
+    };
+
+    /** 
+      * Create new instance and apply to modules and plugins 
+      *
+      *
+    **/
+    GUI.prototype._instance = function(module, opts, callback) {
+        var Sandbox, instanecOpts, id, i = 0, key, length, mod, obj, options, ref, sb, val;
+
+	id = opts.instance || module;
+	options = opts.options;
+	mod = this._modules[module];
+
+	if (this._instances[module]) {
+	    return callback(this._instances[module]);
+	}
+
+	instanceOpts = {};
+	ref = [mod.options, options];
+	length = ref.length;
+
+	do {
+	    obj = ref[i];
+
+	    if (obj) {
+	        for (key in obj) {
+		    val = obj[key];
+			
+		    if (instanceOpts[key] === null) {
+		        instanceOpts[key] = val;
 		    }
+		}
+	    }
 
-		    _this._instances[id] = instance;
-		    _this._sandboxes[id] = sb;
+	    i++;
+	} while (--length);
 
-		    return callback(null, instance, instanceOpts);
-	        };
-	    })(this));
-        };
+	Sandbox = (utils.isFunc(opts.sandbox)) ? opts.sandbox : this.sandbox;
+	sb = new Sandbox(this, id, instanceOpts, module);
 
-        GUI.prototype._startAll = function(modules, callback) {
-            var done, module, action;
+	return this._plugins('load', sb, (function(_this) {
+	    return function(err) {
+	        var instance;
+		
+		instance = new module.creator(sb);
+		if (typeof instance.load !== "function") {
+		    return callback(new Error("Module has no 'load' method"));
+		}
 
-            if (!modules) {
-                modules = (function() {
+		_this._instances[id] = instance;
+		_this._sandboxes[id] = sb;
+
+		return callback(null, instance, instanceOpts);
+	    };
+	})(this));
+    };
+
+    GUI.prototype._startAll = function(modules, callback) {
+        var done, module, action;
+
+        if (!modules) {
+            modules = (function() {
+                var results;
+
+                results = [];
+
+                for (module in this._modules) {
+                    results.push(module);
+                }
+
+                return results;
+            }).call(this);
+        }
+
+        action = (function(_this) {
+            return function(module, next) {
+                return _this.start(module, _this._modules[module].options, next);
+            };
+        })(this);
+
+        done = function(err) {
+            var e, i, j, k, len, mdls, modErrors, x;
+            if ((err != null ? err.length : void 0) > 0) {
+                modErrors = {};
+
+                for (i = j = 0, len = err.length; j < len; i = ++j) {
+                    x = err[i];
+
+                    if (x != null) {
+                        modErrors[mods[i]] = x;
+                    }
+                }
+                mdls = (function() {
                     var results;
-
                     results = [];
 
-                    for (module in this._modules) {
-                        results.push(module);
+                    for (k in modErrors) {
+                        results.push("'" + k + "'");
                     }
 
                     return results;
-                }).call(this);
-            }
-
-            action = (function(_this) {
-                return function(module, next) {
-                    return _this.start(module, _this._modules[module].options, next);
-                };
-            })(this);
-
-            done = function(err) {
-              var e, i, j, k, len, mdls, modErrors, x;
-              if ((err != null ? err.length : void 0) > 0) {
-                modErrors = {};
-                for (i = j = 0, len = err.length; j < len; i = ++j) {
-                  x = err[i];
-                  if (x != null) {
-                    modErrors[mods[i]] = x;
-                  }
-                }
-                mdls = (function() {
-                  var results;
-                  results = [];
-                  for (k in modErrors) {
-                    results.push("'" + k + "'");
-                  }
-                  return results;
                 })();
+
                 e = new Error("errors occurred in the following modules: " + mdls);
                 e.moduleErrors = modErrors;
-              }
-              return typeof cb === "function" ? cb(e) : void 0;
-            };
-            util.doForAll(mods, startAction, done, true);
+            }
 
-            return this;
+            return typeof cb === "function" ? cb(e) : void 0;
         };
+
+        util.doForAll(mods, startAction, done, true);
+
+        return this;
+    };
 
 
     /* Public Methods */
