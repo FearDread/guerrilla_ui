@@ -1,4 +1,8 @@
-// New GUI Core Object //
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @author: Garrett Haptonstall (FearDread) *
+* @module: $.GUI jQuery namespace          * 
+* ---------------------------------------- */
 var GUI, config;
 
 GUI = (function() {
@@ -83,7 +87,7 @@ GUI = (function() {
 	    do {
                 plugin = ref[i];
 
-		if (typeof ((newRef = plugin.plugin) != null ? newRef[ev] : void 0) === "function") {
+		if (typeof ((newRef = plugin.plugin) !== null ? newRef[ev] : void 0) === "function") {
 		    results.push((function(p) {
 		        var fn;
 
@@ -107,7 +111,7 @@ GUI = (function() {
 
         }).call(this);
 
-        return util.runSeries(tasks, cb, true);
+        return utils.run.series(tasks, cb, true);
 
     };
 
@@ -192,13 +196,14 @@ GUI = (function() {
 
         done = function(err) {
             var e, i, j, k, len, mdls, modErrors, x;
-            if ((err != null ? err.length : void 0) > 0) {
+
+            if ((err !== null ? err.length : void 0) > 0) {
                 modErrors = {};
 
                 for (i = j = 0, len = err.length; j < len; i = ++j) {
                     x = err[i];
 
-                    if (x != null) {
+                    if (x !== null) {
                         modErrors[mods[i]] = x;
                     }
                 }
@@ -220,7 +225,7 @@ GUI = (function() {
             return typeof cb === "function" ? cb(e) : void 0;
         };
 
-        util.doForAll(mods, startAction, done, true);
+        utils.run.all(mods, startAction, done, true);
 
         return this;
     };
@@ -270,60 +275,72 @@ GUI = (function() {
             if (!callback) {
                 callback = function () {};
             }
+
             if (arguments.length === 0) {
-              return this._startAll();
+                return this._startAll();
             }
-            if (moduleId instanceof Array) {
-              return this._startAll(moduleId, opt);
+            if (module instanceof Array) {
+                return this._startAll(moduleId, opt);
             }
             if (typeof moduleId === "function") {
-              return this._startAll(null, moduleId);
+                return this._startAll(null, moduleId);
             }
             if (typeof opt === "function") {
-              cb = opt;
-              opt = {};
+                cb = opt;
+                opt = {};
             }
-            e = checkType("string", moduleId, "module ID") || checkType("object", opt, "second parameter") || (!this._modules[moduleId] ? "module doesn't exist" : void 0);
-            if (e) {
-              return this._startFail(e, cb);
-            }
-            id = opt.instanceId || moduleId;
-            if (this._running[id] === true) {
-              return this._startFail(new Error("module was already started"), cb);
-            }
-            initInst = (function(_this) {
-              return function(err, instance, opt) {
-                if (err) {
-                  return _this._startFail(err, cb);
-                }
-                try {
-                  if (util.hasArgs(instance.init, 2)) {
-                    return instance.init(opt, function(err) {
-                      if (!err) {
-                        _this._running[id] = true;
-                      }
-                      return cb(err);
-                    });
-                  } else {
-                    instance.init(opt);
-                    _this._running[id] = true;
-                    return cb();
-                  }
-                } catch (_error) {
-                  e = _error;
-                  return _this._startFail(e, cb);
-                }
-              };
-            })(this);
-            return this.boot((function(_this) {
-              return function(err) {
-                if (err) {
-                  return _this._startFail(err, cb);
-                }
-                return _this._createInstance(moduleId, opt, initInst);
-              };
-            })(this));
 
+            e = utils.isStr(module) || utils.isObj(opts) || (!this._modules[module] ? 'module does not exist.' : void 0);
+
+            if (e) {
+              return this._fail(e, cb);
+            }
+
+            id = opt.instanceId || module;
+
+            if (this._running[id] === true) {
+                return this._fail(new Error("module was already started"), cb);
+            }
+
+            initInst = (function(_this) {
+                return function(err, instance, opt) {
+                    if (err) {
+                        return _this._fail(err, cb);
+                    }
+
+                    try {
+                        if (utils.hasArgs(instance.load, 2)) {
+                            return instance.load(opt, function(err) {
+
+                                if (!err) {
+                                    _this._running[id] = true;
+                                }
+
+                                return cb(err);
+                            });
+                        } else {
+                            instance.load(opt);
+                            _this._running[id] = true;
+                            
+                            return cb();
+                        }
+                    } catch (_error) {
+                        e = _error;
+                        return _this._fail(e, cb);
+                    }
+                };
+            })(this);
+
+            return this.boot((function(_this) {
+                return function(err) {
+                    if (err) {
+                        return _this._fail(err, cb);
+                    }
+
+                    return _this._instance(moduleId, opt, initInst);
+                };
+
+            })(this));
         };
 
         /** 
