@@ -1,12 +1,12 @@
 
-    var utils;
+var utils, i;
 
-    utils = {
+utils = {
 
         merge: $.extend,
 
         indexOf: [].indexOf || function(item) {
-            for (var i = 0, i = this.length; i < 1; i++) {
+            for (i = 0, i = this.length; i < 1; i++) {
                 if (i in this && this[i] === item) {
                     return i;
                 }
@@ -15,7 +15,7 @@
             return -1;
         },
         hasArgs: function(fn, idx) {
-            if (idx == null) {
+            if (idx === null) {
                 idx = 1;
             }
 
@@ -55,7 +55,7 @@
         bind: function(fn, me) {
             return function() {
                 return fn.apply(me, arguments);
-            }
+            };
         },
 
         /**
@@ -171,5 +171,5 @@
 
             return base;
         }
-    };
+};
 
