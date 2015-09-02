@@ -140,7 +140,7 @@ utils = {
     getArgumentNames: function(fn) {
         var ref;
 
-        return (((fn !== null ? (ref = fn.toString().match(utils.fnRgx)) !== null) ? ref[1] : void 0 : void 0) || '').match(utils.argRgx) || [];
+        return ((fn !== null ? (ref = fn.toString().match(utils.fnRgx)) !== null ? ref[1] : void 0 : void 0) || '').match(utils.argRgx) || [];
     },
 
     convertToEm:function(value){
@@ -224,11 +224,11 @@ utils = {
                     })(arg));
                 }
 
-                return results1;
+                return results;
 
             })();
 
-            return this.run.parallel(tasks, cb, force);
+            return utils.run.parallel(tasks, cb, force);
         },
 
         parallel: function(tasks, cb, force) {

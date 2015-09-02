@@ -4,13 +4,19 @@
 * @module: $.GUI jQuery namespace          * 
 * ---------------------------------------- */
 ;(function($){
+    var api = {
+        version: '0.0.1',
+        GUI: GUI,
+        modules: []
+    };
 
     $.GUI = function() {
         var argc = [].slice.call(arguments),
-            app = (argc[0] instanceof Object) ? argc[0] : null,
-            proto = $.extend(app, GUI);
+            sandbox = (argc[0] instanceof Object) ? argc[0] : null,
+            proto = new GUI(sandbox);
 
-        return Object.create(proto);
+        return proto;
+        // return Object.create(proto);
     };
 
     $.fn.GUI = function(options){

@@ -9,12 +9,12 @@ Broker = (function() {
 
         this.channels = {};
 
-	if (utils.isObj) {
-	    this.attach(obj);
+        if (utils.isObj(obj)) {
+            this.attach(obj);
 
-	}else if (obj) {
-	    this.cascade = true;
-	}
+        }else if (obj) {
+            this.cascade = true;
+        }
     }
 
     Broker.prototype.register = function(handle, callback) {
@@ -67,25 +67,25 @@ Broker = (function() {
 
     Broker.prototype.attach = function(obj, forced) {
         var key, value;
+        console.log('attaching obj :: ', obj);
 
-	if (utils.isObj(obj)) {
+        if (utils.isObj(obj)) {
 
-	    for (key in this) {
+            for (key in this) {
 
                 value = this[key];
-	        if (forced) {
-		    obj[key] = value;
-	        } else {
+                if (forced) {
+                    obj[key] = value;
+                } else {
 
-		if (!obj[key]) {
-
-		    obj[key] = value;
-		    }
-		}
-	    }
+                    if (!obj[key]) {
+                        obj[key] = value;
+                    }
+                }
+            }
         }
 
-	return this;
+        return obj;
     };
 
     return Broker;
