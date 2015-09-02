@@ -109,7 +109,7 @@
 
       console.log('GUI :: ', g);
 
-      $.GUI().create('myModule', function(_GUI){
+      $.GUI().createOld('myModule', function(_GUI){
           console.log('sandbox instance :: ', _GUI);
           
            return {
@@ -122,7 +122,7 @@
            }
       });
 
-      $.GUI().create('myApp', function(_GUI){
+      $.GUI().createOld('myApp', function(_GUI){
           /* myModule available on GUI Instance */
           var G = GUI.query;
           console.log('ok myApp sandbox = ', _GUI);
