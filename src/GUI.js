@@ -277,7 +277,7 @@ GUI = (function() {
                         instance:temp 
                     }
                 }else if(temp.fn){
-                    // this._plugin(temp);
+                    this.plugin(temp, module);
                 }
             }
         
@@ -285,6 +285,20 @@ GUI = (function() {
         } while(--length);
 
         return GUI;
+    };
+
+    GUI.prototype.plugin = function(plugin, module) {
+        var GUI = this;
+
+        if(plugin.fn && typeof plugin.fn === 'function'){
+
+            console.log('module = ', module);
+            $.fn[module.toLowerCase()] = function(opts){
+                return new plugin.fn(this, opts);
+            } 
+        }else{
+            GUI.log('Error :: Missing ' + plugin + ' fn() method.');
+        }
     };
 
     function instance() {

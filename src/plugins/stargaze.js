@@ -5,7 +5,7 @@ $.GUI().create('Stargaze', function(GUI){
 
     var Stargaze = function(canvas, options){
 
-        var $canvas = GUI.query(canvas) || null,
+        var $canvas = $(canvas) || null,
             context = (canvas) ? canvas.getContext('2d') : null,
             defaults = {
                 star: {
@@ -20,8 +20,8 @@ $.GUI().create('Stargaze', function(GUI){
                     x: 0, 
                     y: 0 
                 },
-                width: GUI.win.innerWidth,
-                height: GUI.win.innerHeight,
+                width: window.innerWidth,
+                height: window.innerHeight,
                 velocity: 0.1,
                 length: 100,
                 distance: 100,
@@ -144,13 +144,13 @@ $.GUI().create('Stargaze', function(GUI){
         this.loop = function(callback){
             callback();
 
-            GUI.win.requestAnimationFrame(function(){
+            window.requestAnimationFrame(function(){
                 this.loop(callback);
             }.bind(this));
         };
 
         this.bind = function(){
-            $(GUI.doc).on('mousemove', function(e){
+            $(document).on('mousemove', function(e){
                 config.position.x = e.pageX - $canvas.offset().left;
                 config.position.y = e.pageY - $canvas.offset().top;
             });
@@ -170,6 +170,7 @@ $.GUI().create('Stargaze', function(GUI){
             var argc = arguments[0],
                 $elem = argc[0],
                 opts = argc[1];
+            console.log('starting stargaze');
 
             return new Stargaze($elem, opts).init();
         }
