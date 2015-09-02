@@ -86,10 +86,10 @@ GUI = (function() {
             ref = this._plugins;
             length = ref.length;
 
-            do {
-                p = ref[i];
+            if (length > 0){
+                do {
+                    p = ref[i];
 
-                if (p) {
                     if (typeof ((newRef = p.plugin) !== null ? newRef[ev] : void 0) === "function") {
                         results.push((function(p) {
                             var fn;
@@ -106,19 +106,18 @@ GUI = (function() {
                             };
                         })(p));
                     }
-                }
 
-                i++;
-            } while (--length);
+                    i++;
+                } while (--length);
+            }
 
+            console.log('results = ', results);
             return results;
 
         }).call(this);
 
         console.log('wtf ', tasks);
-        // return utils.run.series(tasks, callback, true);
-        return callback(sb);
-
+        return utils.run.series(tasks, callback, true);
     };
 
     /** 
@@ -131,7 +130,10 @@ GUI = (function() {
 
         id = opts.instance || module;
         options = opts.options;
+        console.log('module = ', module);
         mod = this._modules[module];
+        console.log('wtf mods ', this._modules);
+        console.log('mod = ', mod);
 
         if (this._instances[id]) {
             return callback(this._instances[id]);
@@ -164,7 +166,7 @@ GUI = (function() {
             return function(err) {
                 var instance;
                 
-                instance = new module.creator(sb);
+                instance = new mod.creator(sb);
                 if (typeof instance.load !== "function") {
                     return callback(new Error("Module has no 'load' method"));
                 }
@@ -241,12 +243,117 @@ GUI = (function() {
 
     /* Public Methods */
     /* -------------- */
+    GUI.prototype.create = function(module, callback) {
+        var idx,
+            GUI = this,
+            argc = [].slice.call(arguments),
+            func = argc.pop(),
+            imports = (argc[0] && typeof argc[0] === 'string') ? argc : argc[0];
+
+        if(!imports || imports === 'core'){
+            imports = [];
+
+            for(module in GUI.modules){
+
+                if(GUI.modules.hasOwnProperty(module)){
+                    imports.push(module);
+                }
+            }
+        }
+
+        var temp,
+            idx = 0,
+            length = imports.length;
+
+        do {
+            module = imports[idx];
+
+            if(module){
+                temp = func(new instance().create(this, module));
+
+                if(temp.load && temp.unload){
+                    this._modules[module] = {
+                        create:func,
+                        instance:temp 
+                    }
+                }else if(temp.fn){
+                    // this._plugin(temp);
+                }
+            }
+        
+            idx++;
+        } while(--length);
+
+        return GUI;
+    };
+
+    function instance() {
+        return {
+            create:function(core, module_selector){
+                var proto;
+
+                proto = Object.create(utils);
+                /*
+                proto = Object.create({
+                    config:core.config,
+
+                    elem:core.dom.elem,
+
+                    win:core.win,
+
+                    doc:core.dom.doc,
+
+                    log:function(){
+                        core.log(arguments);
+                    },
+
+                    event:core.dom.event,
+
+                    el:function(elem){
+                        return core.dom.create(elem);
+                    },
+
+                    query:function(selector){
+                        return core.dom.query(selector);
+                    },
+
+                    isObj:core.isObj,
+
+                    isArr:core.isArr,
+
+                    emit:function(evnt, argc){
+                        return core.publish(evnt, argc);
+                    },
+
+                    scribe:function(handle, func){
+                        core.subscribe(handle, func);
+                    },
+
+                    unscribe:function(handle){
+                        core.unsubscribe(handle);
+                    },
+
+                    listen:function(events){
+                        core.registerEvents(events, module_selector);
+                    },
+
+                    ignore:function(events){
+                        core.removeEvents(events, module_selector);
+                    }
+                });
+                /* attach modules to GUI Instance */
+                // core._attach(proto);
+                console.log('omg :', proto);
+                return proto; 
+            }
+        };
+    };
     /** 
      * Create new module
      *
      *
     **/
-    GUI.prototype.create = function(module, creator, options) {
+    GUI.prototype.register = function(module, creator, options) {
         console.log('gui this = ', this);
         if (utils.isFunc(options)) {
             creator = options;
@@ -357,8 +464,8 @@ GUI = (function() {
                 if (err) {
                     return _this._fail(err, cb);
                 }
-
-                return _this._instance(module, opts, init);
+                console.log('creating instance with ' + id);
+                return _this._instance(id, opts, init);
             };
 
         })(this));

@@ -309,6 +309,7 @@ utils = {
             results = [];
 
             if (count === 0) {
+                console.log('calling back?');
                 return cb(null, results);
             }
 
