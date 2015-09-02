@@ -113,13 +113,15 @@
 
     <script type='text/javascript'>
       var g = $.GUI();
-      console.log(g.utils);
-      $.GUI().create('myModule', function(GUI){
-           console.log('inside module');
+
+      console.log('GUI :: ', g);
+
+      $.GUI().create('myModule', function(_GUI){
+          console.log('sandbox instance :: ', _GUI);
           
            return {
-              load:function(){
-           
+              load:function(opts){
+                 console.log('loaded module :: ', opts);
               },
               unload:function(){
            
@@ -127,9 +129,10 @@
            }
       });
 
-      $.GUI().create('myApp', function(GUI){
+      $.GUI().create('myApp', function(_GUI){
           /* myModule available on GUI Instance */
           var G = GUI.query;
+          console.log('ok myApp sandbox = ', _GUI);
 
           function printVersion(){
               return GUI.log('GUI :: Version :: ', GUI.config.version);
@@ -141,6 +144,7 @@
           
           return {
               load:function(){
+                  console.log('ok myApp');
                   var btn = GUI.query('.btn'),
                       canvas = GUI.query('.canvas');
 
@@ -189,7 +193,7 @@
           }
       });
 
-      $.GUI().run();
+      $.GUI().start('myApp');
 
     </script>
   </body>
