@@ -1,7 +1,7 @@
 
 /* Stargaze library */
 
-$.GUI().create('Stargaze', function(GUI){
+$.GUI().createOld('Stargaze', function(GUI){
 
     var Stargaze = function(canvas, options){
 
