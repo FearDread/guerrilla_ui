@@ -105,9 +105,34 @@
     <script src='../src/plugins/stargaze.js' type='text/javascript'></script>
 
     <script type='text/javascript'>
-      var g = $.GUI();
+      var g = new $.GUI();
+      console.log('$.GUI :: ', g);
 
-      console.log('GUI :: ', g);
+      $.GUI().create('moduleA', function(G) {
+          console.log('module A sandbox :: ', G);
+
+          function printVersion() {
+            console.log('should print version');
+          }
+
+          return {
+              init: function() {
+                printVersion();
+
+              },
+              destroy: function(){}
+          }
+      }).start('moduleA');
+
+      $.GUI().create('moduleB', function(G) {
+          return {
+              init: function() {
+                  console.log('init called in mod b');
+              }
+          }
+      }).start('moduleB');
+
+      // $.GUI().start();
 
       $.GUI().createOld('myModule', function(_GUI){
           console.log('sandbox instance :: ', _GUI);
@@ -125,7 +150,6 @@
       $.GUI().createOld('myApp', function(_GUI){
           /* myModule available on GUI Instance */
           var G = GUI.query;
-          console.log('ok myApp sandbox = ', _GUI);
           $('.canvas').stargaze();
 
           function printVersion(){
@@ -138,9 +162,6 @@
           
           return {
               load:function(){
-                  console.log('ok myApp', $.stargaze);
-                  console.log('ARG :: ', $.stargaze);
-                  $('.canvas').stargaze();
                   /*
                   var btn = GUI.query('.btn'),
                       canvas = GUI.query('.canvas');
@@ -189,9 +210,6 @@
               }
           }
       });
-
-      // $.GUI().start('myApp');
-
     </script>
   </body>
 </html>
