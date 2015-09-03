@@ -108,11 +108,11 @@
       var g = new $.GUI();
       console.log('$.GUI :: ', g);
 
-      $.GUI().create('moduleA', function(G) {
-          console.log('module A sandbox :: ', G);
+      $.GUI().create('moduleA', function(GUI) {
+          console.log('module A sandbox :: ', GUI);
 
           function printVersion() {
-            console.log('should print version');
+            console.log('init called in mod A');
           }
 
           return {
@@ -122,17 +122,17 @@
               },
               destroy: function(){}
           }
-      }).start('moduleA');
+      });
 
-      $.GUI().create('moduleB', function(G) {
+      $.GUI().create('moduleB', function(GUI) {
+          console.log('module B sandbox :: ', GUI);
+
           return {
               init: function() {
-                  console.log('init called in mod b');
+                  console.log('init called in mod B');
               }
           }
-      }).start('moduleB');
-
-      // $.GUI().start();
+      }).start();
 
       $.GUI().createOld('myModule', function(_GUI){
           console.log('sandbox instance :: ', _GUI);

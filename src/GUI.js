@@ -313,18 +313,13 @@ GUI = (function() {
 
         if (!mods || mods === null) {
             mods = (function() {
-                var results;
-                results = [];
+                var results = [];
 
-                console.log('modules? ', this._modules);
-
-                for (var i = 0; i < this._modules.length; i++) {
-                    m = this._modules[i];
+                for (m in this._modules) {
                     results.push(m);
                 }
 
                 return results;
-
             }).call(this);
         }
 
