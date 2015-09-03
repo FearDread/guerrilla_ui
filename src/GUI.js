@@ -5,14 +5,17 @@
 * ---------------------------------------- */
 var GUI, config;
 
+// GUI Core
 GUI = (function() {
 
+    // Helper method to check property type
     function checkType(type, val, name) {
         if (typeof val !== type) {
             return name + " has to be a " + type;
         }
     }
 
+    // GUI Constructor
     function GUI(sandbox) {
         var error;
 
@@ -22,7 +25,7 @@ GUI = (function() {
             error = checkType('function', this.Sandbox, 'Sandbox');
         }
         if (error) {
-            throw new Error(err);
+            throw new Error(error);
         }
 
         this._modules = {};
@@ -51,9 +54,6 @@ GUI = (function() {
         }
     }
 
-    /** 
-     * Logging 
-    **/
     GUI.prototype.log = {
         log: function() {},
         info: function() {},
@@ -62,151 +62,275 @@ GUI = (function() {
         enable: function() {}
     };
 
-    /* Private Methods */
-    /** 
-      * Called when starting module fails 
-      *
-      *
-    **/
-    GUI.prototype._fail = function(ev, callback) {
-        console.log('failing?', ev);
-        this.log.error(ev);
+    /* Public Methods */
+    /******************/
+    GUI.prototype.create = function(id, creator, options) {
+        var error;
 
-        callback(new Error("could not start module: " + ev.message));
+        if (!options || options === null) {
+          options = {};
+        }
+
+        error = checkType("string", id, "module ID") || checkType("function", creator, "creator") || checkType("object", options, "option parameter");
+
+        if (error) {
+          console.log("could not register module '" + id + "': " + error);
+          this.log.error("could not register module '" + id + "': " + error);
+          return this;
+        }
+
+        if (id in this._modules) {
+          console.log("module " + id + " was already registered");
+          this.log.warn("module " + id + " was already registered");
+          return this;
+        }
+
+        this._modules[id] = {
+          id: id,
+          creator: creator,
+          options: options
+        };
+
+        console.log('created module : ' + id);
+        console.log('modules : ', this._modules);
 
         return this;
     };
 
     /** 
-      * Run all modules with optional options obj 
-      *
-      *
+     * Starts module with new sandbox instance 
+     *
+     *
     **/
-    GUI.prototype._run = function(ev, sandbox, callback) {
-        var p, tasks;
+    GUI.prototype.start = function(moduleId, opt, cb) {
+        var error, id, initInst;
 
-        tasks = (function() {
-            var i = 0, length, ref, newRef, results;
-
-            results = [];
-            ref = this._plugins;
-            length = ref.length;
-
-            if (length > 0){
-                do {
-                    p = ref[i];
-
-                    if (typeof ((newRef = p.plugin) !== null ? newRef[ev] : void 0) === "function") {
-                        results.push((function(p) {
-                            var fn;
-
-                            fn = p.plugin[ev];
-
-                            return function(next) {
-                                if (utils.hasArgs(fn, 3)) {
-                                    return fn(sandbox, p.options, next);
-                                } else {
-                                    fn(sandbox, p.options);
-                                    return next();
-                                }
-                            };
-                        })(p));
-                    }
-
-                    i++;
-                } while (--length);
-            }
-
-            console.log('results = ', results);
-            return results;
-
-        }).call(this);
-
-        console.log('wtf ', tasks);
-        return utils.run.series(tasks, callback, true);
-    };
-
-    /** 
-      * Create new instance and apply to modules and plugins 
-      *
-      *
-    **/
-    GUI.prototype._instance = function(module, opts, callback) {
-        var Sandbox, instanceOpts, id, i = 0, key, length, mod, obj, options, ref, sb, val;
-
-        id = opts.instance || module;
-        options = opts.options;
-        console.log('module = ', module);
-        mod = this._modules[module];
-        console.log('wtf mods ', this._modules);
-        console.log('mod = ', mod);
-
-        if (this._instances[id]) {
-            return callback(this._instances[id]);
+        if (!opt || opt === null) {
+            opt = {};
+        }
+        if (!cb || cb === null) {
+            cb = function() {};
         }
 
-        instanceOpts = {};
-        ref = [module.options, options];
-        length = ref.length;
+        if (arguments.length === 0) {
+            return this._startAll();
+        }
 
-        do {
-            obj = ref[i];
+        if (moduleId instanceof Array) {
+            return this._startAll(moduleId, opt);
+        }
 
-            if (obj) {
-                for (key in obj) {
-                    val = obj[key];
-                        
-                    if (instanceOpts[key] === null) {
-                        instanceOpts[key] = val;
+        if (typeof moduleId === "function") {
+            return this._startAll(null, moduleId);
+        }
+
+        if (typeof opt === "function") {
+            cb = opt;
+            opt = {};
+        }
+
+        error = checkType("string", moduleId, "module ID") || checkType("object", opt, "second parameter") || (!this._modules[moduleId] ? "module doesn't exist" : void 0);
+
+        if (error) {
+            return this._fail(error, cb);
+        }
+
+        id = opt.instanceId || moduleId;
+
+        if (this._running[id] === true) {
+            return this._fail(new Error("module was already started"), cb);
+        }
+
+        initInst = (function(_this) {
+            return function(err, instance, opt) {
+                if (err) {
+                    return _this._fail(err, cb);
+                }
+
+                try {
+                    if (utils.hasArgs(instance.init, 2)) {
+                        return instance.init(opt, function(err) {
+
+                            if (!err) {
+                                _this._running[id] = true;
+                            }
+
+                            return cb(err);
+                        });
+                    } else {
+
+                        instance.init(opt);
+                        _this._running[id] = true;
+
+                        return cb();
                     }
+                } catch (_error) {
+                    e = _error;
+                    return _this._fail(e, cb);
                 }
-            }
+            };
+        })(this);
 
-            i++;
-        } while (--length);
-
-        Sandbox = (utils.isFunc(opts.sandbox)) ? opts.sandbox : this.sandbox;
-        sb = new Sandbox(this, id, instanceOpts, module);
-
-        return this._run('load', sb, (function(_this) {
+        return this.boot((function(_this) {
             return function(err) {
-                var instance;
-                
-                instance = new mod.creator(sb);
-                if (typeof instance.load !== "function") {
-                    return callback(new Error("Module has no 'load' method"));
+                if (err) {
+                    return _this._fail(err, cb);
                 }
 
-                _this._instances[id] = instance;
-                _this._sandboxes[id] = sb;
-
-                return callback(null, instance, instanceOpts);
+                return _this._createInstance(moduleId, opt, initInst);
             };
         })(this));
     };
 
-    GUI.prototype._startAll = function(modules, callback) {
-        var done, module, action;
+    /** 
+     * Stops all running instances 
+     *
+     *
+    **/
+    GUI.prototype.stop = function(id, callback) {
+        var instance, x;
 
-        if (!modules) {
-            modules = (function() {
-                var results;
-                console.log(this._modules);
+        if (cb === null) {
+            cb = function() {};
+        }
 
-                results = [];
+        if (arguments.length === 0 || typeof id === "function") {
+            utils.run.all((function() {
+                var results = [];
 
-                for (module in this._modules) {
-                    results.push(module);
+                for (x in this._instances) {
+                    results.push(x);
                 }
 
                 return results;
+
+            }).call(this), ((function(_this) {
+                return function() {
+                    return _this.stop.apply(_this, arguments);
+                };
+            })(this)), id, true);
+
+        } else if (instance = this._instances[id]) {
+            delete this._instances[id];
+
+            this._mediator.off(instance);
+            this._runSandboxPlugins('destroy', this._sandboxes[id], (function(_this) {
+                return function(err) {
+                    if (utils.hasArgs(instance.destroy)) {
+
+                        return instance.destroy(function(err2) {
+                            delete _this._running[id];
+
+                            return cb(err || err2);
+                        });
+                    } else {
+                        if (typeof instance.destroy === "function") {
+                            instance.destroy();
+                        }
+
+                        delete _this._running[id];
+
+                        return cb(err);
+                    }
+                };
+            })(this));
+        }
+
+        return this;
+    };
+
+    GUI.prototype.boot = function(cb) {
+        var core, p, tasks;
+
+        core = this;
+
+        tasks = (function() {
+            var j, len, ref, results;
+
+            ref = this._plugins;
+            results = [];
+
+            for (j = 0, len = ref.length; j < len; j++) {
+                p = ref[j];
+                
+                if (p.booted !== true) {
+                    results.push((function(p) {
+
+                        if (utils.hasArgs(p.creator, 3)) {
+                            return function(next) {
+                                var plugin;
+                            
+                                return plugin = p.creator(core, p.options, function(err) {
+                                    if (!err) {
+                                        p.booted = true;
+                                        p.plugin = plugin;
+                                    }
+
+                                    return next();
+                                });
+                            };
+                        } else {
+                            return function(next) {
+                                p.plugin = p.creator(core, p.options);
+                                p.booted = true;
+
+                                return next();
+                            };
+                        }
+                    })(p));
+                }
+            }
+
+            return results;
+
+        }).call(this);
+
+        utils.run.series(tasks, cb, true);
+
+        return this;
+    };
+
+
+    /* Private Methods */
+    /*******************/
+
+    /** 
+      * Called when starting module fails 
+      *
+      *
+    **/
+    GUI.prototype._fail = function(ev, cb) {
+        this.log.error(ev);
+        console.log('logging not working ... ', ev);
+
+        cb(new Error("could not start module: " + ev.message));
+
+        return this;
+    };
+
+    GUI.prototype._startAll = function(mods, cb) {
+        var done, m, startAction;
+
+        if (!mods || mods === null) {
+            mods = (function() {
+                var results;
+                results = [];
+
+                console.log('modules? ', this._modules);
+
+                for (var i = 0; i < this._modules.length; i++) {
+                    m = this._modules[i];
+                    results.push(m);
+                }
+
+                return results;
+
             }).call(this);
         }
-        console.log('mods = ', modules);
 
-        action = (function(_this) {
-            return function(module, next) {
-                return _this.start(module, _this._modules[module].options, next);
+        startAction = (function(_this) {
+            return function(m, next) {
+                return _this.start(m, _this._modules[m].options, next);
             };
         })(this);
 
@@ -215,7 +339,7 @@ GUI = (function() {
 
             if ((err !== null ? err.length : void 0) > 0) {
                 modErrors = {};
-
+                
                 for (i = j = 0, len = err.length; j < len; i = ++j) {
                     x = err[i];
 
@@ -223,6 +347,7 @@ GUI = (function() {
                         modErrors[mods[i]] = x;
                     }
                 }
+
                 mdls = (function() {
                     var results;
                     results = [];
@@ -240,43 +365,99 @@ GUI = (function() {
 
             return typeof cb === "function" ? cb(e) : void 0;
         };
-        console.log('running all :: ', modules);
-        utils.run.all(modules, action, done, true);
+
+        utils.run.all(mods, startAction, done, true);
 
         return this;
     };
 
+    GUI.prototype._createInstance = function(moduleId, o, cb) {
+        var Sandbox, iOpts, id, j, key, len, module, obj, opt, ref, sb, val;
 
-    /* Public Methods */
-    /* -------------- */
-    GUI.prototype.create = function(id, creator, options) {
-        var error;
+        id = o.instanceId || moduleId;
+        opt = o.options;
+        module = this._modules[moduleId];
 
-        if (options === null) {
-          options = {};
+        if (this._instances[id]) {
+            return cb(this._instances[id]);
         }
 
-        error = checkType("string", id, "module ID") || checkType("function", creator, "creator") || checkType("object", options, "option parameter");
+        iOpts = {};
+        ref = [module.options, opt];
 
-        if (error) {
-          this.log.error("could not register module '" + id + "': " + error);
-          return this;
+        for (j = 0, len = ref.length; j < len; j++) {
+            obj = ref[j];
+
+            if (obj) {
+                for (key in obj) {
+                    val = obj[key];
+                    
+                    if (iOpts[key] === null) {
+                        iOpts[key] = val;
+                    }
+                }
+            }
         }
 
-        if (id in this._modules) {
-          this.log.warn("module " + id + " was already registered");
-          return this;
-        }
+        Sandbox = typeof o.sandbox === 'function' ? o.sandbox : this.Sandbox;
+        sb = new Sandbox(this, id, iOpts, moduleId);
 
-        this._modules[id] = {
-          id: id,
-          creator: creator,
-          options: options
-        };
+        return this._runSandboxPlugins('init', sb, (function(_this) {
+            return function(err) {
+                var instance;
+                instance = new module.creator(sb);
 
-        return this;
+                if (typeof instance.init !== "function") {
+                    return cb(new Error("module has no 'init' method"));
+                }
+
+                _this._instances[id] = instance;
+                _this._sandboxes[id] = sb;
+
+                return cb(null, instance, iOpts);
+            };
+        })(this));
     };
 
+    GUI.prototype._runSandboxPlugins = function(ev, sb, cb) {
+        var p, tasks;
+
+        tasks = (function() {
+            var j, len, ref, ref1, results;
+
+            ref = this._plugins;
+            results = [];
+
+            for (j = 0, len = ref.length; j < len; j++) {
+                p = ref[j];
+
+                if (typeof ((ref1 = p.plugin) !== null ? ref1[ev] : void 0) === "function") {
+                    results.push((function(p) {
+                        var fn;
+                        fn = p.plugin[ev];
+
+                        return function(next) {
+                            if (utils.hasArgs(fn, 3)) {
+                                return fn(sb, p.options, next);
+                            } else {
+                                fn(sb, p.options);
+                                return next();
+                            }
+                        };
+                    })(p));
+                }
+            }
+
+            return results;
+
+        }).call(this);
+
+        return utils.run.series(tasks, cb, true);
+    };
+
+
+    /* Old Core Methods */
+    /********************/
     GUI.prototype.createOld = function(module, callback) {
         var idx,
             GUI = this,
@@ -326,10 +507,9 @@ GUI = (function() {
 
         if(plugin.fn && typeof plugin.fn === 'function'){
 
-            console.log('module = ', module);
             $.fn[module.toLowerCase()] = function(opts){
                 return new plugin.fn(this, opts);
-            } 
+            }
         }else{
             GUI.log('Error :: Missing ' + plugin + ' fn() method.');
         }
@@ -391,170 +571,11 @@ GUI = (function() {
                 });
                 /* attach modules to GUI Instance */
                 // core._attach(proto);
-                console.log('omg :', proto);
                 return proto; 
             }
         };
     }
    
-    /** 
-     * Starts module with new sandbox instance 
-     *
-     *
-    **/
-    GUI.prototype.start = function(moduleId, opt, cb) {
-        var error, id, initInst;
-
-        if (opt === null) {
-            opt = {};
-        }
-        if (cb === null) {
-            cb = function() {};
-        }
-
-        if (arguments.length === 0) {
-            return this._startAll();
-        }
-
-        if (moduleId instanceof Array) {
-            return this._startAll(moduleId, opt);
-        }
-
-        if (typeof moduleId === "function") {
-            return this._startAll(null, moduleId);
-        }
-
-        if (typeof opt === "function") {
-            cb = opt;
-            opt = {};
-        }
-
-        error = checkType("string", moduleId, "module ID") || checkType("object", opt, "second parameter") || (!this._modules[moduleId] ? "module doesn't exist" : void 0);
-
-        if (error) {
-            return this._fail(error, cb);
-        }
-
-        id = opt.instanceId || moduleId;
-
-        if (this._running[id] === true) {
-            return this._fail(new Error("module was already started"), cb);
-        }
-
-        initInst = (function(_this) {
-            return function(err, instance, opt) {
-                if (err) {
-                    return _this._fail(err, cb);
-                }
-
-                try {
-                    if (util.hasArgument(instance.init, 2)) {
-                        return instance.init(opt, function(err) {
-
-                            if (!err) {
-                                _this._running[id] = true;
-                            }
-
-                            return cb(err);
-                        });
-                    } else {
-
-                        instance.init(opt);
-                        _this._running[id] = true;
-
-                        return cb();
-                    }
-                } catch (_error) {
-                    e = _error;
-                    return _this._fail(e, cb);
-                }
-            };
-        })(this);
-
-        return this.boot((function(_this) {
-            return function(err) {
-                if (err) {
-                    return _this._fail(err, cb);
-                }
-
-                return _this._createInstance(moduleId, opt, initInst);
-            };
-        })(this));
-    };
-
-    /** 
-     * Stops all running instances 
-     *
-     *
-    **/
-    GUI.prototype.stop = function(id, callback) {
-
-    };
-    
-    /** 
-     * Register new plugin 
-     *
-     *
-    **/
-    GUI.prototype.use = function(plugin, opts) {
-
-    };
-
-    /** 
-     * Load all available plugins 
-     *
-     *
-    **/
-    GUI.prototype.boot = function(callback) {
-        var core, p, tasks;
-
-        core = this;
-
-        tasks = (function() {
-            var j, len, ref, results;
-
-            ref = this._plugins;
-            results = [];
-
-            for (j = 0, len = ref.length; j < len; j++) {
-                p = ref[j];
-
-                if (p.booted !== true) {
-
-                    results.push((function(p) {
-                        if (util.hasArgument(p.creator, 3)) {
-                            return function(next) {
-                                var plugin;
-
-                                return plugin = p.creator(core, p.options, function(err) {
-                                    if (!err) {
-                                        p.booted = true;
-                                        p.plugin = plugin;
-                                    }
-                                    return next();
-                                });
-                            };
-                        } else {
-                            return function(next) {
-                                p.plugin = p.creator(core, p.options);
-                                p.booted = true;
-
-                                return next();
-                            };
-                        }
-                    })(p));
-                }
-            }
-
-            return results;
-
-        }).call(this);
-
-        utils.run.series(tasks, callback, true);
-
-        return this;
-    };
-
     return GUI;
 
 })(this);

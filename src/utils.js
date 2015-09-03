@@ -205,34 +205,37 @@ utils = {
     run: {
 
         all: function(args, fn, cb, force) {
-            var arg, tasks;
+            var a, tasks;
 
-            if (args === null) {
+            if (!args || args === null) {
                 args = [];
             }
 
             tasks = (function() {
-                var j, len, results = [];
+                var j, len, results1;
+
+                results1 = [];
 
                 for (j = 0, len = args.length; j < len; j++) {
-                    arg = args[j];
+                    a = args[j];
 
-                    results.push((function(a) {
+                    results1.push((function(a) {
                         return function(next) {
                             return fn(a, next);
                         };
-                    })(arg));
+                    })(a));
                 }
 
-                return results;
+                return results1;
 
             })();
 
-            return utils.run.parallel(tasks, cb, force);
+            return this.parallel(tasks, cb, force);
         },
 
         parallel: function(tasks, cb, force) {
             var count, errors, hasErr, i, j, len, results, paralleled, task;
+            console.log('p tasks = ', tasks);
 
             if (tasks === null) {
                 tasks = [];
@@ -291,6 +294,7 @@ utils = {
             })(task, i));
           }
 
+          console.log('parallel = ', paralleled);
           return paralleled;
         },
 
@@ -309,7 +313,6 @@ utils = {
             results = [];
 
             if (count === 0) {
-                console.log('calling back?');
                 return cb(null, results);
             }
 

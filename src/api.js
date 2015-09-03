@@ -10,13 +10,14 @@
         modules: []
     };
 
+    var G = new GUI(null);
+
     $.GUI = function() {
         var argc = [].slice.call(arguments),
             sandbox = (argc[0] instanceof Object) ? argc[0] : null,
-            proto = new GUI(sandbox);
+            proto = G;
 
         return proto;
-        // return Object.create(proto);
     };
 
     $.fn.GUI = function(options){
