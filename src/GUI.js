@@ -47,19 +47,25 @@ GUI = (function() {
                 this.options = (options !== null) ? options : {}; 
 
                 // attach new sandbox instance
-                core._broker.attach(this);
+                core._broker.install(this);
 
                 return this;
             };
         }
     }
 
-    GUI.prototype.log = {
-        log: function() {},
-        info: function() {},
-        warn: function() {},
-        error: function() {},
-        enable: function() {}
+    // console log wrapper
+    GUI.prototype.log = function() {
+        this.log.history = [];
+        this.log.history.push(arguments);
+
+        if (console) {
+            console.log([].slice.call(arguments));
+        }
+
+        if (this.debug) {
+            console.log(this.log.history);
+        }
     };
 
     /* Public Methods */
@@ -74,13 +80,11 @@ GUI = (function() {
         error = checkType("string", id, "module ID") || checkType("function", creator, "creator") || checkType("object", options, "option parameter");
 
         if (error) {
-          console.log("could not register module '" + id + "': " + error);
           this.log.error("could not register module '" + id + "': " + error);
           return this;
         }
 
         if (id in this._modules) {
-          console.log("module " + id + " was already registered");
           this.log.warn("module " + id + " was already registered");
           return this;
         }
@@ -90,9 +94,6 @@ GUI = (function() {
           creator: creator,
           options: options
         };
-
-        console.log('created module : ' + id);
-        console.log('modules : ', this._modules);
 
         return this;
     };
@@ -188,7 +189,7 @@ GUI = (function() {
      *
     **/
     GUI.prototype.stop = function(id, callback) {
-        var instance, x;
+        var instance;
 
         if (cb === null) {
             cb = function() {};
@@ -196,7 +197,7 @@ GUI = (function() {
 
         if (arguments.length === 0 || typeof id === "function") {
             utils.run.all((function() {
-                var results = [];
+                var results = [], x;
 
                 for (x in this._instances) {
                     results.push(x);
@@ -210,10 +211,12 @@ GUI = (function() {
                 };
             })(this)), id, true);
 
-        } else if (instance = this._instances[id]) {
+        } else if (instance === this._instances[id]) {
+
             delete this._instances[id];
 
-            this._mediator.off(instance);
+            this._broker.off(instance);
+
             this._runSandboxPlugins('destroy', this._sandboxes[id], (function(_this) {
                 return function(err) {
                     if (utils.hasArgs(instance.destroy)) {
@@ -260,7 +263,7 @@ GUI = (function() {
                             return function(next) {
                                 var plugin;
                             
-                                return plugin = p.creator(core, p.options, function(err) {
+                                return p.creator(core, p.options, function(err) {
                                     if (!err) {
                                         p.booted = true;
                                         p.plugin = plugin;
@@ -301,7 +304,6 @@ GUI = (function() {
     **/
     GUI.prototype._fail = function(ev, cb) {
         this.log.error(ev);
-        console.log('logging not working ... ', ev);
 
         cb(new Error("could not start module: " + ev.message));
 
@@ -309,11 +311,11 @@ GUI = (function() {
     };
 
     GUI.prototype._startAll = function(mods, cb) {
-        var done, m, startAction;
+        var done, startAction;
 
         if (!mods || mods === null) {
             mods = (function() {
-                var results = [];
+                var results = [], m;
 
                 for (m in this._modules) {
                     results.push(m);
@@ -344,8 +346,7 @@ GUI = (function() {
                 }
 
                 mdls = (function() {
-                    var results;
-                    results = [];
+                    var results = [], k;
 
                     for (k in modErrors) {
                         results.push("'" + k + "'");
@@ -400,7 +401,7 @@ GUI = (function() {
         return this._runSandboxPlugins('init', sb, (function(_this) {
             return function(err) {
                 var instance;
-                instance = new module.creator(sb);
+                instance = new module.creator(sb[0]);
 
                 if (typeof instance.init !== "function") {
                     return cb(new Error("module has no 'init' method"));
@@ -450,12 +451,10 @@ GUI = (function() {
         return utils.run.series(tasks, cb, true);
     };
 
-
     /* Old Core Methods */
     /********************/
     GUI.prototype.createOld = function(module, callback) {
-        var idx,
-            GUI = this,
+        var GUI = this,
             argc = [].slice.call(arguments),
             func = argc.pop(),
             imports = (argc[0] && typeof argc[0] === 'string') ? argc : argc[0];
@@ -479,14 +478,14 @@ GUI = (function() {
             module = imports[idx];
 
             if(module){
-                temp = func(new instance().create(this, module));
+                temp = func(new API().create(this, module));
 
                 if(temp.load && temp.unload){
                     this._modules[module] = {
                         create:func,
                         instance:temp 
-                    }
-                }else if(temp.fn){
+                    };
+                } else if (temp.fn){
                     this.plugin(temp, module);
                 }
             }
@@ -504,73 +503,12 @@ GUI = (function() {
 
             $.fn[module.toLowerCase()] = function(opts){
                 return new plugin.fn(this, opts);
-            }
+            };
         }else{
             GUI.log('Error :: Missing ' + plugin + ' fn() method.');
         }
     };
 
-    function instance() {
-        return {
-            create:function(core, module_selector){
-                var proto;
-
-                proto = Object.create(utils);
-                /*
-                proto = Object.create({
-                    config:core.config,
-
-                    elem:core.dom.elem,
-
-                    win:core.win,
-
-                    doc:core.dom.doc,
-
-                    log:function(){
-                        core.log(arguments);
-                    },
-
-                    event:core.dom.event,
-
-                    el:function(elem){
-                        return core.dom.create(elem);
-                    },
-
-                    query:function(selector){
-                        return core.dom.query(selector);
-                    },
-
-                    isObj:core.isObj,
-
-                    isArr:core.isArr,
-
-                    emit:function(evnt, argc){
-                        return core.publish(evnt, argc);
-                    },
-
-                    scribe:function(handle, func){
-                        core.subscribe(handle, func);
-                    },
-
-                    unscribe:function(handle){
-                        core.unsubscribe(handle);
-                    },
-
-                    listen:function(events){
-                        core.registerEvents(events, module_selector);
-                    },
-
-                    ignore:function(events){
-                        core.removeEvents(events, module_selector);
-                    }
-                });
-                /* attach modules to GUI Instance */
-                // core._attach(proto);
-                return proto; 
-            }
-        };
-    }
-   
     return GUI;
 
 })(this);

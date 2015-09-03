@@ -1,7 +1,7 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
-* @module: $.GUI jQuery namespace          * 
+* @module: Utility methods for all modules * 
 * ---------------------------------------- */
 var utils;
 
@@ -74,12 +74,6 @@ utils = {
     **/
     isStr: function(str) {
         return (typeof str === 'string');
-    },
-
-    bind: function(fn, me) {
-        return function() {
-            return fn.apply(me, arguments);
-        };
     },
 
     /**
@@ -235,7 +229,6 @@ utils = {
 
         parallel: function(tasks, cb, force) {
             var count, errors, hasErr, i, j, len, results, paralleled, task;
-            console.log('p tasks = ', tasks);
 
             if (tasks === null) {
                 tasks = [];
@@ -294,7 +287,6 @@ utils = {
             })(task, i));
           }
 
-          console.log('parallel = ', paralleled);
           return paralleled;
         },
 
