@@ -101,16 +101,16 @@
     <script src='../src/api.js' type='text/javascript'></script>
     <script src='../src/GUI.js' type='text/javascript'></script>
     <script src='../src/plugin.js' type='text/javascript'></script>
-
     <!-- modules -->
     <script src='../src/plugins/stargaze.js' type='text/javascript'></script>
+
 
     <script type='text/javascript'>
       var g = new $.GUI();
       console.log('$.GUI :: ', g);
 
-      $.GUI().create('moduleA', function(G) {
-          console.log('module A sandbox :: ', G);
+      $.GUI().create('moduleA', function(sb) {
+          console.log('module A sandbox :: ', sb);
 
           function printVersion() {
             console.log('init called in mod A');
@@ -125,92 +125,25 @@
           }
       });
 
-      $.GUI().create('moduleB', function(G) {
+      $.GUI({
+          debug: true,
+          someOpt: 'mod b',
+          animated: true
+        }
+      ).create('moduleB', function(G) {
           console.log('module B sandbox :: ', G);
 
           return {
               init: function() {
                   console.log('init called in mod B');
-              }
-          }
-      }).start();
 
-      $.GUI().createOld('myModule', function(_GUI){
-          console.log('sandbox instance :: ', _GUI);
-          
-           return {
-              load:function(opts){
-                 console.log('loaded module :: ', opts);
-              },
-              unload:function(){
-           
-              }
-           }
-      });
-
-      $.GUI().createOld('myApp', function(_GUI){
-          /* myModule available on GUI Instance */
-          var G = GUI.query;
-          $('.canvas').stargaze();
-
-          function printVersion(){
-              return GUI.log('GUI :: Version :: ', GUI.config.version);
-          }
-
-          function printGUISandbox(){
-              return GUI.log('GUI :: ', GUI);
-          }
-          
-          return {
-              load:function(){
-                  /*
-                  var btn = GUI.query('.btn'),
-                      canvas = GUI.query('.canvas');
-
-                  printVersion();
-                  printGUISandbox();
-
-                  var test = G('.btn');
-                  console.log('GUI Wrapped el = ', test);
-                  var jtest = $('.btn');
-                  console.log('jQuery $ Wrapped el = ', jtest);
-                  
-                  GUI.scribe('custom_event', function(){
-                      GUI.log('fired custom event');
-                  });
-                  */
-                  
-                  /* Plugin Usage */
-                  
-                  /* jquery Equivilants */
-                  // btn.on('click', this.myMethod);
-                  
-                  GUI.event.on(btn, this.myMethod);
-
-                  /* Library Plugins */
-                  GUI.Media({
-                      media:'(max-width: 1024px)', 
-                      in:function(){
-                          GUI.log('media in');
-                      },
-                      out:function(){
-                          GUI.log('media out');
-                      },
-                      both:function(){
-                          GUI.log('media change');
-                      }
-                  });
-              },
-              unload:function(){
-                  GUI.unscribe('custom_event');
-
-              },
-              myMethod:function(){
-                  GUI.emit('custom_event');
-
+                  $('.canvas').stargaze();
               }
           }
       });
+
+      $.GUI().start();
+
     </script>
   </body>
 </html>
