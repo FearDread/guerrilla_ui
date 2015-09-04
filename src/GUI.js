@@ -1,7 +1,7 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
-* @module: $.GUI jQuery namespace          * 
+* @module: GUI Core library class          * 
 * ---------------------------------------- */
 var GUI, config;
 
@@ -16,18 +16,23 @@ GUI = (function() {
     }
 
     // GUI Constructor
-    function GUI(sandbox) {
+    function GUI() {
         var error;
 
-        this.Sandbox = sandbox;
-        
-        if (this.Sandbox !== null) {
-            error = checkType('function', this.Sandbox, 'Sandbox');
-        }
-        if (error) {
-            throw new Error(error);
-        }
+        // console log history
+        this.history = [];
 
+        // ability to pass optional config object
+        this.configure = function(options) {
+
+            if (options !== null && utils.isObj(options)) {
+               
+                this.config = options;
+                this.log('config set :: ', this.config);
+            }
+        };
+        
+        // private objects & arrays for tracking 
         this._modules = {};
         this._plugins = [];
         this._instances = {};
@@ -37,34 +42,18 @@ GUI = (function() {
         // add broker to core object
         this._broker = new Broker(this);
         this.Broker = Broker;
-
-        if (this.Sandbox === null) {
-
-            this.Sandbox = function(core, instanceId, options, moduleId) {
-            
-                this.instanceId = instanceId;
-                this.moduleId = moduleId;
-                this.options = (options !== null) ? options : {}; 
-
-                // attach new sandbox instance
-                core._broker.install(this);
-
-                return this;
-            };
-        }
     }
 
     // console log wrapper
     GUI.prototype.log = function() {
-        this.log.history = [];
-        this.log.history.push(arguments);
+        this.history.push(arguments);
 
         if (console) {
             console.log([].slice.call(arguments));
         }
 
-        if (this.debug) {
-            console.log(this.log.history);
+        if (this.config.debug) {
+            console.log(this.history);
         }
     };
 
@@ -80,12 +69,12 @@ GUI = (function() {
         error = checkType("string", id, "module ID") || checkType("function", creator, "creator") || checkType("object", options, "option parameter");
 
         if (error) {
-          this.log.error("could not register module '" + id + "': " + error);
+          this.log("could not register module '" + id + "': " + error);
           return this;
         }
 
         if (id in this._modules) {
-          this.log.warn("module " + id + " was already registered");
+          this.log("module " + id + " was already registered");
           return this;
         }
 
@@ -242,6 +231,20 @@ GUI = (function() {
         return this;
     };
 
+    /* Add to jQuery namespace */
+    GUI.prototype.plugin = function(plugin, module) {
+        var GUI = this;
+
+        if(plugin.fn && typeof plugin.fn === 'function'){
+
+            $.fn[module.toLowerCase()] = function(opts){
+                return new plugin.fn(this, opts);
+            };
+        }else{
+            GUI.log('Error :: Missing ' + plugin + ' fn() method.');
+        }
+    };
+
     GUI.prototype.boot = function(cb) {
         var core, p, tasks;
 
@@ -303,7 +306,7 @@ GUI = (function() {
       *
     **/
     GUI.prototype._fail = function(ev, cb) {
-        this.log.error(ev);
+        this.log(ev);
 
         cb(new Error("could not start module: " + ev.message));
 
@@ -370,8 +373,9 @@ GUI = (function() {
     GUI.prototype._createInstance = function(moduleId, o, cb) {
         var Sandbox, iOpts, id, j, key, len, module, obj, opt, ref, sb, val;
 
-        id = o.instanceId || moduleId;
         opt = o.options;
+        id = o.instanceId || moduleId;
+
         module = this._modules[moduleId];
 
         if (this._instances[id]) {
@@ -395,15 +399,21 @@ GUI = (function() {
             }
         }
 
-        Sandbox = typeof o.sandbox === 'function' ? o.sandbox : this.Sandbox;
-        sb = new Sandbox(this, id, iOpts, moduleId);
+        // create new API Sandbox
+        sb = new API().create(this, id, iOpts, moduleId);
 
         return this._runSandboxPlugins('init', sb, (function(_this) {
             return function(err) {
                 var instance;
-                instance = new module.creator(sb[0]);
+
+                instance = new module.creator(sb);
 
                 if (typeof instance.init !== "function") {
+
+                    if (instance.fn && typeof instance.fn === 'function') {
+                        return _this.plugin(instance, id); 
+                    }
+
                     return cb(new Error("module has no 'init' method"));
                 }
 
@@ -449,64 +459,6 @@ GUI = (function() {
         }).call(this);
 
         return utils.run.series(tasks, cb, true);
-    };
-
-    /* Old Core Methods */
-    /********************/
-    GUI.prototype.createOld = function(module, callback) {
-        var GUI = this,
-            argc = [].slice.call(arguments),
-            func = argc.pop(),
-            imports = (argc[0] && typeof argc[0] === 'string') ? argc : argc[0];
-
-        if(!imports || imports === 'core'){
-            imports = [];
-
-            for(module in GUI.modules){
-
-                if(GUI.modules.hasOwnProperty(module)){
-                    imports.push(module);
-                }
-            }
-        }
-
-        var temp,
-            idx = 0,
-            length = imports.length;
-
-        do {
-            module = imports[idx];
-
-            if(module){
-                temp = func(new API().create(this, module));
-
-                if(temp.load && temp.unload){
-                    this._modules[module] = {
-                        create:func,
-                        instance:temp 
-                    };
-                } else if (temp.fn){
-                    this.plugin(temp, module);
-                }
-            }
-        
-            idx++;
-        } while(--length);
-
-        return GUI;
-    };
-
-    GUI.prototype.plugin = function(plugin, module) {
-        var GUI = this;
-
-        if(plugin.fn && typeof plugin.fn === 'function'){
-
-            $.fn[module.toLowerCase()] = function(opts){
-                return new plugin.fn(this, opts);
-            };
-        }else{
-            GUI.log('Error :: Missing ' + plugin + ' fn() method.');
-        }
     };
 
     return GUI;

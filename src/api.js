@@ -1,32 +1,23 @@
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @author: Garrett Haptonstall (FearDread) *
+* @module: $.GUI Sandbox API               * 
+* ---------------------------------------- */
+var API = function() {
 
-var API = function(core, moduleId, options) {
     return {
-        create: function(core, module_selector) {
-            var proto;
+        create: function(core, instance, options, module) {
 
-            proto = Object.create({
-                config:core.config,
+            this.id = instance;
+            this.module = module;
+            this.options = (options !== null) ? options : {}; 
 
-                utils:utils,
+            this.utils = utils;
 
-                log: function() {
-                    core.log(arguments);
-                },
-
-                elem: function(elem) {
-
-                },
-
-                query: function(selector) {
-
-                }
-            });
-
-            /* attach modules to GUI Instance */
+            // attach new sandbox instance
             core._broker.install(this);
-            
-            return Object.create(proto); 
+
+            return this;
         }
     };
 };
-

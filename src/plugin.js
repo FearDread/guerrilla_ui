@@ -4,14 +4,19 @@
 * @module: $.GUI jQuery namespace          * 
 * ---------------------------------------- */
 ;(function($){
-    var $G, Sandbox;
+    var $G;
 
-    $G = new GUI($);
+    $G = new GUI();
 
     $.GUI = function() {
         var argc = [].slice.call(arguments),
             options = (argc[0] instanceof Object) ? argc[0] : null,
             app = $G;
+
+        if (options !== null) {
+
+            app.configure(options);
+        }
 
         return app;
     };
