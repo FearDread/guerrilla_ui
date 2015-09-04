@@ -1,7 +1,7 @@
 Build Status :: [![Build Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js)
 Guerrilla JS jQuery Framework
 =============================
-Front End application framework and plugin library using jQuery.
+The best front-end scalable framework and plugin library extending from jQuery.
 
 ## Documentation ##
 
@@ -13,6 +13,7 @@ Front End application framework and plugin library using jQuery.
   - [jQuery](http://jquery.org)
   - [jQuery UI](http://jqueryui.com)
   - [Requirejs](http://requirejs.org)
+  - [Bootstrap](http://getbootstrap.org)
 
 ## Getting started ##
 
@@ -28,6 +29,7 @@ mv guerrilla_js my-branch
 ```
 
 ## Build process ##
+# Uses Grunt CLI to concat, uglify and minify src/ libraries.
 
 ``` bash
 # To run the build process with runtime environment built in.
@@ -40,8 +42,6 @@ mv guerrilla_js my-branch
 ## Running tests ##
 
 ``` bash
-
-Select 'Launch App'
 
 ```
 ## License ##
