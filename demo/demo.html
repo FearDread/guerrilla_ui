@@ -57,9 +57,11 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-8 col-md-offset-2 pop fadeInDown">
-                            <h1 class="brand-heading">Guerrilla UI</h1>
+                            <h1 class="brand-heading">Guerrilla UI < GUI ></h1>
                             <hr />
-                            <p class="intro-text data-pop-duration=1s">A free, front-end jQuery framework.</p>
+                            <p class="intro-text data-pop-duration=1s">The scalable, jQuery driven, modular front-end framework.</p>
+                            <span class="text-center">An ultimate library of modules and plugins to get your single page javascript applications off the ground and up to the universe beyond!<span>
+                            <br />
                             <a id="about" class="btn btn-circle page-scroll">
                                 <i class="fa fa-angle-double-down animated"></i>
                             </a>
@@ -68,24 +70,6 @@
                 </div>
             </div>
         </header>
-        
-        <section id="about" class="container content-section text-center">
-            <div class="row">
-                <div class="col-lg-8 col-lg-offset-2 pop bounceIn">
-                  <h3>About Guerrilla UI</h3>
-                  <button class='btn'>Build GUI</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="output" class="container content-section text-center">
-            <div class="row">
-                <div class="col-lg-8 col-lg-offset-2 pop bounceIn">
-                    <h3>Console Output</h3>
-                    <textarea class="output-terminal" readonly></textarea>
-                </div>
-            </div>
-        </section>
         
         <footer>
             <div class="container text-center pop fadeInDown">
@@ -106,11 +90,12 @@
 
 
     <script type='text/javascript'>
-      var g = new $.GUI();
-      console.log('$.GUI :: ', g);
+      var $G = new $.GUI();
 
-      $.GUI().create('moduleA', function(sb) {
-          console.log('module A sandbox :: ', sb);
+      console.log('$.GUI :: ', $G);
+
+      $.GUI().create('moduleA', function(G) {
+          console.log('module A sandbox :: ', G);
 
           function printVersion() {
             console.log('init called in mod A');
@@ -127,10 +112,10 @@
 
       $.GUI({
           debug: true,
-          someOpt: 'mod b',
-          animated: true
-        }
-      ).create('moduleB', function(G) {
+          animated: true,
+          instanceId: 'module B 1'
+
+      }).create('moduleB', function(G) {
           console.log('module B sandbox :: ', G);
 
           return {

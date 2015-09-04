@@ -12,8 +12,8 @@ The best front-end scalable framework and plugin library extending from jQuery.
 # Technolegy Used
   - [jQuery](http://jquery.org)
   - [jQuery UI](http://jqueryui.com)
-  - [Requirejs](http://requirejs.org)
-  - [Bootstrap](http://getbootstrap.org)
+  - [Animate.css](https://daneden.github.io/animate.css/)
+  - [Bootstrap](http://getbootstrap.com)
 
 ## Getting started ##
 
