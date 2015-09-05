@@ -3,7 +3,7 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: Guerrilla.ui GUI Core           *
 * ---------------------------------------- */
-$.GUI().create('Media', function(GUI){
+$.GUI().create('Media', function(G){
 
     var Media = function(options){
         var self = this,
@@ -124,18 +124,17 @@ $.GUI().create('Media', function(GUI){
 
                 return proto.media_listener();
             }
-        } 
+        };
     };
   
     return {
-        load:function(){
-            var argc = arguments[0],
-                media = new Media();
+        load: function() {
+            var argc = arguments[0];
 
-            return media(argc);
+            return new Media(argc);
         },
-        unload:function(){
-            GUI.cleanup();
+        unload: function() {
+            G.cleanup();
         }
-    }
+    };
 });

@@ -9,11 +9,36 @@ utils = {
     /* jQuery re-map of $.extend */
     merge: $.extend,
 
+    /* Fallback merge method */
+    combine: function(child, parent) {
+        var key;
+
+        for (key in parent) { 
+            if (utils.hasProp.call(parent, key)) {
+                
+                child[key] = parent[key]; 
+            } 
+        }
+
+        function ctor() { 
+            this.constructor = child; 
+        }
+
+        child.prototype = new ctor();
+
+        ctor.prototype = parent.prototype;
+        child.__super__ = parent.prototype;
+
+        return child;
+    },
+
     /* Function Regex */
     fnRgx: /function[^(]*\(([^)]*)\)/,
 
     /* Argument Regex */
     argRgx: /([^\s,]+)/g,
+
+    hasProp: {}.hasOwnProperty,
 
     /* Shorthand reference to Array.prototype.slice */
     slice: [].slice,

@@ -98,11 +98,11 @@
           console.log('module A sandbox :: ', G);
 
           function printVersion() {
-            console.log('init called in mod A');
+            console.log('load called in mod A');
           }
 
           return {
-              init: function() {
+              load: function() {
                 printVersion();
 
               },
@@ -119,8 +119,8 @@
           console.log('module B sandbox :: ', G);
 
           return {
-              init: function() {
-                  console.log('init called in mod B');
+              load: function() {
+                  console.log('load called in mod B');
 
                   $('.canvas').stargaze();
               }
