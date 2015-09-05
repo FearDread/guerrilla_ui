@@ -138,8 +138,8 @@ GUI = (function() {
                 }
 
                 try {
-                    if (utils.hasArgs(instance.init, 2)) {
-                        return instance.init(opt, function(err) {
+                    if (utils.hasArgs(instance.load, 2)) {
+                        return instance.load(opt, function(err) {
 
                             if (!err) {
                                 _this._running[id] = true;
@@ -149,7 +149,7 @@ GUI = (function() {
                         });
                     } else {
 
-                        instance.init(opt);
+                        instance.load(opt);
                         _this._running[id] = true;
 
                         return cb();
@@ -206,18 +206,18 @@ GUI = (function() {
 
             this._broker.off(instance);
 
-            this._runSandboxPlugins('destroy', this._sandboxes[id], (function(_this) {
+            this._runSandboxPlugins('unload', this._sandboxes[id], (function(_this) {
                 return function(err) {
-                    if (utils.hasArgs(instance.destroy)) {
+                    if (utils.hasArgs(instance.unload)) {
 
-                        return instance.destroy(function(err2) {
+                        return instance.unload(function(err2) {
                             delete _this._running[id];
 
                             return cb(err || err2);
                         });
                     } else {
-                        if (typeof instance.destroy === "function") {
-                            instance.destroy();
+                        if (typeof instance.unload === "function") {
+                            instance.unload();
                         }
 
                         delete _this._running[id];
@@ -402,19 +402,19 @@ GUI = (function() {
         // create new API Sandbox
         sb = new API().create(this, id, iOpts, moduleId);
 
-        return this._runSandboxPlugins('init', sb, (function(_this) {
+        return this._runSandboxPlugins('load', sb, (function(_this) {
             return function(err) {
                 var instance;
 
                 instance = new module.creator(sb);
 
-                if (typeof instance.init !== "function") {
+                if (typeof instance.load !== "function") {
 
                     if (instance.fn && typeof instance.fn === 'function') {
                         return _this.plugin(instance, id); 
                     }
 
-                    return cb(new Error("module has no 'init' method"));
+                    return cb(new Error("module has no 'load' method"));
                 }
 
                 _this._instances[id] = instance;
