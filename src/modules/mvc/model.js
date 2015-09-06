@@ -16,7 +16,7 @@ $.GUI().create('Model', function(G) {
             Model.__super__.constructor.call(this);
 
             for (k in obj) {
-                v = obj[k]:
+                v = obj[k];
 
                 if (this[k] === null) {
 
@@ -40,7 +40,7 @@ $.GUI().create('Model', function(G) {
                         }
 
                         if (!silent) {
-                            return this.emit(Model.CHANGED, (function() {
+                            return this.fire(Model.CHANGED, (function() {
                                 var results = [];
 
                                 for (k in key) {
@@ -58,7 +58,7 @@ $.GUI().create('Model', function(G) {
                             this[key] = val;
 
                             if (!silent) {
-                                this.emit(Model.CHANGED, [key]);
+                                this.fire(Model.CHANGED, [key]);
                             }
                         } else {
 
@@ -82,7 +82,7 @@ $.GUI().create('Model', function(G) {
 
             } else if (arguments.length === 0) {
 
-                return this.emit(Model.CHANGED);
+                return this.fire(Model.CHANGED);
 
             }
         };

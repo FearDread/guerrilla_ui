@@ -1,6 +1,4 @@
-
 /* Stargaze library */
-
 $.GUI().create('Stargaze', function(G){
     console.log('Stargaze Sandbox :: ', G);
 
@@ -172,10 +170,10 @@ $.GUI().create('Stargaze', function(G){
                 $elem = argc[0],
                 opts = argc[1];
 
-            console.log('starting stargaze');
+            console.log('starting stargaze.');
             return new Stargaze($elem, opts).init();
         },
-        destory: function() {}
+        unload: function() {}
     };
 
 });
