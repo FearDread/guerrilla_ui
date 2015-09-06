@@ -1,7 +1,7 @@
 /* --------------------------------------- *
 * Gurilla JS                               *
 * @author: Garrett Haptonstall (FearDread) *
-*                                          *
+* @module: Grunt CLI build & config        * 
 * ---------------------------------------- */
 module.exports = function(grunt){
 
@@ -14,18 +14,24 @@ module.exports = function(grunt){
           },
           dist: {
               src: [
-                  'src/core/instance.js',
-                  'src/core/core.js',
-                  'src/core/init.js',
-                  'src/core/ui/media.js',
-                  'src/core/ui/slider.js',
-                  'src/core/ui/stargaze.js'
+                  'src/utils.js',
+                  'src/broker.js',
+                  'src/api.js',
+                  'src/GUI.js',
+                  'src/plugin.js',
+                  'src/plugins/fog.js',
+                  'src/plugins/slider.js',
+                  'src/plugins/stargaze.js',
+                  'src/modules/mvc/model.js',
+                  'src/modules/mvc/view.js',
+                  'src/modules/mvc/controller.js'
               ],
               dest: 'dist/<%= pkg.name %>.js'
            }
       },
       uglify: {
           options: {
+              preserveComments: false,
               banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
           },
           dist: {

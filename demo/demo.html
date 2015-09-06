@@ -60,6 +60,8 @@
                             <h1 class="brand-heading">Guerrilla UI < GUI ></h1>
                             <hr />
                             <p class="intro-text data-pop-duration=1s">The scalable, jQuery driven, modular front-end framework.</p>
+                            <br />
+                            <p class="intro-text data-pop-duration=1s">Write even less, do even more!</p>
                             <span class="text-center">An ultimate library of modules and plugins to get your single page javascript applications off the ground and up to the universe beyond!<span>
                             <br />
                             <a id="about" class="btn btn-circle page-scroll">
@@ -77,9 +79,10 @@
             </div>
         </footer>
 
+    <!-- jQuery Framework Library -->
     <script src='../libs/jquery/jquery.min.js' type='text/javascript'></script>
     <script src='../libs/jquery/jquery-ui.min.js' type='text/javascript'></script>
-
+    <!-- GUI -->
     <script src='../src/utils.js' type='text/javascript'></script>
     <script src='../src/broker.js' type='text/javascript'></script>
     <script src='../src/api.js' type='text/javascript'></script>
@@ -93,40 +96,52 @@
       var $G = new $.GUI();
 
       console.log('$.GUI :: ', $G);
-
+      
+      // basic module with passed options on start 
       $.GUI().create('moduleA', function(G) {
-          console.log('module A sandbox :: ', G);
+          G.log('module A sandbox :: ', G);
 
-          function printVersion() {
-            console.log('load called in mod A');
+          function print() {
+            G.log('load called in mod A');
           }
 
           return {
-              load: function() {
-                printVersion();
+              load: function(options) {
+                  print();
 
+                  G.log('loaded with options :: ', options);
               },
-              destroy: function(){}
+              unload: function(){}
+          }
+      }).start('instance 1', {
+          user: {
+              id: 1,
+              username: 'FearDread',
+              email: 'ghaptonstall@gmail.com'
           }
       });
 
+      // Pass config object
       $.GUI({
           debug: true,
           animated: true,
           instanceId: 'module B 1'
 
       }).create('moduleB', function(G) {
-          console.log('module B sandbox :: ', G);
+          G.log('module B sandbox :: ', G);
+          G.log('config object available in sandbox :: ', G.debug);
 
           return {
               load: function() {
-                  console.log('load called in mod B');
+                  G.log('load called in mod B');
 
                   $('.canvas').stargaze();
-              }
+              },
+              unload: function() {}
           }
       });
 
+      // start instance of all modules
       $.GUI().start();
 
     </script>
