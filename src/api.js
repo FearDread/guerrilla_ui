@@ -25,6 +25,9 @@ API = function() {
             // attach new sandbox instance
             core._broker.install(this);
 
+            // refrence to debug method, shows console history
+            this.debug = core._debug; 
+
             this.elem = function(el) {
                 if (!utils.isStr(el)) {
 

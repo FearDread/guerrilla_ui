@@ -97,7 +97,7 @@
 
       console.log('$.GUI :: ', $G);
       
-      // basic module with passed options on start 
+      // basic module with start 
       $.GUI().create('moduleA', function(G) {
           G.log('module A sandbox :: ', G);
 
@@ -108,28 +108,20 @@
           return {
               load: function(options) {
                   print();
-
-                  G.log('loaded with options :: ', options);
               },
               unload: function(){}
           }
-      }).start('instance 1', {
-          user: {
-              id: 1,
-              username: 'FearDread',
-              email: 'ghaptonstall@gmail.com'
-          }
       });
 
-      // Pass config object
+      // module with config object
       $.GUI({
           debug: true,
           animated: true,
-          instanceId: 'module B 1'
+          instanceId: 'instance2'
 
       }).create('moduleB', function(G) {
           G.log('module B sandbox :: ', G);
-          G.log('config object available in sandbox :: ', G.debug);
+          G.log('config object available in sandbox :: ', G.config);
 
           return {
               load: function() {
@@ -138,6 +130,28 @@
                   $('.canvas').stargaze();
               },
               unload: function() {}
+          }
+      });
+
+      // module with custom options object
+      $.GUI().create('moduleC', function(G) {
+
+          function printHistory() {
+              G.debug();
+          }
+
+          return {
+              load: function(options) {
+                  G.log('loaded with options :: ', options);
+                  printHistory();
+              },
+              unload: function(){}
+          };
+      }).start('instance 1', {
+          user: {
+              id: 1,
+              username: 'FearDread',
+              email: 'ghaptonstall@gmail.com'
           }
       });
 

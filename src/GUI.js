@@ -8,10 +8,6 @@ var GUI, config;
 // GUI Core
 GUI = (function() {
 
-    // Helper method to check property type
-    function utils.isType(type, val, name) {
-    }
-
     // GUI Constructor
     function GUI() {
         var error;
@@ -48,7 +44,9 @@ GUI = (function() {
         if (console) {
             console.log([].slice.call(arguments));
         }
+    };
 
+    GUI.prototype._debug = function() {
         if (this.config.debug) {
             console.log(this.history);
         }
