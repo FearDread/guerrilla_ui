@@ -92,6 +92,18 @@ utils = {
     },
 
     /**
+    * Check typeof of passed value to name 
+    *
+    * @param type {string} - string type to check against 
+    * @return boolean
+    **/
+    isType: function(type, val, name) {
+        if (typeof val !== type) {
+            return 'Error :: ' + name + " must be of type " + type;
+        }
+    },
+
+    /**
     * Check if valid string
     *
     * @param object - string to check

@@ -9,10 +9,7 @@ var GUI, config;
 GUI = (function() {
 
     // Helper method to check property type
-    function checkType(type, val, name) {
-        if (typeof val !== type) {
-            return name + " has to be a " + type;
-        }
+    function utils.isType(type, val, name) {
     }
 
     // GUI Constructor
@@ -66,7 +63,7 @@ GUI = (function() {
           options = {};
         }
 
-        error = checkType("string", id, "module ID") || checkType("function", creator, "creator") || checkType("object", options, "option parameter");
+        error = utils.isType("string", id, "module ID") || utils.isType("function", creator, "creator") || utils.isType("object", options, "option parameter");
 
         if (error) {
           this.log("could not register module '" + id + "': " + error);
@@ -90,7 +87,10 @@ GUI = (function() {
     /** 
      * Starts module with new sandbox instance 
      *
-     *
+     * @param moduleId {string} - module name or identifier
+     * @param opt {object} - optional options object
+     * @param cb {function} - callback function 
+     * @return boot {function} - call boot method and create new sandbox instance 
     **/
     GUI.prototype.start = function(moduleId, opt, cb) {
         var error, id, initInst;
@@ -119,7 +119,7 @@ GUI = (function() {
             opt = {};
         }
 
-        error = checkType("string", moduleId, "module ID") || checkType("object", opt, "second parameter") || (!this._modules[moduleId] ? "module doesn't exist" : void 0);
+        error = utils.isType("string", moduleId, "module ID") || utils.isType("object", opt, "second parameter") || (!this._modules[moduleId] ? "module doesn't exist" : void 0);
 
         if (error) {
             return this._fail(error, cb);
