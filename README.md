@@ -1,4 +1,4 @@
-Build Status :: [![Build Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js)
+[![Build Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js)
 Guerrilla JS jQuery Framework
 =============================
 The best front-end scalable framework and plugin library extending from jQuery.
