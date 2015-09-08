@@ -26,7 +26,7 @@ $.GUI().create('View', function(G) {
           };
 
           this.render = function() {
-              G.log('Render method called in View.');
+              console.log('Render method called in View.');
           };
       }
 
@@ -36,7 +36,7 @@ $.GUI().create('View', function(G) {
 
     return {
         load: function() {
-            G.log('View class :: ', View);
+            console.log('View class :: ', View);
         },
         unload: function() {}
     };

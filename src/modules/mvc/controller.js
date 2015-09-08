@@ -27,7 +27,7 @@ $.GUI().create('Controller', function(G) {
 
     return {
         load: function() {
-            G.log('Controller class :: ', Controller);
+            console.log('Controller class :: ', Controller);
         },
         unload: function() {}
     };

@@ -54,6 +54,15 @@ GUI = (function() {
 
     /* Public Methods */
     /******************/
+
+    /** 
+     * Create new GUI module 
+     *
+     * @param id {string} - module identifier
+     * @param creator {function}  logic to execute inside module namespace
+     * @param options {object} - optional object of extra parameters that will be passed to load() 
+     * @return this {object}
+    **/
     GUI.prototype.create = function(id, creator, options) {
         var error;
 
@@ -170,10 +179,45 @@ GUI = (function() {
         })(this));
     };
 
+    GUI.prototype.use = function(plugin, opt) {
+        var i, len, p;
+
+        if (plugin instanceof Array) {
+
+            for (i = 0, len = plugin.length; i < len; i++) {
+                p = plugin[i];
+
+                switch (typeof p) {
+                    case "function":
+                        this.use(p);
+                        break;
+
+                    case "object":
+                        this.use(p.plugin, p.options);
+                }
+            }
+
+      } else {
+
+          if (typeof plugin !== "function") {
+              return this;
+          }
+
+          this._plugins.push({
+              creator: plugin,
+              options: opt
+          });
+      }
+
+      return this;
+    };
+
     /** 
      * Stops all running instances 
      *
-     *
+     * @param id {string} - module identifier 
+     * @param callback {function} - optional callback to run when module stopped
+     * @return this {object}
     **/
     GUI.prototype.stop = function(id, callback) {
         var instance;
@@ -200,10 +244,13 @@ GUI = (function() {
 
         } else if (instance === this._instances[id]) {
 
+            // remove instance from instances cache
             delete this._instances[id];
 
+            // disable any events registered by module
             this._broker.off(instance);
 
+            // run unload method in stopped modules
             this._runSandboxPlugins('unload', this._sandboxes[id], (function(_this) {
                 return function(err) {
                     if (utils.hasArgs(instance.unload)) {
@@ -229,7 +276,13 @@ GUI = (function() {
         return this;
     };
 
-    /* Add to jQuery namespace */
+    /** 
+     * Register jQuery plugins to $ nameSpace 
+     *
+     * @param plugin {object} - plugin object with all logic 
+     * @param module {string} - identifier for jQuery plugin 
+     * @return void
+    **/
     GUI.prototype.plugin = function(plugin, module) {
         var GUI = this;
 
@@ -243,6 +296,12 @@ GUI = (function() {
         }
     };
 
+    /** 
+     * Load single or all available core plugins 
+     *
+     * @param cb {function} - callback to execute after plugins loaded 
+     * @return this {object} - return GUI object with tasks array
+    **/
     GUI.prototype.boot = function(cb) {
         var core, p, tasks;
 
@@ -301,7 +360,9 @@ GUI = (function() {
     /** 
       * Called when starting module fails 
       *
-      *
+      * @param ev {string / object} - message or error object 
+      * @param cb {function} - callback method to run with error string / object
+      * @return this {object}
     **/
     GUI.prototype._fail = function(ev, cb) {
         this.log(ev);
@@ -311,6 +372,13 @@ GUI = (function() {
         return this;
     };
 
+    /** 
+      * Called when starting module fails 
+      *
+      * @param ev {string / object} - message or error object 
+      * @param cb {function} - callback method to run with error string / object
+      * @return this {object}
+    **/
     GUI.prototype._startAll = function(mods, cb) {
         var done, startAction;
 
@@ -368,6 +436,13 @@ GUI = (function() {
         return this;
     };
 
+    /** 
+      * Called when starting module fails 
+      *
+      * @param ev {string / object} - message or error object 
+      * @param cb {function} - callback method to run with error string / object
+      * @return this {object}
+    **/
     GUI.prototype._createInstance = function(moduleId, o, cb) {
         var Sandbox, iOpts, id, j, key, len, module, obj, opt, ref, sb, val;
 
@@ -422,7 +497,14 @@ GUI = (function() {
             };
         })(this));
     };
-
+    
+    /** 
+      * Called when starting module fails 
+      *
+      * @param ev {string / object} - message or error object 
+      * @param cb {function} - callback method to run with error string / object
+      * @return this {object}
+    **/
     GUI.prototype._runSandboxPlugins = function(ev, sb, cb) {
         var p, tasks;
 

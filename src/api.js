@@ -25,9 +25,13 @@ API = function() {
             // attach new sandbox instance
             core._broker.install(this);
 
+            // reference log function
+            this.log = core.log;
+
             // refrence to debug method, shows console history
             this.debug = core._debug; 
 
+            // create new html element
             this.elem = function(el) {
                 if (!utils.isStr(el)) {
 
@@ -39,6 +43,7 @@ API = function() {
                 return document.createElement(el);
             };
 
+            // find selector in dom with wrapped methods
             this.query = function(selector, context) {
                 var $el, _ret = {}, _this = this;
                 
@@ -79,7 +84,7 @@ API = function() {
             this.methodCache = function(source, cache, refetch) {
                 var key;
 
-                cache || (cache = {});
+                cache = cache || (cache = {});
 
                 return function(args) {
                     key = arguments.length > 1 ? [].join.call(arguments, DELIM) : String(args);
@@ -91,8 +96,7 @@ API = function() {
                     }
 
                     return cache[key];
-                }
-
+                };
             };
 
             return this;

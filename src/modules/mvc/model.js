@@ -6,12 +6,12 @@
 $.GUI().create('Model', function(G) {
     var Model;
 
-    Model = (function(super) {
-        var k, v;
+    Model = (function(superClass) {
 
-        utils.combine(Model, super);
+        utils.combine(Model, superClass);
 
         function Model(obj) {
+            var k, v;
 
             Model.__super__.constructor.call(this);
 
@@ -25,6 +25,7 @@ $.GUI().create('Model', function(G) {
             }
 
             this.set = function(key, val, silent) {
+                var k;
 
                 if (silent === null) {
 
@@ -41,7 +42,7 @@ $.GUI().create('Model', function(G) {
 
                         if (!silent) {
                             return this.fire(Model.CHANGED, (function() {
-                                var results = [];
+                                var results = [], k;
 
                                 for (k in key) {
                                     v = key[k];
@@ -73,7 +74,7 @@ $.GUI().create('Model', function(G) {
                     return this;
                 }
             };
-        };
+        }
 
         Model.prototype.change = function(cb, context) {
             if (typeof cb === "function") {
@@ -93,7 +94,7 @@ $.GUI().create('Model', function(G) {
 
     return {
         load: function() {
-            G.log('Model Object Class :: ', Model);
+            console.log('Model Object Class :: ', Model);
         },
         unload: function() {} 
     };
