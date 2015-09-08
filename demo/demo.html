@@ -144,22 +144,26 @@
           }
 
           return {
-              load: function(options) {
-                  console.log('loaded with options :: ', options);
+              load: function(opts) {
+                  console.log('loaded with options :: ', opts);
                   printHistory();
               },
               unload: function(){}
           };
-      }).start('instance 1', {
-          user: {
-              id: 1,
-              username: 'FearDread',
-              email: 'ghaptonstall@gmail.com'
+      }).start('moduleC', {
+          instanceId: 'Instance 2',
+          options: {
+              myProp: 'some property',
+              user: {
+                  id: 1,
+                  username: 'FearDread',
+                  email: 'ghaptonstall@gmail.com'
+              }
           }
       });
 
       // start instance of all modules
-      $.GUI().start();
+      $.GUI().start(['moduleA','moduleB']);
 
     </script>
   </body>

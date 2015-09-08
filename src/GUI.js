@@ -465,7 +465,7 @@ GUI = (function() {
                 for (key in obj) {
                     val = obj[key];
                     
-                    if (iOpts[key] === null) {
+                    if (!iOpts[key] || iOpts[key] === null) {
                         iOpts[key] = val;
                     }
                 }
@@ -487,7 +487,7 @@ GUI = (function() {
                         return _this.plugin(instance, id); 
                     }
 
-                    return cb(new Error("module has no 'load' method"));
+                    return cb(new Error("module has no 'load' or 'fn' method"));
                 }
 
                 _this._instances[id] = instance;
