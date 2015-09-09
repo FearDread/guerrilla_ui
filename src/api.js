@@ -14,6 +14,9 @@ API = function() {
         // create new API sandbox instance
         create: function(core, instance, options, module) {
 
+            console.log('plugins = ', core._plugins);
+            core.use(core._plugins.mvc);
+
             // set sandbox vars
             this.id = instance;
             this.module = module;

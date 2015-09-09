@@ -4,15 +4,16 @@ var plugin,
 
 plugin = function(core) {
   var Controller, Model, View;
+
   Model = (function(superClass) {
-    extend(Model, superClass);
+    // extend(Model, superClass);
 
     function Model(obj) {
       var k, v;
       Model.__super__.constructor.call(this);
       for (k in obj) {
         v = obj[k];
-        if (this[k] == null) {
+        if (this[k] === null) {
           this[k] = v;
         }
       }
@@ -20,7 +21,7 @@ plugin = function(core) {
 
     Model.prototype.set = function(key, val, silent) {
       var k, v;
-      if (silent == null) {
+      if (silent === null) {
         silent = false;
       }
       switch (typeof key) {
