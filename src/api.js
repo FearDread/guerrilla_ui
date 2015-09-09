@@ -14,9 +14,6 @@ API = function() {
         // create new API sandbox instance
         create: function(core, instance, options, module) {
 
-            console.log('plugins = ', core._plugins);
-            core.use(core._plugins.mvc);
-
             // set sandbox vars
             this.id = instance;
             this.module = module;
@@ -29,17 +26,19 @@ API = function() {
             core._broker.install(this);
 
             // reference log function
-            this.log = core.log;
+            this.log = function() {
+                return core.log(arguments);
+            };
 
             // refrence to debug method, shows console history
-            this.debug = core._debug; 
+            this.debug = function() {
+                return core._debug();
+            };
 
             // create new html element
             this.elem = function(el) {
                 if (!utils.isStr(el)) {
-
                     core.log('Error :: Element must be type String.');
-
                     return false;
                 }
 
@@ -101,6 +100,13 @@ API = function() {
                     return cache[key];
                 };
             };
+
+            // attach core modules //
+            for (var p in core._plugins) {
+
+              var plugin = core._plugins[p];
+
+            }
 
             return this;
         }

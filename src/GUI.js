@@ -92,6 +92,27 @@ GUI = (function() {
     };
 
     /** 
+     * Extend GUI core library and add to Sandbox API 
+     *
+     * @param plugin {string} - plugin identifier 
+     * @param creator {function} - function containing plugin class logic 
+     * @return this {object} 
+    **/
+    GUI.prototype.extend = function(plugin, creator, opts) {
+
+        if (!opts || opts === null) {
+            opts = {};
+        }
+
+        this._plugins.push({
+            creator: plugin,
+            options: opt
+        });
+
+        return this;
+    };
+
+    /** 
      * Starts module with new sandbox instance 
      *
      * @param moduleId {string} - module name or identifier

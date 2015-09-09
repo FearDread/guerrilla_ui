@@ -3,7 +3,7 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: MVC Model object module         * 
 * ---------------------------------------- */
-$.GUI().create('Model', function(G) {
+$.GUI().extend('Model', function(G) {
     var Model;
 
     Model = (function(superClass) {
