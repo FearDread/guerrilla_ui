@@ -89,7 +89,7 @@
     <script src='../src/GUI.js' type='text/javascript'></script>
     <script src='../src/plugin.js' type='text/javascript'></script>
     <!-- modules -->
-    <script src='../src/modules/mvc/mvc.js' type='text/javascript'></script>
+    <script src='../src/modules/mvc/model.js' type='text/javascript'></script>
     <!-- jQuery Plugins -->
     <script src='../src/plugins/stargaze.js' type='text/javascript'></script>
 
@@ -101,7 +101,7 @@
       
       // basic module with start 
       $.GUI().create('moduleA', function(G) {
-          console.log('module A sandbox :: ', G);
+          G.log('module A sandbox :: ', G);
 
           function print() {
             console.log('load called in mod A');
@@ -122,8 +122,8 @@
           instanceId: 'instance2'
 
       }).create('moduleB', function(G) {
-          console.log('module B sandbox :: ', G);
-          console.log('config object available in sandbox :: ', G.config);
+          G.log('module B sandbox :: ', G);
+          G.log('config object available in sandbox :: ', G.config);
 
           return {
               load: function() {
@@ -139,13 +139,15 @@
       $.GUI().create('moduleC', function(G) {
 
           function printHistory() {
-              // G.debug();
-              console.log('Module C sandbox :: ', G);
+              G.debug();
+              G.log('Module C sandbox :: ', G);
           }
 
           return {
               load: function(opts) {
-                  console.log('loaded with options :: ', opts);
+                  console.log('load called in mod C');
+
+                  G.log('loaded with options :: ', opts);
                   printHistory();
               },
               unload: function(){}
