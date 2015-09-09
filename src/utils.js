@@ -9,11 +9,18 @@ utils = {
     /* jQuery re-map of $.extend */
     merge: $.extend,
 
-    /* Fallback merge method */
+    /**
+     * Attach child object prototype to parent object prototype 
+     *
+     * @param child {object} - object to merge prototype 
+     * @param parent {object} - parent object prototype 
+     * @return child {object} - combined child & parent prototypes 
+    **/
     combine: function(child, parent) {
         var key;
 
         for (key in parent) { 
+
             if (utils.hasProp.call(parent, key)) {
                 
                 child[key] = parent[key]; 
@@ -38,6 +45,7 @@ utils = {
     /* Argument Regex */
     argRgx: /([^\s,]+)/g,
 
+    /* Shorthand reference to Object.prototype.hasOwnProperty */
     hasProp: {}.hasOwnProperty,
 
     /* Shorthand reference to Array.prototype.slice */
@@ -168,24 +176,22 @@ utils = {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     },
 
+    /**
+    * Returns list of argument names from function 
+    *
+    * @param fn {function} - the function to get arguments from 
+    * @return {array}  
+    **/
     getArgumentNames: function(fn) {
         var ref;
 
         return ((fn !== null ? (ref = fn.toString().match(utils.fnRgx)) !== null ? ref[1] : void 0 : void 0) || '').match(utils.argRgx) || [];
     },
-
-    convertToEm:function(value){
-        return value * this.getFontsize();
-    },
-
-    convertToPt:function(value){
-    
-    },
                 
     /**
     * Use to resize elemen to match window size 
     *
-    * @param $el - jQuery wrapped element to resize 
+    * @param $el {object} - jQuery wrapped element to resize 
     * @return void
     **/
     resizeWindow: function($el) {
@@ -219,22 +225,15 @@ utils = {
             .replace(/-+$/, '');            // Trim - from end of text
     },
 
-    convertBase:function(){
-        var pixels, 
-            elem = this.dom.elem,
-            style = elem.getAttribute('style');
-
-        elem.setAttribute('style', style + ';font-size:1em !important');
-
-        base = this.getFontsize();
-
-        elem.setAttribute('style', style);
-
-        return base;
-    },
     /* Run methods for async loading of modules and plugins */
     run: {
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         all: function(args, fn, cb, force) {
             var a, tasks;
 
@@ -264,6 +263,12 @@ utils = {
             return this.parallel(tasks, cb, force);
         },
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         parallel: function(tasks, cb, force) {
             var count, errors, hasErr, i, j, len, results, paralleled, task;
 
@@ -327,6 +332,12 @@ utils = {
           return paralleled;
         },
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         series: function(tasks, cb, force) {
             var count, errors, hasErr, i, next, results;
 
@@ -384,6 +395,12 @@ utils = {
           return next();
         },
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         first: function(tasks, cb, force) {
             var count, errors, i, next, result;
 
@@ -435,6 +452,12 @@ utils = {
             return next();
         },
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         waterfall: function(tasks, cb) {
             var i, next;
 
@@ -461,5 +484,153 @@ utils = {
 
             return next();
         }
+    },
+
+    /**
+    * Copy an Array or Object and return new instance 
+    *
+    * @param data {various} - the array / object to clone (copy) 
+    * @return copy {various} - the new array / object 
+    **/
+    clone: function(data) {
+        var copy, k, v;
+
+        if (data instanceof Array) {
+
+            copy = (function() {
+                var i, len, results;
+
+                results = [];
+                for (i = 0, len = data.length; i < len; i++) {
+  
+                    v = data[i];
+                    results.push(v);
+                }
+
+                return results;
+
+            })();
+
+        } else {
+            copy = {};
+
+            for (k in data) {
+                v = data[k];
+                copy[k] = v;
+            }
+        }
+
+        return copy;
+    },
+
+    convertToEm:function(value){
+        return value * this.getFontsize();
+    },
+
+    convertToPt:function(value){
+    
+    },
+
+    /**
+    * Get computed fontsize from created element in pixels
+    *
+    * @return base {number} - computed fontsize
+    **/
+    convertBase:function(){
+        var pixels, 
+            elem = document.createElement(), 
+            style = elem.getAttribute('style');
+
+        elem.setAttribute('style', style + ';font-size:1em !important');
+
+        base = this.getFontsize();
+
+        elem.setAttribute('style', style);
+
+        return base;
+    },
+
+    /**
+    * Mix properties of two objects, optional to override property names 
+    *
+    * @param giv {object} - object to give properties
+    * @param rec {object} - object to recieve givers properties
+    * @param override {boolean} - optional arg to replace existing property keys
+    * @return results {array} - new array of mixed object properties and values 
+    **/
+    mix: function(giv, rec, override) {
+        var k, results, mixins, v;
+
+        if (override === true) {
+            results = [];
+
+            for (k in giv) {
+                v = giv[k];
+                results.push(rec[k] = v);
+            }
+
+            return results;
+
+        } else {
+            mixins = [];
+
+            for (k in giv) {
+                v = giv[k];
+
+                if (!rec.hasOwnProperty(k)) {
+                    results.push(rec[k] = v);
+                }
+            }
+
+            return results;
+        }
+    },
+
+    /**
+    * Mix various object / function combinations 
+    *
+    * @param input {various} - input class to give properties 
+    * @param output {various} - receiving class to retain mixed properties 
+    * @param override {boolean} - override property names with new values
+    * @return {function} - mix 
+    **/
+    mixin: function(input, output, override) {
+        if (!override || override === null) {
+            override = false;
+        }
+
+        switch ((typeof output) + "-" + (typeof input)) {
+            case "function-function":
+                return this.mix(output.prototype, input.prototype, override);
+
+            case "function-object":
+                return this.mix(output.prototype, input, override);
+
+            case "object-object":
+                return this.mix(output, input, override);
+
+            case "object-function":
+                return this.mix(output, input.prototype, override);
+        }
+    },
+    
+    /**
+    * Generate random unique identifier string
+    *
+    * @param length {number} - how long the random string should be
+    * @return id {string} - unique identifier 
+    **/
+    unique: function(length) {
+        var id = '';
+
+        if (!length || length === null) {
+            length = 8;
+        }
+
+        while (id.length < length) {
+            id += Math.random().toString(36).substr(2);
+        }
+
+        return id.substr(0, length);
     }
 };
