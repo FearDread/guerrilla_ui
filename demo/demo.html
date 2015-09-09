@@ -90,6 +90,8 @@
     <script src='../src/plugin.js' type='text/javascript'></script>
     <!-- modules -->
     <script src='../src/modules/mvc/model.js' type='text/javascript'></script>
+    <script src='../src/modules/mvc/view.js' type='text/javascript'></script>
+    <script src='../src/modules/mvc/controller.js' type='text/javascript'></script>
     <!-- jQuery Plugins -->
     <script src='../src/plugins/stargaze.js' type='text/javascript'></script>
 
@@ -102,6 +104,9 @@
       // basic module with start 
       $.GUI().create('moduleA', function(G) {
           G.log('module A sandbox :: ', G);
+
+          var el = G.query('.btn');
+          console.log('G elem = ', el);
 
           function print() {
             console.log('load called in mod A');

@@ -3,100 +3,123 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: MVC Model object module         * 
 * ---------------------------------------- */
-$.GUI().extend('Model', function(G) {
-    var Model;
+var Model;
 
-    Model = (function(superClass) {
+Model = (function(superClass) {
 
-        utils.combine(Model, superClass);
+    utils.combine(Model, superClass);
 
-        function Model(obj) {
-            var k, v;
+    function Model(obj) {
 
-            Model.__super__.constructor.call(this);
+        // call super class ctor
+        Model.__super__.constructor.call(this);
 
-            for (k in obj) {
-                v = obj[k];
+        // extend model object with passed model
+        this.extend(obj);
 
-                if (this[k] === null) {
+        /** 
+         * Set property of current Model object
+         *
+         * @param key {object} {string} - the object or string to merge into Model class 
+         * @param val {various} = value of key and can be any super type 
+         * @param silent {boolean} - rather or not to fire model change event 
+         * @return this {object} 
+        **/
+        this.set = function(key, val, silent) {
+            var k;
 
-                    this[k] = v;
-                }
+            if (!silent || silent === null) {
+                silent = false;
             }
 
-            this.set = function(key, val, silent) {
-                var k;
+            switch (typeof key) {
 
-                if (silent === null) {
+                case "object":
 
-                    silent = false;
-                }
+                    for (k in key) {
 
-                switch (typeof key) {
-                    case "object":
-                        for (k in key) {
-                            v = key[k];
+                        v = key[k];
+                        this.set(k, v, true);
+                    }
 
-                            this.set(k, v, true);
-                        }
+                    if (!silent) {
+                        return this.fire(Model.CHANGED, (function() {
+                            var results = [], k;
+
+                            for (k in key) {
+                                v = key[k];
+                                results.push(k);
+                            }
+
+                            return results;
+
+                        })());
+                    }
+                    break;
+
+                case "string":
+                    if (!(key === "set" || key === "get") && this[key] !== val) {
+                        this[key] = val;
 
                         if (!silent) {
-                            return this.fire(Model.CHANGED, (function() {
-                                var results = [], k;
-
-                                for (k in key) {
-                                    v = key[k];
-                                    results.push(k);
-                                }
-
-                                return results;
-                            })());
+                            this.fire(Model.CHANGED, [key]);
                         }
-                        break;
+                    } else {
 
-                    case "string":
-                        if (!(key === "set" || key === "get") && this[key] !== val) {
-                            this[key] = val;
+                        if (typeof console !== "undefined" && console !== null) {
 
-                            if (!silent) {
-                                this.fire(Model.CHANGED, [key]);
-                            }
-                        } else {
-
-                            if (typeof console !== "undefined" && console !== null) {
-
-                                if (typeof console.error === "function") {
-                                    console.error("key is not a string");
-                                }
+                            if (typeof console.error === "function") {
+                                console.error("key is not a string");
                             }
                         }
+                    }
 
-                    return this;
-                }
-            };
-        }
-
-        Model.prototype.change = function(cb, context) {
-            if (typeof cb === "function") {
-
-                return this.on(Model.CHANGED, cb, context);
-
-            } else if (arguments.length === 0) {
-
-                return this.fire(Model.CHANGED);
-
+                return this;
             }
         };
+    }
 
-        return Model;
+    /** 
+     * Extend Model object with passed object properies 
+     *
+     * @param obj {object} - the object to merge into Model class 
+     * @return this {object} 
+    **/
+    Model.prototype.extend = function(obj) {
+        var k, v;
 
-    })(G.Broker);
+        for (k in obj) {
+            v = obj[k];
 
-    return {
-        load: function() {
-            console.log('Model Object Class :: ', Model);
-        },
-        unload: function() {} 
+            if (this[k] === null) {
+
+                this[k] = v;
+            }
+        }
+
+        return this;
     };
-});
 
+    /** 
+     * Handler that executes when Model object changes 
+     *
+     * @param cb {function} - callback method for event register 
+     * @param context {object} - context to use when registering event 
+     * @return {function} - executed pub / sub 
+    **/
+    Model.prototype.change = function(cb, context) {
+        if (typeof cb === "function") {
+
+            // register model change event
+            return this.on(Model.CHANGED, cb, context);
+
+        } else if (arguments.length === 0) {
+
+            // publish model change event
+            return this.fire(Model.CHANGED);
+        }
+    };
+
+    return Model;
+
+})($.GUI().Broker);

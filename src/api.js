@@ -13,6 +13,7 @@ API = function() {
     return {
         // create new API sandbox instance
         create: function(core, instance, options, module) {
+            console.log('testing api arguments ..', arguments);
 
             // set sandbox vars
             this.id = instance;
@@ -21,6 +22,9 @@ API = function() {
 
             // add utils object
             this.utils = utils;
+
+            // add MVC classes
+            this.Model = Model;
 
             // attach new sandbox instance
             core._broker.install(this);
@@ -83,7 +87,7 @@ API = function() {
                 };
             };
 
-            this.methodCache = function(source, cache, refetch) {
+            this.fnCache = function(source, cache, refetch) {
                 var key;
 
                 cache = cache || (cache = {});
@@ -102,11 +106,11 @@ API = function() {
             };
 
             // attach core modules //
+            /* 
             for (var p in core._plugins) {
-
               var plugin = core._plugins[p];
-
             }
+            */
 
             return this;
         }
