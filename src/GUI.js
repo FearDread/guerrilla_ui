@@ -106,7 +106,7 @@ GUI = (function() {
 
         this._plugins.push({
             creator: plugin,
-            options: opt
+            options: opts
         });
 
         return this;
