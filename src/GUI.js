@@ -318,7 +318,7 @@ GUI = (function() {
      * @return void
     **/
     GUI.prototype.plugin = function(plugin, module) {
-        var GUI = this;
+        var _this = this;
 
         if(plugin.fn && typeof plugin.fn === 'function'){
 
