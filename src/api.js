@@ -13,7 +13,6 @@ API = function() {
     return {
         // create new API sandbox instance
         create: function(core, instance, options, module) {
-            console.log('testing api arguments ..', arguments);
 
             // set sandbox vars
             this.id = instance;
@@ -23,8 +22,16 @@ API = function() {
             // add utils object
             this.utils = utils;
 
+            // add Animation library
+            this.Animation = $.Animation;
+
             // add MVC classes
             this.Model = Model;
+            this.View = View;
+
+            // should be done plugin way
+            // this.Model = core.use(core.plugins.Model);
+            // this.View = core.use(core.plugins.View);
 
             // attach new sandbox instance
             core._broker.install(this);
@@ -104,13 +111,6 @@ API = function() {
                     return cache[key];
                 };
             };
-
-            // attach core modules //
-            /* 
-            for (var p in core._plugins) {
-              var plugin = core._plugins[p];
-            }
-            */
 
             return this;
         }

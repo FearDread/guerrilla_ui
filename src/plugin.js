@@ -13,8 +13,7 @@
             options = (argc[0] instanceof Object) ? argc[0] : null,
             app = $G;
 
-        if (options !== null) {
-
+        if (options && options !== null) {
             app.configure(options);
         }
 

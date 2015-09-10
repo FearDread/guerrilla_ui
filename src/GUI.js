@@ -3,14 +3,18 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: GUI Core library class          * 
 * ---------------------------------------- */
-var GUI, config;
+var GUI;
+
+/** 
+ * @todo - add default config that will change behavior of GUI core 
+ * @todo - add custom config logic to apply customization options 
+ **/
 
 // GUI Core
 GUI = (function() {
 
     // GUI Constructor
     function GUI() {
-        var error;
 
         // console log history
         this.history = [];
@@ -20,6 +24,7 @@ GUI = (function() {
 
             if (options !== null && utils.isObj(options)) {
                
+                // set custom config options
                 this.config = options;
                 this.log('config set :: ', this.config);
             }
@@ -200,6 +205,13 @@ GUI = (function() {
         })(this));
     };
 
+    /** 
+     * Loads plugin to Sandbox or Core classes 
+     *
+     * @param plugin {function} - method with plugin logic 
+     * @param opt {object} - optional options object to be accessed in plugin 
+     * @return this {object}
+    **/
     GUI.prototype.use = function(plugin, opt) {
         var i, len, p;
 
@@ -219,11 +231,12 @@ GUI = (function() {
             }
 
       } else {
-
-          if (typeof plugin !== "function") {
+          // must be function
+          if (!utils.isFunc(plugin)) {
               return this;
           }
 
+          // add to _plugins array
           this._plugins.push({
               creator: plugin,
               options: opt
@@ -403,6 +416,7 @@ GUI = (function() {
     GUI.prototype._startAll = function(mods, cb) {
         var done, startAction;
 
+        // start all stored modules
         if (!mods || mods === null) {
             mods = (function() {
                 var results = [], m;
@@ -415,12 +429,14 @@ GUI = (function() {
             }).call(this);
         }
 
+        // self executing action
         startAction = (function(_this) {
             return function(m, next) {
                 return _this.start(m, _this._modules[m].options, next);
             };
         })(this);
 
+        // optional done callback for async loading 
         done = function(err) {
             var e, i, j, k, len, mdls, modErrors, x;
 
@@ -435,6 +451,7 @@ GUI = (function() {
                     }
                 }
 
+                // store all available modules errors
                 mdls = (function() {
                     var results = [], k;
 
@@ -452,6 +469,7 @@ GUI = (function() {
             return typeof cb === "function" ? cb(e) : void 0;
         };
 
+        // run all modules in parallel formation
         utils.run.all(mods, startAction, done, true);
 
         return this;
@@ -496,6 +514,12 @@ GUI = (function() {
         // create new API Sandbox
         sb = new API().create(this, id, iOpts, moduleId);
 
+        // add config object if avail
+        if (this.config && this.config !== null) {
+          sb.config = this.config;
+        }
+
+        // run sandboxed instance load method
         return this._runSandboxPlugins('load', sb, (function(_this) {
             return function(err) {
                 var instance;
@@ -504,6 +528,7 @@ GUI = (function() {
 
                 if (typeof instance.load !== "function") {
 
+                    // determine if module is jQuery plugin
                     if (instance.fn && typeof instance.fn === 'function') {
                         return _this.plugin(instance, id); 
                     }
@@ -511,6 +536,7 @@ GUI = (function() {
                     return cb(new Error("module has no 'load' or 'fn' method"));
                 }
 
+                // store instance and sandbox
                 _this._instances[id] = instance;
                 _this._sandboxes[id] = sb;
 
