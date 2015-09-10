@@ -3,42 +3,32 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: MVC View class module           * 
 * ---------------------------------------- */
-$.GUI().create('View', function(G) {
-    var View;
+var plugin, View;
 
-    View = (function() {
+View = (function() {
 
-      function View(model) {
+  function View(model) {
 
-          if (model) {
-              return this.setModel(model);
-          }
-      
-          this.setModel = function(obj) {
-              this.model = obj;
-
-              return this.model.change((function() {
-
-                  return this.render();
-
-              }), this);
-
-          };
-
-          this.render = function() {
-              console.log('Render method called in View.');
-          };
+      if (model) {
+          return this.setModel(model);
       }
+  
+      this.setModel = function(obj) {
+          this.model = obj;
 
-      return View;
+          return this.model.change((function() {
 
-    })();
+              return this.render();
 
-    return {
-        load: function() {
-            console.log('View class :: ', View);
-        },
-        unload: function() {}
-    };
+          }), this);
 
-});
+      };
+
+      this.render = function() {
+          console.log('Render method called in View.');
+      };
+  }
+
+  return View;
+
+})();

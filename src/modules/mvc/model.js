@@ -3,7 +3,7 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: MVC Model object module         * 
 * ---------------------------------------- */
-var Model;
+var plugin, Model;
 
 Model = (function(superClass) {
 
