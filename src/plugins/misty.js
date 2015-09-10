@@ -1,6 +1,5 @@
 /* Fog Library */
-$.GUI().create('Fog', function(G) {
-    console.log('Fog Sandbox :: ', G);
+$.GUI().create('Misty', function(G) {
     // Create an array to store our particles
     var particles = [];
 
@@ -164,7 +163,7 @@ $.GUI().create('Fog', function(G) {
 
     return {
         fn: function() {
-            console.log('starting fog library.');
+            console.log('starting misty library.');
             // Initialize the scene
             init();
 
@@ -181,4 +180,4 @@ $.GUI().create('Fog', function(G) {
         },
         unload: function() {}
     };
-});
+}).start('Misty');

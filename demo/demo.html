@@ -53,7 +53,7 @@
         
         <header class="intro">
             <div class="intro-body">
-              <canvas class='canvas' height='695'></canvas>
+              <canvas id="bg-canvas" class='canvas' height='695'></canvas>
                 <div class="container">
                     <div class="row">
                         <div class="col-md-8 col-md-offset-2 pop fadeInDown">
@@ -93,7 +93,9 @@
     <script src='../src/modules/mvc/view.js' type='text/javascript'></script>
     <script src='../src/modules/mvc/controller.js' type='text/javascript'></script>
     <!-- Plugins -->
+    <script src='../src/plugins/glisslider.js' type='text/javascript'></script>
     <script src='../src/plugins/stargaze.js' type='text/javascript'></script>
+    <script src='../src/plugins/misty.js' type='text/javascript'></script>
 
 
     <script type='text/javascript'>
@@ -134,7 +136,8 @@
               load: function() {
                   console.log('load called in mod B');
 
-                  $('.canvas').stargaze();
+                  // G.query('.canvas').stargaze();
+                  G.query('.canvas').misty();
               },
               unload: function() {}
           }
