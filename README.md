@@ -3,12 +3,6 @@ Guerrilla JS jQuery Framework
 =============================
 The best front-end scalable framework and plugin library extending from jQuery.
 
-## Documentation ##
-
-[Guerrilla JS Wiki](https://github.com/FearDread/UltimateTotals/wiki)
-
-[Guerrilla Git Page](http://feardread.github.io/UltimateTotals)
-
 # Technolegy Used
   - [jQuery](http://jquery.org)
   - [jQuery UI](http://jqueryui.com)
@@ -26,6 +20,7 @@ git clone --depth 1 https://github.com/FearDread/guerrilla_js.git
 
 # Move the repository to your own branch / project name.
 mv guerrilla_js my-branch 
+
 ```
 
 ## Build process ##
@@ -36,14 +31,8 @@ mv guerrilla_js my-branch
 
 # To run the build process without runtime environment. 
 
-
 ```
 
-## Running tests ##
-
-``` bash
-
-```
 ## License ##
 Copyright © 2014 Garrett Haptonstall (@FearDread)  
 Licensed under the MIT license.
