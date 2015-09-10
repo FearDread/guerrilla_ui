@@ -122,6 +122,15 @@ utils = {
     },
 
     /**
+    * Check for retina display on device 
+    *
+    * @return boolean
+    **/
+    isRetina: function() {
+      return (window.retina || window.devicePixelRatio > 1);
+    },
+
+    /**
     * Return number of keys in first level of object
     *
     * @param object - object to size
