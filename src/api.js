@@ -19,22 +19,14 @@ API = function() {
             this.module = module;
             this.options = (options !== null) ? options : {}; 
 
+            // attach new sandbox instance
+            core._broker.install(this);
+
             // add utils object
             this.utils = utils;
 
             // add Animation library
             this.Animation = $.Animation;
-
-            // add MVC classes
-            this.Model = Model;
-            this.View = View;
-
-            // should be done plugin way
-            // this.Model = core.use(core.plugins.Model);
-            // this.View = core.use(core.plugins.View);
-
-            // attach new sandbox instance
-            core._broker.install(this);
 
             // reference log function
             this.log = function() {

@@ -387,7 +387,6 @@ GUI = (function() {
         return this;
     };
 
-
     /* Private Methods */
     /*******************/
 
