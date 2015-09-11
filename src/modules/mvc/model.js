@@ -5,9 +5,9 @@
 * ---------------------------------------- */
 $.GUI().use(function(G) {
     var plugin, Model;
+    console.log('core = ', G);
 
     Model = (function(superClass) {
-      console.log('super = ', superClass);
 
         utils.combine(Model, superClass);
 
@@ -121,7 +121,6 @@ $.GUI().use(function(G) {
             }
         };
 
-        console.log('Finished :: ', Model);
         return Model;
 
     })(G.Broker);
