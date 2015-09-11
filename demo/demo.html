@@ -33,7 +33,7 @@
                 </div>
                 
                 <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
-                    <ul class="nav navbar-nav">
+                    <ul class="nav navbar-nav navbar-top">
                         <li class="hidden">
                             <a href="#page-top"></a>
                         </li>
@@ -53,7 +53,8 @@
         
         <header class="intro">
             <div class="intro-body">
-              <canvas id="bg-canvas" class='canvas' height='695'></canvas>
+              <canvas class='canvas stargaze'></canvas>
+              <canvas id="bg-canvas"></canvas>
                 <div class="container">
                     <div class="row">
                         <div class="col-md-8 col-md-offset-2 pop fadeInDown">
@@ -64,7 +65,7 @@
                             <p class="intro-text data-pop-duration=1s">Write even less, do even more!</p>
                             <span class="text-center">An ultimate library of modules and plugins to get your single page javascript applications off the ground and up to the universe beyond!<span>
                             <br />
-                            <a id="about" class="btn btn-circle page-scroll">
+                            <a id="about" class="btn btn-circle page-scroll" href='#about'>
                                 <i class="fa fa-angle-double-down animated"></i>
                             </a>
                         </div>
@@ -72,7 +73,28 @@
                 </div>
             </div>
         </header>
+
+        <section id='about' class='hidden body-section'>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-sm-12">
+                        <h3 class="section-heading centered">< About ></h3>
+                        <hr />
+                        <p class="section-text centered data-pop-duration=1s">The scalable, jQuery driven, modular front-end framework.</p>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id='download' class='hidden body-section'>
+
+        </section>
         
+        <section id='contact' class='hidden body-section'>
+
+        </section>
+
         <footer>
             <div class="container text-center pop fadeInDown">
                 <p>Copyright &copy; Guerrilla UI 2014 - 2015</p>
@@ -80,23 +102,24 @@
         </footer>
 
     <!-- jQuery Framework Library -->
-    <script src='../libs/jquery/jquery.min.js' type='text/javascript'></script>
-    <script src='../libs/jquery/jquery-ui.min.js' type='text/javascript'></script>
+    <script src='../libs/jquery/jquery.min.js'></script>
+    <script src='../libs/jquery/jquery-ui.min.js'></script>
     <!-- GUI -->
-    <script src='../src/utils.js' type='text/javascript'></script>
-    <script src='../src/broker.js' type='text/javascript'></script>
-    <script src='../src/api.js' type='text/javascript'></script>
-    <script src='../src/GUI.js' type='text/javascript'></script>
-    <script src='../src/plugin.js' type='text/javascript'></script>
+    <script src='../src/utils.js'></script>
+    <script src='../src/broker.js'></script>
+    <script src='../src/api.js'></script>
+    <script src='../src/GUI.js'></script>
+    <script src='../src/plugin.js'></script>
     <!-- Modules -->
-    <script src='../src/modules/mvc/model.js' type='text/javascript'></script>
-    <script src='../src/modules/mvc/view.js' type='text/javascript'></script>
-    <script src='../src/modules/mvc/controller.js' type='text/javascript'></script>
+    <script src='../src/modules/mvc/model.js'></script>
+    <script src='../src/modules/mvc/view.js'></script>
+    <script src='../src/modules/mvc/controller.js'></script>
     <!-- Plugins -->
-    <script src='../src/plugins/glisslider.js' type='text/javascript'></script>
-    <script src='../src/plugins/stargaze.js' type='text/javascript'></script>
-    <script src='../src/plugins/misty.js' type='text/javascript'></script>
-
+    <script src='../src/plugins/glisslider.js'></script>
+    <script src='../src/plugins/stargaze.js'></script>
+    <script src='../src/plugins/misty.js'></script>
+    <!-- Demo App -->
+    <script src='js/demo.js'></script>
 
     <script type='text/javascript'>
       var $G = new $.GUI();
