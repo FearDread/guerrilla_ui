@@ -27,7 +27,7 @@ Broker = (function() {
         };
     };
 
-    Broker.prototype.on = function(channel, fn, context) {
+    Broker.prototype.add = function(channel, fn, context) {
         var subscription, _this = this;
 
         if (!context || context === null) {
@@ -50,53 +50,73 @@ Broker = (function() {
                 return this;
             },
             ignore: function() {
-                _this.off(channel);
+                _this.remove(channel);
                 return this;
             }
         }.listen();
     };
 
-    Broker.prototype.off = function(channel) {
-        var index = 0, current, length;
+    Broker.prototype.remove = function(channel) {
 
-        if (this.channels[channel.event]) {
-
-            current = this.channels[channel.event];
-            length = current.length;
-
-            if (length > 0) {
-
-                do {
-
-                    if (current[idx] === channel.callback) {
-                        current.splice(idx, 1);
-                    }
-
-                    index++;
-                } while(--length);
-            }
-        }
     };
         
-    Broker.prototype.fire = function(channel, data) {
-        var index= 0, event,
-            params = (data) ? data : [],
-            length = this.channels.length;
+    Broker.prototype.fire = function(channel, data, cb, origin) {
+        var o;
 
-        if (this.channels[channel]) {
-
-            event = this.channels[channel];
-
-            if (length > 0) {
-
-                do {
-
-                    event[index].call(this, params);
-                    index++;
-
-                } while(--length);
-            }
+        if (cb === null) {
+            cb = (function() {});
         }
+
+        if (origin === null) {
+            origin = channel;
+        }
+
+        if (utils.isFunc(data)) {
+            return cb = data;
+        }
+
+        data = void 0;
+
+        if (typeof channel !== "string") {
+            return false;
+        }
+
+        tasks = this._setup(data, channel, origin, this);
+
+        utils.run.series(tasks, (function(errors, series) {
+            var e, x;
+
+            if (errors) {
+
+                return e = new Error(((function() {
+                    var i, len, results;
+
+                    results = [];
+
+                    for (i = 0, len = errors.length; i < len; i++) {
+                        x = errors[i];
+
+                        if (x != null) {
+                            results.push(x.message);
+                        }
+                    }
+
+                    return results;
+
+                })()).join('; '));
+            }
+        }, cb(e)), true);
+
+        if (this.cascade && (chnls = channel.split('/')).length > 1) {
+
+          if (this.fireOrigin) {
+            o = origin;
+          }
+        }
+
+        this.fire(chnls.slice(0, -1).join('/'), data, cb, o);
+
+        return this;
     };
 
     Broker.prototype.install = function(obj, forced) {
@@ -119,6 +139,63 @@ Broker = (function() {
         }
 
         return this;
+    };
+
+    Broker.prototype._delete = function(obj, channel, cb, context) {
+        var s;
+
+        if (obj.channels[channel] == null) {
+
+            return obj.channels[channel] = (function() {
+                var i, len, ref, results;
+
+                ref = obj.channels[ch];
+                results = [];
+
+                for (i = 0, len = ref.length; i < len; i++) {
+                    s = ref[i];
+
+                    if ((typeof cb !== "undefined" && cb !== null ? s.callback !== cb : typeof ctxt !== "undefined" && ctxt !== null ? s.context !== context : s.context !== obj)) {
+
+                        results.push(s);
+                    }
+                }
+
+                return results;
+
+            })();
+        }
+    };
+
+    Broker.prototype._setup = function(data, channel, origin, context) {
+        var e, fn, i, len, sub, subscribers;
+
+        subscribers = context.channels[channel] || [];
+
+        fn = function(sub) {};
+
+        for (i = 0, len = subscribers.length; i < len; i++) {
+            sub = subscribers[i];
+            fn(sub);
+        }
+
+        (function(next) {});
+
+        try {
+
+            if (utils.hasArg(sub.callback, 3)) {
+
+                sub.callback.apply(sub.context, [data, origin, next]);
+
+            } else {
+
+                next(null, sub.callback.apply(sub.context, [data, origin]));
+            }
+        } catch (_error) {
+            e = _error;
+        }
+
+        next(e);
     };
 
     return Broker;
