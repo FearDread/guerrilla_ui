@@ -13,6 +13,9 @@ $.GUI().create('App', function(G) {
     function bind() {
 
         G.query('.navbar-top').click(showPage);
+        G.query.('.btn').click(function(e) {
+            G.fire('scrollPage');
+        });
     }
 
     function initView() {
@@ -53,6 +56,9 @@ $.GUI().create('App', function(G) {
 
     return {
         load: function(opts) {
+            G.add('scrollPage', function() {
+                console.log('fired scroll page channel');
+            });
             initView();
         },
         unload: function() {
