@@ -11,7 +11,12 @@ var GUI;
  **/
 
 // GUI Core
-GUI = (function() {
+GUI = (function($) {
+
+    // Make sure we have jQuery
+    if (typeof $ === 'undefined' || $ === null) {
+        throw new Error('Guerrilla UI requires jQuery library.');
+    }
 
     // GUI Constructor
     function GUI() {
@@ -19,14 +24,20 @@ GUI = (function() {
         // console log history
         this.history = [];
 
+        // default config
+        this.config = {
+            name: 'Guerrilla UI',
+            version: '0.1.3',
+            animations: false,
+            jquery: true 
+        };
+
         // ability to pass optional config object
         this.configure = function(options) {
 
             if (options !== null && utils.isObj(options)) {
-               
                 // set custom config options
-                this.config = options;
-                this.log('config set :: ', this.config);
+                this.config = utils.combine(this.config, options);
             }
         };
         
@@ -589,4 +600,4 @@ GUI = (function() {
 
     return GUI;
 
-})(this);
+})(jQuery);

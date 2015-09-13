@@ -25,6 +25,9 @@ API = function() {
             // add utils object
             this.utils = utils;
 
+            // Ajax shorthand reference
+            this.xhr = $.ajax;
+
             // add Animation library
             this.Animation = $.Animation;
 
@@ -46,6 +49,22 @@ API = function() {
                 }
 
                 return document.createElement(el);
+            };
+
+            /**
+             * Animate method utalizing animate.css library
+             *
+            **/
+            this.animate = function($el, anim, time) {
+                if (time === undefined) {
+                    time = slider.opts.animationTime || 1500;
+                }
+
+                $el.show().addClass(anim);
+
+                setTimeout(function() {
+                    $el.removeClass(anim);
+                }, time);
             };
 
             // find selector in dom with wrapped methods
