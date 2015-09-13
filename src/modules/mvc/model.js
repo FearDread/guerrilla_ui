@@ -5,18 +5,17 @@
 * ---------------------------------------- */
 $.GUI().use(function(G) {
     var plugin, Model;
-    console.log('core = ', G);
 
     Model = (function(superClass) {
 
-        utils.combine(Model, superClass);
+        utils.extend(Model, superClass);
 
         function Model(obj) {
             // call super class ctor
             Model.__super__.constructor.call(this);
 
-            // extend model object with passed model
-            this.extend(obj);
+            // combine model object with passed model
+            this.combine(obj);
 
             /** 
              * Set property of current Model object
@@ -86,7 +85,7 @@ $.GUI().use(function(G) {
          * @param obj {object} - the object to merge into Model class 
          * @return this {object} 
         **/
-        Model.prototype.extend = function(obj) {
+        Model.prototype.combine = function(obj) {
             var k, v;
 
             for (k in obj) {

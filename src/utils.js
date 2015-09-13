@@ -16,7 +16,7 @@ utils = {
      * @param parent {object} - parent object prototype 
      * @return child {object} - combined child & parent prototypes 
     **/
-    combine: function(child, parent) {
+    extend: function(child, parent) {
         var key;
 
         for (key in parent) { 
