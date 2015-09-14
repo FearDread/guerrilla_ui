@@ -168,12 +168,6 @@ utils = {
         return value;
     },
 
-    getFontsize: function(elem) {
-        return parseFloat(
-            getComputedStyle(elem || this.dom.elem).fontSize
-        );
-    },
-
     /**
     * Returns a random number between min (inclusive) and max (exclusive)
     *
