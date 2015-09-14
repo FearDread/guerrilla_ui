@@ -171,9 +171,6 @@ $.GUI().create('Stargaze', function(G){
 
             return new Stargaze($elem, opts).init();
         },
-        unload: function() {
-        
-        }
     };
 
 }).start('Stargaze');

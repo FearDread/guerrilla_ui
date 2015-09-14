@@ -298,8 +298,5 @@ $.GUI().create('Glisslider', function(G) {
         fn:function(){
 
         },
-        unload:function(){
-        
-        }
     };
 });

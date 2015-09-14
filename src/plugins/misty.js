@@ -178,6 +178,5 @@ $.GUI().create('Misty', function(G) {
                 }, 1000 / targetFPS);
             }
         },
-        unload: function() {}
     };
 }).start('Misty');
