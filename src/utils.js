@@ -350,10 +350,10 @@ utils = {
         series: function(tasks, cb, force) {
             var count, errors, hasErr, i, next, results;
 
-            if (tasks === null) {
+            if (!tasks || tasks === null) {
                 tasks = [];
             }
-            if (cb === null) {
+            if (!cb || cb === null) {
                 cb = (function() {});
             }
 

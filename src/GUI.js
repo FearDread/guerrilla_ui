@@ -37,7 +37,7 @@ GUI = (function($) {
 
             if (options !== null && utils.isObj(options)) {
                 // set custom config options
-                this.config = utils.combine(this.config, options);
+                this.config = utils.extend(this.config, options);
             }
         };
         
