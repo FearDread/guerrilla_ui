@@ -3,12 +3,12 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: Guerrilla.ui GUI Core           *
 * ---------------------------------------- */
-$.GUI().create('Media', function(G){
+$.GUI().use(function(G) {
 
     var Media = function(options){
         var self = this,
             breaks, media_change, add_listener, matches,
-            hasMatch = GUI.win.media_matches !== undefined && !!GUI.win.media_matches('!').add_listener,
+            hasMatch = window.media_matches !== undefined && !!window.media_matches('!').add_listener,
 
         proto = {
 
@@ -33,19 +33,19 @@ $.GUI().create('Media', function(G){
 
             add_listener:function(options){
                 var self = this,
-                    query = GUI.win.media_matches(options.media),
+                    query = window.media_matches(options.media),
                     query_cb = function(){
                         return proto.media_change(query, options);
                     },
                     window_cb = function(){
-                        var q = GUI.win.matches(options.media);
+                        var q = window.matches(options.media);
 
                         return proto.media_change(q, options);
                     };
 
                 query.addListener(query_cb);
 
-                GUI.win.addEventListener("orientationchange", window_cb, false);
+                window.addEventListener("orientationchange", window_cb, false);
 
                 return proto.media_change(query, options);
             },
@@ -63,8 +63,8 @@ $.GUI().create('Media', function(G){
                     value = parts[3];
                 }
 
-                windowWidth = window.innerWidth || GUI.docElem.clientWidth;
-                windowHeight = window.innerHeight || GUI.docElem.clientHeight;
+                windowWidth = window.innerWidth || document.documentElement.clientWidth;
+                windowHeight = window.innerHeight || document.documentElement.clientHeight;
 
                 if(dimension === 'width'){
                     matches = constraint === "max" && value > windowWidth || constraint === "min" && value < windowWidth;
@@ -108,17 +108,17 @@ $.GUI().create('Media', function(G){
         return function(){
             options = arguments[0] || {};
 
-            if(GUI.win.media_matches){
+            if(window.media_matches){
                 return proto.add_listener();
             
             }else{
-                if(GUI.win.addEventListener){
-                    GUI.win.addEventListener("resize", proto.media_listener);
+                if(window.addEventListener){
+                    window.addEventListener("resize", proto.media_listener);
 
                 }else{
 
-                    if(GUI.win.attachEvent){
-                        GUI.win.attachEvent("onresize", proto.media_listener);
+                    if(window.attachEvent){
+                        window.attachEvent("onresize", proto.media_listener);
                     }
                 }
 
@@ -128,10 +128,8 @@ $.GUI().create('Media', function(G){
     };
   
     return {
-        load: function() {
-            var argc = arguments[0];
-
-            return new Media(argc);
+        load: function(sb, args) {
+            sb.Media = new Media(args);
         },
         unload: function() {
             G.cleanup();

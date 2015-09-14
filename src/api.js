@@ -41,23 +41,13 @@ API = function() {
                 return core._debug();
             };
 
-            // create new html element
-            this.elem = function(el) {
-                if (!utils.isStr(el)) {
-                    core.log('Error :: Element must be type String.');
-                    return false;
-                }
-
-                return document.createElement(el);
-            };
-
             /**
              * Animate method utalizing animate.css library
              *
             **/
             this.animate = function($el, anim, time) {
                 if (time === undefined) {
-                    time = slider.opts.animationTime || 1500;
+                    time = 1500;
                 }
 
                 $el.show().addClass(anim);
@@ -86,8 +76,22 @@ API = function() {
                 _ret.length = $el.length;
 
                 _ret.query = function(sel) {
-
                     return _this.query(sel, $el);
+                };
+
+                _ret.create = function(el) {
+                    if (!utils.isStr(el)) {
+                        core.log('Error :: Element must be type String.');
+                        return false;
+                    }
+
+                    return document.createElement(el);
+                };
+
+                _ret.getFontsize = function() {
+                    return parseFloat(
+                        getComputedStyle($el).fontSize
+                    );
                 };
 
                 return _ret;
