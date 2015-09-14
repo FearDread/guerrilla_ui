@@ -20,11 +20,13 @@ module.exports = function(grunt){
                   'src/GUI.js',
                   'src/plugin.js',
                   'src/plugins/fog.js',
-                  'src/plugins/slider.js',
+                  'src/plugins/glisslider.js',
+                  'src/plugins/misty.js',
                   'src/plugins/stargaze.js',
                   'src/modules/mvc/model.js',
                   'src/modules/mvc/view.js',
-                  'src/modules/mvc/controller.js'
+                  'src/modules/mvc/controller.js',
+                  'src/modules/net/router.js'
               ],
               dest: 'dist/<%= pkg.name %>.js'
            }
