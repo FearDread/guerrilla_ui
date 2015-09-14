@@ -9,11 +9,18 @@ utils = {
     /* jQuery re-map of $.extend */
     merge: $.extend,
 
-    /* Fallback merge method */
-    combine: function(child, parent) {
+    /**
+     * Attach child object prototype to parent object prototype 
+     *
+     * @param child {object} - object to merge prototype 
+     * @param parent {object} - parent object prototype 
+     * @return child {object} - combined child & parent prototypes 
+    **/
+    extend: function(child, parent) {
         var key;
 
         for (key in parent) { 
+
             if (utils.hasProp.call(parent, key)) {
                 
                 child[key] = parent[key]; 
@@ -38,6 +45,7 @@ utils = {
     /* Argument Regex */
     argRgx: /([^\s,]+)/g,
 
+    /* Shorthand reference to Object.prototype.hasOwnProperty */
     hasProp: {}.hasOwnProperty,
 
     /* Shorthand reference to Array.prototype.slice */
@@ -92,6 +100,18 @@ utils = {
     },
 
     /**
+    * Check typeof of passed value to name 
+    *
+    * @param type {string} - string type to check against 
+    * @return boolean
+    **/
+    isType: function(type, val, name) {
+        if (typeof val !== type) {
+            return 'Error :: ' + name + " must be of type " + type;
+        }
+    },
+
+    /**
     * Check if valid string
     *
     * @param object - string to check
@@ -99,6 +119,15 @@ utils = {
     **/
     isStr: function(str) {
         return (typeof str === 'string');
+    },
+
+    /**
+    * Check for retina display on device 
+    *
+    * @return boolean
+    **/
+    isRetina: function() {
+      return (window.retina || window.devicePixelRatio > 1);
     },
 
     /**
@@ -156,24 +185,22 @@ utils = {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     },
 
+    /**
+    * Returns list of argument names from function 
+    *
+    * @param fn {function} - the function to get arguments from 
+    * @return {array}  
+    **/
     getArgumentNames: function(fn) {
         var ref;
 
         return ((fn !== null ? (ref = fn.toString().match(utils.fnRgx)) !== null ? ref[1] : void 0 : void 0) || '').match(utils.argRgx) || [];
     },
-
-    convertToEm:function(value){
-        return value * this.getFontsize();
-    },
-
-    convertToPt:function(value){
-    
-    },
                 
     /**
     * Use to resize elemen to match window size 
     *
-    * @param $el - jQuery wrapped element to resize 
+    * @param $el {object} - jQuery wrapped element to resize 
     * @return void
     **/
     resizeWindow: function($el) {
@@ -207,22 +234,15 @@ utils = {
             .replace(/-+$/, '');            // Trim - from end of text
     },
 
-    convertBase:function(){
-        var pixels, 
-            elem = this.dom.elem,
-            style = elem.getAttribute('style');
-
-        elem.setAttribute('style', style + ';font-size:1em !important');
-
-        base = this.getFontsize();
-
-        elem.setAttribute('style', style);
-
-        return base;
-    },
     /* Run methods for async loading of modules and plugins */
     run: {
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         all: function(args, fn, cb, force) {
             var a, tasks;
 
@@ -252,6 +272,12 @@ utils = {
             return this.parallel(tasks, cb, force);
         },
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         parallel: function(tasks, cb, force) {
             var count, errors, hasErr, i, j, len, results, paralleled, task;
 
@@ -315,13 +341,19 @@ utils = {
           return paralleled;
         },
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         series: function(tasks, cb, force) {
             var count, errors, hasErr, i, next, results;
 
-            if (tasks === null) {
+            if (!tasks || tasks === null) {
                 tasks = [];
             }
-            if (cb === null) {
+            if (!cb || cb === null) {
                 cb = (function() {});
             }
 
@@ -372,6 +404,12 @@ utils = {
           return next();
         },
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         first: function(tasks, cb, force) {
             var count, errors, i, next, result;
 
@@ -423,6 +461,12 @@ utils = {
             return next();
         },
 
+        /**
+        * Run all modules one after another 
+        *
+        * @param args {array} - arguments list 
+        * @return void
+        **/
         waterfall: function(tasks, cb) {
             var i, next;
 
@@ -449,6 +493,154 @@ utils = {
 
             return next();
         }
+    },
+
+    /**
+    * Copy an Array or Object and return new instance 
+    *
+    * @param data {various} - the array / object to clone (copy) 
+    * @return copy {various} - the new array / object 
+    **/
+    clone: function(data) {
+        var copy, k, v;
+
+        if (data instanceof Array) {
+
+            copy = (function() {
+                var i, len, results;
+
+                results = [];
+                for (i = 0, len = data.length; i < len; i++) {
+  
+                    v = data[i];
+                    results.push(v);
+                }
+
+                return results;
+
+            })();
+
+        } else {
+            copy = {};
+
+            for (k in data) {
+                v = data[k];
+                copy[k] = v;
+            }
+        }
+
+        return copy;
+    },
+
+    convertToEm:function(value){
+        return value * this.getFontsize();
+    },
+
+    convertToPt:function(value){
+    
+    },
+
+    /**
+    * Get computed fontsize from created element in pixels
+    *
+    * @return base {number} - computed fontsize
+    **/
+    convertBase:function(){
+        var pixels, 
+            elem = document.createElement(), 
+            style = elem.getAttribute('style');
+
+        elem.setAttribute('style', style + ';font-size:1em !important');
+
+        base = this.getFontsize();
+
+        elem.setAttribute('style', style);
+
+        return base;
+    },
+
+    /**
+    * Mix properties of two objects, optional to override property names 
+    *
+    * @param giv {object} - object to give properties
+    * @param rec {object} - object to recieve givers properties
+    * @param override {boolean} - optional arg to replace existing property keys
+    * @return results {array} - new array of mixed object properties and values 
+    **/
+    mix: function(giv, rec, override) {
+        var k, results, mixins, v;
+
+        if (override === true) {
+            results = [];
+
+            for (k in giv) {
+                v = giv[k];
+                results.push(rec[k] = v);
+            }
+
+            return results;
+
+        } else {
+            mixins = [];
+
+            for (k in giv) {
+                v = giv[k];
+
+                if (!rec.hasOwnProperty(k)) {
+                    results.push(rec[k] = v);
+                }
+            }
+
+            return results;
+        }
+    },
+
+    /**
+    * Mix various object / function combinations 
+    *
+    * @param input {various} - input class to give properties 
+    * @param output {various} - receiving class to retain mixed properties 
+    * @param override {boolean} - override property names with new values
+    * @return {function} - mix 
+    **/
+    mixin: function(input, output, override) {
+        if (!override || override === null) {
+            override = false;
+        }
+
+        switch ((typeof output) + "-" + (typeof input)) {
+            case "function-function":
+                return this.mix(output.prototype, input.prototype, override);
+
+            case "function-object":
+                return this.mix(output.prototype, input, override);
+
+            case "object-object":
+                return this.mix(output, input, override);
+
+            case "object-function":
+                return this.mix(output, input.prototype, override);
+        }
+    },
+    
+    /**
+    * Generate random unique identifier string
+    *
+    * @param length {number} - how long the random string should be
+    * @return id {string} - unique identifier 
+    **/
+    unique: function(length) {
+        var id = '';
+
+        if (!length || length === null) {
+            length = 8;
+        }
+
+        while (id.length < length) {
+            id += Math.random().toString(36).substr(2);
+        }
+
+        return id.substr(0, length);
     }
 };
 ;/* --------------------------------------- *
@@ -480,7 +672,7 @@ Broker = (function() {
         };
     };
 
-    Broker.prototype.on = function(channel, fn, context) {
+    Broker.prototype.add = function(channel, fn, context) {
         var subscription, _this = this;
 
         if (!context || context === null) {
@@ -503,53 +695,103 @@ Broker = (function() {
                 return this;
             },
             ignore: function() {
-                _this.off(channel);
+                _this.remove(channel);
                 return this;
             }
         }.listen();
     };
 
-    Broker.prototype.off = function(channel) {
-        var index = 0, current, length;
+    Broker.prototype.remove = function(channel, cb) {
+        var id;
 
-        if (this.channels[channel.event]) {
+        switch (typeof channel) {
 
-            current = this.channels[channel.event];
-            length = current.length;
+            case "string":
+                if (typeof cb === "function") {
+                    Broker._delete(this, ch, cb);
+                }
 
-            if (length > 0) {
+                if (typeof cb === "undefined") {
+                    Broker._delete(this, ch);
+                }
+                break;
 
-                do {
+            case "function":
+                for (id in this.channels) {
+                    Broker._delete(this, id, ch);
+                }
+                break;
 
-                    if (current[idx] === channel.callback) {
-                        current.splice(idx, 1);
-                    }
+            case "undefined":
+                for (id in this.channels) {
+                    Broker._delete(this, id);
+                }
+                break;
 
-                    index++;
-                } while(--length);
-            }
+            case "object":
+                for (id in this.channels) {
+                    Broker._delete(this, id, null, ch);
+                }
         }
+
+        return this;
     };
         
-    Broker.prototype.fire = function(channel, data) {
-        var index= 0, event,
-            params = (data) ? data : [],
-            length = this.channels.length;
+    Broker.prototype.fire = function(channel, data, cb, origin) {
+        var o, e, x, chnls;
 
-        if (this.channels[channel]) {
-
-            event = this.channels[channel];
-
-            if (length > 0) {
-
-                do {
-
-                    event[index].call(this, params);
-                    index++;
-
-                } while(--length);
-            }
+        if (!cb || cb === null) {
+            cb = (function() {});
         }
+
+        if (!origin || origin === null) {
+            origin = channel;
+        }
+
+        if (data && utils.isFunc(data)) {
+            return cb = data;
+        }
+
+        data = void 0;
+
+        if (typeof channel !== "string") {
+            return false;
+        }
+
+        tasks = this._setup(data, channel, origin, this);
+
+        utils.run.series(tasks, (function(errors, series) {
+            if (errors) {
+
+                return e = new Error(((function() {
+                    var i, len, results;
+
+                    results = [];
+
+                    for (i = 0, len = errors.length; i < len; i++) {
+                        x = errors[i];
+
+                        if (x !== null) {
+                            results.push(x.message);
+                        }
+                    }
+
+                    return results;
+
+                })()).join('; '));
+            }
+        }, cb(e)), true);
+
+        if (this.cascade && (chnls = channel.split('/')).length > 1) {
+
+            if (this.fireOrigin) {
+                o = origin;
+            }
+
+            this.fire(chnls.slice(0, -1).join('/'), data, cb, o);
+        }
+
+        return this;
     };
 
     Broker.prototype.install = function(obj, forced) {
@@ -572,6 +814,70 @@ Broker = (function() {
         }
 
         return this;
+    };
+
+    Broker.prototype._delete = function(obj, channel, cb, context) {
+        var s;
+
+        if (obj.channels[channel] == null) {
+
+            return obj.channels[channel] = (function() {
+                var i, len, ref, results;
+
+                ref = obj.channels[ch];
+                results = [];
+
+                for (i = 0, len = ref.length; i < len; i++) {
+                    s = ref[i];
+
+                    if ((typeof cb !== "undefined" && cb !== null ? s.callback !== cb : typeof context !== "undefined" && context !== null ? s.context !== context : s.context !== obj)) {
+
+                        results.push(s);
+                    }
+                }
+
+                return results;
+
+            })();
+        }
+    };
+
+    Broker.prototype._setup = function(data, channel, origin, context) {
+        var i, len, results = [], sub, subscribers;
+
+        subscribers = context.channels[channel] || [];
+        len = subscribers.length;
+
+        do {
+            sub = subscribers[i];
+
+            results.push((function(sub) {
+
+                return function(next) {
+                    var e;
+
+                    try {
+
+                        if (utils.hasArgs(sub.callback, 3)) {
+
+                            return sub.callback.apply(sub.context, [data, origin, next]);
+
+                        } else {
+
+                            return next(null, sub.callback.apply(sub.context, [data, origin]));
+                        }
+                    } catch (_error) {
+                        e = _error;
+
+                        return next(e);
+                    }
+                };
+            })(sub));
+
+            i++;
+        } while(--len);
+
+        return results;
     };
 
     return Broker;
@@ -598,23 +904,55 @@ API = function() {
             this.module = module;
             this.options = (options !== null) ? options : {}; 
 
-            // add utils object
-            this.utils = utils;
-
             // attach new sandbox instance
             core._broker.install(this);
 
+            // add utils object
+            this.utils = utils;
+
+            // Ajax shorthand reference
+            this.xhr = $.ajax;
+
+            // add Animation library
+            this.Animation = $.Animation;
+
+            // reference log function
+            this.log = function() {
+                return core.log(arguments);
+            };
+
+            // refrence to debug method, shows console history
+            this.debug = function() {
+                return core._debug();
+            };
+
+            // create new html element
             this.elem = function(el) {
                 if (!utils.isStr(el)) {
-
                     core.log('Error :: Element must be type String.');
-
                     return false;
                 }
 
                 return document.createElement(el);
             };
 
+            /**
+             * Animate method utalizing animate.css library
+             *
+            **/
+            this.animate = function($el, anim, time) {
+                if (time === undefined) {
+                    time = slider.opts.animationTime || 1500;
+                }
+
+                $el.show().addClass(anim);
+
+                setTimeout(function() {
+                    $el.removeClass(anim);
+                }, time);
+            };
+
+            // find selector in dom with wrapped methods
             this.query = function(selector, context) {
                 var $el, _ret = {}, _this = this;
                 
@@ -652,10 +990,10 @@ API = function() {
                 };
             };
 
-            this.methodCache = function(source, cache, refetch) {
+            this.fnCache = function(source, cache, refetch) {
                 var key;
 
-                cache || (cache = {});
+                cache = cache || (cache = {});
 
                 return function(args) {
                     key = arguments.length > 1 ? [].join.call(arguments, DELIM) : String(args);
@@ -667,8 +1005,7 @@ API = function() {
                     }
 
                     return cache[key];
-                }
-
+                };
             };
 
             return this;
@@ -680,32 +1017,41 @@ API = function() {
 * @author: Garrett Haptonstall (FearDread) *
 * @module: GUI Core library class          * 
 * ---------------------------------------- */
-var GUI, config;
+var GUI;
+
+/** 
+ * @todo - add default config that will change behavior of GUI core 
+ * @todo - add custom config logic to apply customization options 
+ **/
 
 // GUI Core
-GUI = (function() {
+GUI = (function($) {
 
-    // Helper method to check property type
-    function checkType(type, val, name) {
-        if (typeof val !== type) {
-            return name + " has to be a " + type;
-        }
+    // Make sure we have jQuery
+    if (typeof $ === 'undefined' || $ === null) {
+        throw new Error('Guerrilla UI requires jQuery library.');
     }
 
     // GUI Constructor
     function GUI() {
-        var error;
 
         // console log history
         this.history = [];
+
+        // default config
+        this.config = {
+            name: 'Guerrilla UI',
+            version: '0.1.3',
+            animations: false,
+            jquery: true 
+        };
 
         // ability to pass optional config object
         this.configure = function(options) {
 
             if (options !== null && utils.isObj(options)) {
-               
-                this.config = options;
-                this.log('config set :: ', this.config);
+                // set custom config options
+                this.config = utils.extend(this.config, options);
             }
         };
         
@@ -728,7 +1074,9 @@ GUI = (function() {
         if (console) {
             console.log([].slice.call(arguments));
         }
+    };
 
+    GUI.prototype._debug = function() {
         if (this.config.debug) {
             console.log(this.history);
         }
@@ -736,6 +1084,15 @@ GUI = (function() {
 
     /* Public Methods */
     /******************/
+
+    /** 
+     * Create new GUI module 
+     *
+     * @param id {string} - module identifier
+     * @param creator {function}  logic to execute inside module namespace
+     * @param options {object} - optional object of extra parameters that will be passed to load() 
+     * @return this {object}
+    **/
     GUI.prototype.create = function(id, creator, options) {
         var error;
 
@@ -743,7 +1100,7 @@ GUI = (function() {
           options = {};
         }
 
-        error = checkType("string", id, "module ID") || checkType("function", creator, "creator") || checkType("object", options, "option parameter");
+        error = utils.isType("string", id, "module ID") || utils.isType("function", creator, "creator") || utils.isType("object", options, "option parameter");
 
         if (error) {
           this.log("could not register module '" + id + "': " + error);
@@ -765,9 +1122,33 @@ GUI = (function() {
     };
 
     /** 
+     * Extend GUI core library and add to Sandbox API 
+     *
+     * @param plugin {string} - plugin identifier 
+     * @param creator {function} - function containing plugin class logic 
+     * @return this {object} 
+    **/
+    GUI.prototype.extend = function(plugin, creator, opts) {
+
+        if (!opts || opts === null) {
+            opts = {};
+        }
+
+        this._plugins.push({
+            creator: plugin,
+            options: opts
+        });
+
+        return this;
+    };
+
+    /** 
      * Starts module with new sandbox instance 
      *
-     *
+     * @param moduleId {string} - module name or identifier
+     * @param opt {object} - optional options object
+     * @param cb {function} - callback function 
+     * @return boot {function} - call boot method and create new sandbox instance 
     **/
     GUI.prototype.start = function(moduleId, opt, cb) {
         var error, id, initInst;
@@ -796,7 +1177,7 @@ GUI = (function() {
             opt = {};
         }
 
-        error = checkType("string", moduleId, "module ID") || checkType("object", opt, "second parameter") || (!this._modules[moduleId] ? "module doesn't exist" : void 0);
+        error = utils.isType("string", moduleId, "module ID") || utils.isType("object", opt, "second parameter") || (!this._modules[moduleId] ? "module doesn't exist" : void 0);
 
         if (error) {
             return this._fail(error, cb);
@@ -850,9 +1231,52 @@ GUI = (function() {
     };
 
     /** 
+     * Loads plugin to Sandbox or Core classes 
+     *
+     * @param plugin {function} - method with plugin logic 
+     * @param opt {object} - optional options object to be accessed in plugin 
+     * @return this {object}
+    **/
+    GUI.prototype.use = function(plugin, opt) {
+        var i, len, p;
+
+        if (plugin instanceof Array) {
+
+            for (i = 0, len = plugin.length; i < len; i++) {
+                p = plugin[i];
+
+                switch (typeof p) {
+                    case "function":
+                        this.use(p);
+                        break;
+
+                    case "object":
+                        this.use(p.plugin, p.options);
+                }
+            }
+
+      } else {
+          // must be function
+          if (!utils.isFunc(plugin)) {
+              return this;
+          }
+
+          // add to _plugins array
+          this._plugins.push({
+              creator: plugin,
+              options: opt
+          });
+      }
+
+      return this;
+    };
+
+    /** 
      * Stops all running instances 
      *
-     *
+     * @param id {string} - module identifier 
+     * @param callback {function} - optional callback to run when module stopped
+     * @return this {object}
     **/
     GUI.prototype.stop = function(id, callback) {
         var instance;
@@ -879,10 +1303,13 @@ GUI = (function() {
 
         } else if (instance === this._instances[id]) {
 
+            // remove instance from instances cache
             delete this._instances[id];
 
+            // disable any events registered by module
             this._broker.off(instance);
 
+            // run unload method in stopped modules
             this._runSandboxPlugins('unload', this._sandboxes[id], (function(_this) {
                 return function(err) {
                     if (utils.hasArgs(instance.unload)) {
@@ -908,9 +1335,15 @@ GUI = (function() {
         return this;
     };
 
-    /* Add to jQuery namespace */
+    /** 
+     * Register jQuery plugins to $ nameSpace 
+     *
+     * @param plugin {object} - plugin object with all logic 
+     * @param module {string} - identifier for jQuery plugin 
+     * @return void
+    **/
     GUI.prototype.plugin = function(plugin, module) {
-        var GUI = this;
+        var _this = this;
 
         if(plugin.fn && typeof plugin.fn === 'function'){
 
@@ -922,6 +1355,12 @@ GUI = (function() {
         }
     };
 
+    /** 
+     * Load single or all available core plugins 
+     *
+     * @param cb {function} - callback to execute after plugins loaded 
+     * @return this {object} - return GUI object with tasks array
+    **/
     GUI.prototype.boot = function(cb) {
         var core, p, tasks;
 
@@ -973,14 +1412,15 @@ GUI = (function() {
         return this;
     };
 
-
     /* Private Methods */
     /*******************/
 
     /** 
       * Called when starting module fails 
       *
-      *
+      * @param ev {string / object} - message or error object 
+      * @param cb {function} - callback method to run with error string / object
+      * @return this {object}
     **/
     GUI.prototype._fail = function(ev, cb) {
         this.log(ev);
@@ -990,9 +1430,17 @@ GUI = (function() {
         return this;
     };
 
+    /** 
+      * Called when starting module fails 
+      *
+      * @param ev {string / object} - message or error object 
+      * @param cb {function} - callback method to run with error string / object
+      * @return this {object}
+    **/
     GUI.prototype._startAll = function(mods, cb) {
         var done, startAction;
 
+        // start all stored modules
         if (!mods || mods === null) {
             mods = (function() {
                 var results = [], m;
@@ -1005,12 +1453,14 @@ GUI = (function() {
             }).call(this);
         }
 
+        // self executing action
         startAction = (function(_this) {
             return function(m, next) {
                 return _this.start(m, _this._modules[m].options, next);
             };
         })(this);
 
+        // optional done callback for async loading 
         done = function(err) {
             var e, i, j, k, len, mdls, modErrors, x;
 
@@ -1025,6 +1475,7 @@ GUI = (function() {
                     }
                 }
 
+                // store all available modules errors
                 mdls = (function() {
                     var results = [], k;
 
@@ -1042,11 +1493,19 @@ GUI = (function() {
             return typeof cb === "function" ? cb(e) : void 0;
         };
 
+        // run all modules in parallel formation
         utils.run.all(mods, startAction, done, true);
 
         return this;
     };
 
+    /** 
+      * Called when starting module fails 
+      *
+      * @param ev {string / object} - message or error object 
+      * @param cb {function} - callback method to run with error string / object
+      * @return this {object}
+    **/
     GUI.prototype._createInstance = function(moduleId, o, cb) {
         var Sandbox, iOpts, id, j, key, len, module, obj, opt, ref, sb, val;
 
@@ -1069,7 +1528,7 @@ GUI = (function() {
                 for (key in obj) {
                     val = obj[key];
                     
-                    if (iOpts[key] === null) {
+                    if (!iOpts[key] || iOpts[key] === null) {
                         iOpts[key] = val;
                     }
                 }
@@ -1079,6 +1538,12 @@ GUI = (function() {
         // create new API Sandbox
         sb = new API().create(this, id, iOpts, moduleId);
 
+        // add config object if avail
+        if (this.config && this.config !== null) {
+          sb.config = this.config;
+        }
+
+        // run sandboxed instance load method
         return this._runSandboxPlugins('load', sb, (function(_this) {
             return function(err) {
                 var instance;
@@ -1087,13 +1552,15 @@ GUI = (function() {
 
                 if (typeof instance.load !== "function") {
 
+                    // determine if module is jQuery plugin
                     if (instance.fn && typeof instance.fn === 'function') {
                         return _this.plugin(instance, id); 
                     }
 
-                    return cb(new Error("module has no 'load' method"));
+                    return cb(new Error("module has no 'load' or 'fn' method"));
                 }
 
+                // store instance and sandbox
                 _this._instances[id] = instance;
                 _this._sandboxes[id] = sb;
 
@@ -1101,7 +1568,14 @@ GUI = (function() {
             };
         })(this));
     };
-
+    
+    /** 
+      * Called when starting module fails 
+      *
+      * @param ev {string / object} - message or error object 
+      * @param cb {function} - callback method to run with error string / object
+      * @return this {object}
+    **/
     GUI.prototype._runSandboxPlugins = function(ev, sb, cb) {
         var p, tasks;
 
@@ -1140,7 +1614,7 @@ GUI = (function() {
 
     return GUI;
 
-})(this);
+})(jQuery);
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
@@ -1156,8 +1630,7 @@ GUI = (function() {
             options = (argc[0] instanceof Object) ? argc[0] : null,
             app = $G;
 
-        if (options !== null) {
-
+        if (options && options !== null) {
             app.configure(options);
         }
 
@@ -1176,205 +1649,8 @@ GUI = (function() {
     };
 
 })(jQuery);
-;/* Fog Library */
-$.GUI().create('Fog', function(G) {
-    console.log('Fog Sandbox :: ', G);
-    // Create an array to store our particles
-    var particles = [];
-
-    // The amount of particles to render
-    var particleCount = 30;
-
-    // The maximum velocity in each direction
-    var maxVelocity = 2;
-
-    // The target frames per second (how often do we want to update / redraw the scene)
-    var targetFPS = 33;
-
-    // Set the dimensions of the canvas as variables so they can be used.
-    var canvasWidth = 400;
-    var canvasHeight = 400;
-
-    // Create an image object (only need one instance)
-    var imageObj = new Image();
-
-    // Once the image has been downloaded then set the image on all of the particles
-    imageObj.onload = function() {
-        particles.forEach(function(particle) {
-                particle.setImage(imageObj);
-        });
-    };
-
-    // Once the callback is arranged then set the source of the image
-    imageObj.src = "img/fog.png";
-
-    // A function to create a particle object.
-    function Particle(context) {
-
-        // Set the initial x and y positions
-        this.x = 0;
-        this.y = 0;
-
-        // Set the initial velocity
-        this.xVelocity = 0;
-        this.yVelocity = 0;
-
-        // Set the radius
-        this.radius = 5;
-
-        // Store the context which will be used to draw the particle
-        this.context = context;
-
-        // The function to draw the particle on the canvas.
-        this.draw = function() {
-            
-            // If an image is set draw it
-            if(this.image){
-                this.context.drawImage(this.image, this.x-128, this.y-128);         
-                // If the image is being rendered do not draw the circle so break out of the draw function                
-                return;
-            }
-            // Draw the circle as before, with the addition of using the position and the radius from this object.
-            this.context.beginPath();
-            this.context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-            this.context.fillStyle = "rgba(0, 255, 255, 0)";
-            this.context.fill();
-            this.context.closePath();
-        };
-
-        // Update the particle.
-        this.update = function() {
-            // Update the position of the particle with the addition of the velocity.
-            this.x += this.xVelocity;
-            this.y += this.yVelocity;
-
-            // Check if has crossed the right edge
-            if (this.x >= canvasWidth) {
-                this.xVelocity = -this.xVelocity;
-                this.x = canvasWidth;
-            }
-            // Check if has crossed the left edge
-            else if (this.x <= 0) {
-                this.xVelocity = -this.xVelocity;
-                this.x = 0;
-            }
-
-            // Check if has crossed the bottom edge
-            if (this.y >= canvasHeight) {
-                this.yVelocity = -this.yVelocity;
-                this.y = canvasHeight;
-            }
-            
-            // Check if has crossed the top edge
-            else if (this.y <= 0) {
-                this.yVelocity = -this.yVelocity;
-                this.y = 0;
-            }
-        };
-
-        // A function to set the position of the particle.
-        this.setPosition = function(x, y) {
-            this.x = x;
-            this.y = y;
-        };
-
-        // Function to set the velocity.
-        this.setVelocity = function(x, y) {
-            this.xVelocity = x;
-            this.yVelocity = y;
-        };
-        
-        this.setImage = function(image){
-            this.image = image;
-        }
-    }
-
-    // A function to generate a random number between 2 values
-    function generateRandom(min, max){
-        return Math.random() * (max - min) + min;
-    }
-
-    // The canvas context if it is defined.
-    var context;
-
-    // Initialise the scene and set the context if possible
-    function init() {
-        var canvas = document.getElementById('bg-canvas');
-        if (canvas.getContext) {
-
-            // Set the context variable so it can be re-used
-            context = canvas.getContext('2d');
-
-            // Create the particles and set their initial positions and velocities
-            for(var i=0; i < particleCount; ++i){
-                var particle = new Particle(context);
-                
-                // Set the position to be inside the canvas bounds
-                particle.setPosition(generateRandom(0, canvasWidth), generateRandom(0, canvasHeight));
-                
-                // Set the initial velocity to be either random and either negative or positive
-                particle.setVelocity(generateRandom(-maxVelocity, maxVelocity), generateRandom(-maxVelocity, maxVelocity));
-                particles.push(particle);            
-            }
-        }
-        else {
-            alert("Please use a modern browser");
-        }
-    }
-
-    // The function to draw the scene
-    function draw() {
-        // draw clear canvas 
-        context.clearRect(0,0,canvasWidth,canvasHeight);
-
-        // Go through all of the particles and draw them.
-        particles.forEach(function(particle) {
-            particle.draw();
-        });
-    }
-
-    // Update the scene
-    function update() {
-        particles.forEach(function(particle) {
-            particle.update();
-        });
-    }
-
-    return {
-        fn: function() {
-            console.log('starting fog library.');
-            // Initialize the scene
-            init();
-
-            // If the context is set then we can draw the scene (if not then the browser does not support canvas)
-            if (context) {
-                setInterval(function() {
-                    // Update the scene befoe drawing
-                    update();
-
-                    // Draw the scene
-                    draw();
-                }, 1000 / targetFPS);
-            }
-        },
-        unload: function() {}
-    };
-});
-;/* Slider using GUI Extension */
-$.GUI().create('Slider', function(GUI){
-  
-    return {
-        load:function(){
-
-        },
-        unload:function(){
-        
-        }
-    }
-});
 ;/* Stargaze library */
 $.GUI().create('Stargaze', function(G){
-    console.log('Stargaze Sandbox :: ', G);
 
     var Stargaze = function(canvas, options){
 
@@ -1544,57 +1820,58 @@ $.GUI().create('Stargaze', function(G){
                 $elem = argc[0],
                 opts = argc[1];
 
-            console.log('starting stargaze.');
             return new Stargaze($elem, opts).init();
         },
-        unload: function() {}
     };
 
-});
+}).start('Stargaze');
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
 * @module: MVC Model object module         * 
 * ---------------------------------------- */
-$.GUI().create('Model', function(G) {
-    var Model;
+$.GUI().use(function(G) {
+    var plugin, Model;
 
-    Model = (function(super) {
-        var k, v;
+    Model = (function(superClass) {
 
-        utils.combine(Model, super);
+        utils.extend(Model, superClass);
 
         function Model(obj) {
-
+            // call super class ctor
             Model.__super__.constructor.call(this);
 
-            for (k in obj) {
-                v = obj[k];
+            // combine model object with passed model
+            this.combine(obj);
 
-                if (this[k] === null) {
-
-                    this[k] = v;
-                }
-            }
-
+            /** 
+             * Set property of current Model object
+             *
+             * @param key {object} {string} - the object or string to merge into Model class 
+             * @param val {various} = value of key and can be any super type 
+             * @param silent {boolean} - rather or not to fire model change event 
+             * @return this {object} 
+            **/
             this.set = function(key, val, silent) {
+                var k;
 
-                if (silent === null) {
-
+                if (!silent || silent === null) {
                     silent = false;
                 }
 
                 switch (typeof key) {
-                    case "object":
-                        for (k in key) {
-                            v = key[k];
 
+                    case "object":
+
+                        for (k in key) {
+
+                            v = key[k];
                             this.set(k, v, true);
                         }
 
                         if (!silent) {
                             return this.fire(Model.CHANGED, (function() {
-                                var results = [];
+                                var results = [], k;
 
                                 for (k in key) {
                                     v = key[k];
@@ -1602,6 +1879,7 @@ $.GUI().create('Model', function(G) {
                                 }
 
                                 return results;
+
                             })());
                         }
                         break;
@@ -1626,17 +1904,46 @@ $.GUI().create('Model', function(G) {
                     return this;
                 }
             };
+        }
+
+        /** 
+         * Extend Model object with passed object properies 
+         *
+         * @param obj {object} - the object to merge into Model class 
+         * @return this {object} 
+        **/
+        Model.prototype.combine = function(obj) {
+            var k, v;
+
+            for (k in obj) {
+                v = obj[k];
+
+                if (this[k] === null) {
+
+                    this[k] = v;
+                }
+            }
+
+            return this;
         };
 
+        /** 
+         * Handler that executes when Model object changes 
+         *
+         * @param cb {function} - callback method for event register 
+         * @param context {object} - context to use when registering event 
+         * @return {function} - executed pub / sub 
+        **/
         Model.prototype.change = function(cb, context) {
             if (typeof cb === "function") {
 
+                // register model change event
                 return this.on(Model.CHANGED, cb, context);
 
             } else if (arguments.length === 0) {
 
+                // publish model change event
                 return this.fire(Model.CHANGED);
-
             }
         };
 
@@ -1645,56 +1952,53 @@ $.GUI().create('Model', function(G) {
     })(G.Broker);
 
     return {
-        load: function() {
-            G.log('Model Object Class :: ', Model);
+        load: function(sandbox) {
+            sandbox.Model = Model;
         },
-        unload: function() {} 
+        unload: function(){}
     };
 });
-
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
 * @module: MVC View class module           * 
 * ---------------------------------------- */
-$.GUI().create('View', function(G) {
-    var View;
+$.GUI().use(function(G) {
+    var plugin, View;
 
     View = (function() {
 
-      function View(model) {
+        function View(model) {
 
-          if (model) {
-              return this.setModel(model);
-          }
+            if (model) {
+                return this.setModel(model);
+            }
       
-          this.setModel = function(obj) {
-              this.model = obj;
+            this.setModel = function(obj) {
+                this.model = obj;
 
-              return this.model.change((function() {
+                return this.model.change((function() {
 
-                  return this.render();
+                    return this.render();
 
-              }), this);
+                }), this);
+            };
 
-          };
+            this.render = function() {
+                console.log('Render method called in View.');
+            };
+        }
 
-          this.render = function() {
-              G.log('Render method called in View.');
-          };
-      }
-
-      return View;
+        return View;
 
     })();
 
     return {
-        load: function() {
-            G.log('View class :: ', View);
+        load: function(sandbox) {
+            sandbox.View = View;
         },
-        unload: function() {}
+        unload: function(){}
     };
-
 });
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
@@ -1725,7 +2029,7 @@ $.GUI().create('Controller', function(G) {
 
     return {
         load: function() {
-            G.log('Controller class :: ', Controller);
+            console.log('Controller class :: ', Controller);
         },
         unload: function() {}
     };
