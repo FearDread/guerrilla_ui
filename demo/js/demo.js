@@ -6,14 +6,14 @@
 $.GUI().create('App', function(G) {
     console.log('Demo app :: ', G);
 
-    G.on('navclick', function(args) {
+    G.add('navclick', function(args) {
         console.log('navclick args = ', args);
-    });
+    }, this);
 
     function bind() {
 
         G.query('.navbar-top').click(showPage);
-        G.query.('.btn').click(function(e) {
+        G.query('.btn').click(function(e) {
             G.fire('scrollPage');
         });
     }
