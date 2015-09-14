@@ -20,7 +20,9 @@ API = function() {
             this.options = (options !== null) ? options : {}; 
 
             // attach new sandbox instance
-            core._broker.install(this);
+            // core._broker.install(this);
+
+            this.Broker = core._broker;
 
             // add utils object
             this.utils = utils;
