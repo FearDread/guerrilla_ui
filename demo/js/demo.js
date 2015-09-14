@@ -10,6 +10,14 @@ $.GUI().create('App', function(G) {
         console.log('navclick args = ', args);
     }, this);
 
+    function _load(opts) {
+        G.add('scrollPage', function() {
+            console.log('fired scroll page channel');
+        });
+        initView();
+
+    }
+
     function bind() {
 
         G.query('.navbar-top').click(showPage);
@@ -55,14 +63,7 @@ $.GUI().create('App', function(G) {
     }
 
     return {
-        load: function(opts) {
-            G.add('scrollPage', function() {
-                console.log('fired scroll page channel');
-            });
-            initView();
-        },
-        unload: function() {
-            G.cleanup();
-        }
+        load: _load,
+        unload: function() {}
     };
 }).start('App');
