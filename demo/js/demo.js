@@ -6,23 +6,29 @@
 $.GUI().create('App', function(G) {
     console.log('Demo app :: ', G);
 
-    G.add('navclick', function(args) {
+    G.Broker.add('navclick', function(args) {
         console.log('navclick args = ', args);
     }, this);
 
     function _load(opts) {
-        G.add('scrollPage', function() {
+        G.Broker.add('scrollPage', function() {
             console.log('fired scroll page channel');
         });
+
         initView();
 
+        G.Router.config({ mode: 'history'});
+
+        G.Router.add(/about/, function() {
+            console.log('about');
+        });
     }
 
     function bind() {
 
         G.query('.navbar-top').click(showPage);
         G.query('.btn').click(function(e) {
-            G.fire('scrollPage');
+            G.Broker.fire('scrollPage');
         });
     }
 
@@ -59,7 +65,7 @@ $.GUI().create('App', function(G) {
         }
 
         console.log('href = ' + href);
-        G.fire('navclick', {page:href});
+        G.Broker.fire('navclick', {page:href});
     }
 
     return {
