@@ -1,4 +1,3 @@
-
 /**
 // configuration
 Router.config({ mode: 'history'});
@@ -8,9 +7,6 @@ Router.navigate();
 
 // adding routes
 Router
-.add(/about/, function() {
-    console.log('about');
-})
 .add(/products\/(.*)\/edit\/(.*)/, function() {
     console.log('products', arguments);
 })
@@ -32,8 +28,7 @@ $.GUI().use(function(G) {
             mode: null,
             root: '/',
             config: function(options) {
-                this.mode = options && options.mode && options.mode == 'history' 
-                            && !!(history.pushState) ? 'history' : 'hash';
+                this.mode = options && options.mode && options.mode == 'history' && !!(history.pushState) ? 'history' : 'hash';
                 this.root = options && options.root ? '/' + this.clearSlashes(options.root) + '/' : '/';
                 return this;
             },
@@ -61,7 +56,7 @@ $.GUI().use(function(G) {
                 return this;
             },
             remove: function(param) {
-                for(var i=0, r; i<this.routes.length, r = this.routes[i]; i++) {
+                for (var i = 0, r; i < this.routes.length, r = this.routes[i]; i++) {
                     if(r.handler === param || r.re.toString() === param.toString()) {
                         this.routes.splice(i, 1); 
                         return this;
