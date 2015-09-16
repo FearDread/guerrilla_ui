@@ -26,13 +26,18 @@ API = function() {
 
             // add utils object
             this.utils = utils;
-
+             
+            /* jQuery wrappers */
             // Ajax shorthand reference
             this.xhr = $.ajax;
 
-            // add Animation library
+            // each loop reference
+            this.each = utils.each;
+
+            // add Animation reference 
             this.Animation = $.Animation;
 
+            /* --------------- */
             // reference log function
             this.log = function() {
                 return core.log(arguments);

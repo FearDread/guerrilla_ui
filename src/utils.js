@@ -9,6 +9,8 @@ utils = {
     /* jQuery re-map of $.extend */
     merge: $.extend,
 
+    each: $.each,
+
     /**
      * Attach child object prototype to parent object prototype 
      *
@@ -64,6 +66,12 @@ utils = {
         return -1;
     },
 
+    arrLike: function(obj) {
+        var length = "length" in obj && obj.length;
+
+        return typeof arr !== "function" && ( length === 0 || typeof length === "number" && length > 0 && ( length - 1 ) in obj );
+    },
+
     /**
      * Check number of arguments passed to function / method
      *
@@ -72,7 +80,7 @@ utils = {
      * @return argument length {int} - number of arguments actually passed to function
     **/
     hasArgs: function(fn, idx) {
-        if (idx === null) {
+        if (!idx || idx === null) {
             idx = 1;
         }
 
@@ -82,7 +90,7 @@ utils = {
     /**
     * Check if passed object is instance of Object
     *
-    * @param object - object to check
+    * @param obj {object} - object to check
     * @return boolean
     **/
     isObj: function(obj) {
@@ -90,9 +98,19 @@ utils = {
     },
 
     /**
+    * Check if passed value is Array 
+    *
+    * @param arr {array} - array to check
+    * @return boolean
+    **/
+    isArr: function(arr) {
+        return $.isArray(arr); 
+    },
+
+    /**
     * Check if passed function is indeed type function
     *
-    * @param object - function to check
+    * @param obj {object} - function to check
     * @return boolean
     **/
     isFunc: function(obj) {
@@ -635,5 +653,31 @@ utils = {
         }
 
         return id.substr(0, length);
+    },
+
+    /**
+    * Turn passed object into array 
+    *
+    * @param arr {object} - object to convert to array 
+    * @return ret {array} - created array 
+    **/
+    toArr: function(arr) {
+        var ret = [];
+
+        this.each(arr, function (a, i) {
+            ret[i] = a;
+        });
+
+        return ret;
+    },
+
+    /**
+    * Generate random unique identifier string
+    *
+    * @param length {number} - how long the random string should be
+    * @return id {string} - unique identifier 
+    **/
+    toObj: function(obj) {
+      
     }
 };
