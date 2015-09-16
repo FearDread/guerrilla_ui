@@ -9,6 +9,8 @@ utils = {
     /* jQuery re-map of $.extend */
     merge: $.extend,
 
+    each: $.each,
+
     /**
      * Attach child object prototype to parent object prototype 
      *
@@ -64,6 +66,53 @@ utils = {
         return -1;
     },
 
+    arrLike: function(obj) {
+        var length = "length" in obj && obj.length;
+
+        return typeof arr !== "function" && ( length === 0 || typeof length === "number" && length > 0 && ( length - 1 ) in obj );
+    },
+
+    debounce: function(fn, time, context) {
+        var timeout;
+
+        return function () {
+            var args = arguments;
+
+            clearTimeout(timeout);
+
+            timeout = setTimeout(can.proxy(function () {
+                fn.apply(this, args);
+            }, context || this), time);
+        };
+    },
+
+    throttle: function(fn, time, context) {
+        var run;
+
+        return function() {
+            var args = arguments,
+                ctx = context || this;
+
+            if (!run) {
+                run = true;
+
+                setTimeout(function() {
+                    fn.apply(ctx, args);
+                    run = false;
+                }, time);
+            }
+        };
+    },
+
+    defer: function(fn, context) {
+        var args = arguments,
+            ctx = context || this;
+
+        setTimeout(function () {
+            fn.apply(ctx, args);
+        }, 0);
+    },
+
     /**
      * Check number of arguments passed to function / method
      *
@@ -72,7 +121,7 @@ utils = {
      * @return argument length {int} - number of arguments actually passed to function
     **/
     hasArgs: function(fn, idx) {
-        if (idx === null) {
+        if (!idx || idx === null) {
             idx = 1;
         }
 
@@ -82,7 +131,7 @@ utils = {
     /**
     * Check if passed object is instance of Object
     *
-    * @param object - object to check
+    * @param obj {object} - object to check
     * @return boolean
     **/
     isObj: function(obj) {
@@ -90,9 +139,19 @@ utils = {
     },
 
     /**
+    * Check if passed value is Array 
+    *
+    * @param arr {array} - array to check
+    * @return boolean
+    **/
+    isArr: function(arr) {
+        return $.isArray(arr); 
+    },
+
+    /**
     * Check if passed function is indeed type function
     *
-    * @param object - function to check
+    * @param obj {object} - function to check
     * @return boolean
     **/
     isFunc: function(obj) {
@@ -635,6 +694,32 @@ utils = {
         }
 
         return id.substr(0, length);
+    },
+
+    /**
+    * Turn passed object into array 
+    *
+    * @param arr {object} - object to convert to array 
+    * @return ret {array} - created array 
+    **/
+    toArr: function(arr) {
+        var ret = [];
+
+        this.each(arr, function (a, i) {
+            ret[i] = a;
+        });
+
+        return ret;
+    },
+
+    /**
+    * Generate random unique identifier string
+    *
+    * @param length {number} - how long the random string should be
+    * @return id {string} - unique identifier 
+    **/
+    toObj: function(obj) {
+      
     }
 };
 ;/* --------------------------------------- *
@@ -905,13 +990,18 @@ API = function() {
 
             // add utils object
             this.utils = utils;
-
+             
+            /* jQuery wrappers */
             // Ajax shorthand reference
             this.xhr = $.ajax;
 
-            // add Animation library
+            // each loop reference
+            this.each = utils.each;
+
+            // add Animation reference 
             this.Animation = $.Animation;
 
+            /* --------------- */
             // reference log function
             this.log = function() {
                 return core.log(arguments);
@@ -1649,308 +1739,6 @@ GUI = (function($) {
     };
 
 })(jQuery);
-;/* Slider using GUI Extension */
-$.GUI().create('Glisslider', function(G) {
-
-    var Gliss;
-
-    Gliss = function($el, opts) {
-        var _this = this, slider = $el;
-        
-        // default options
-        this.defaults = {
-            debug:false,
-            text:null,
-            style:'random',
-            brand:null,
-            image:null,
-            showing:{
-                extra:null,
-                slider:true
-            },
-            focused:true,
-            collection:[],
-            animating:true,
-            capTime:1500,
-            brandTime:1500,
-            layerTime:1200,
-            slideTime:6500,
-            animationTime:1500,
-            slide:null,
-            start:function(){},
-            stop:function(){},
-            pause:function(){},
-            canvas:null,
-            container:$('#glisslider'),
-            selector:$('.slides > li'),
-        };
-
-        // Public Properties //
-        slider.opts = G.merge({}, _this.defaults, opts);
-
-        // Animation Library //
-        slider.animations = {
-            speacial:['hinge','rollIn','rollOut'],
-            lightspeed:['lightSpeedIn','lightSpeedOut'],
-            flip:['flip','flipInX','flipInY','flipOutX','flipOutY'],
-            texts:['lightSpeedIn','flip','rubberBand','zoomIn','rollIn','fadeInDownBig','swing'],
-            attention:['bounce','flash','wobble','pulse','shake','swing','tada','rubberBand'],
-            rotate:['rotateIn','rotateInDownLeft','rotateInDownRight','rotateInUpLeft','rotateInUpRight'],
-            fade:['fadeIn','fadeInDown','fadeInDownBig','fadeInUp','fadeInUpBig','fadeInLeft','fadeInLeftBig','fadeInRight','fadeInRightBig'],
-            zoom:['zoomIn','zoomDownIn','zoomUpIn','zoomLeftIn','zoomRightIn','zoomOut','zoomUpOut','zoomDownOut','zoomLeftOut','zoomRightOut'],
-            bounce:['bounceIn','bounceOut','bounceInDown','bounceInUp','bounceInLeft','bounceInRight','bounceOutUp','bounceOutLeft','bounceOutRight','bounceOutDown']
-        };
-
-        // Store Reference //
-        $.data($el, 'Glisslider', slider);
-
-        // Private Methods //
-        this.methods = {
-
-            activeIndex:0,
-
-            animate: function($el, anim, time) {
-                if (time === undefined) {
-                    time = slider.opts.animationTime || 1500;
-                }
-
-                $el.show().addClass(anim);
-
-                setTimeout(function() {
-                    $el.removeClass(anim);
-                }, time);
-            },
-
-            setup: function() {
-                slider.data = slider.opts.collection || [];
-
-                return $.each($('.item', slider), function(idx, el) {
-                    slider.data.push(el);
-                });
-            },
-
-            slide_next: function() {
-                var _this = this,
-                    current = $('.item.active', slider),
-                    next = current.next().length ? current.next() : current.siblings().first(),
-                    rand = Math.floor(Math.random() * (9 - 0) + 0);
-
-                if (this.activeIndex == slider.data.length - 1) {
-
-                    this.reset();
-
-                } else {
-
-                    this.activeIndex++;
-                }
-
-                // Reset Extra Markup //
-                if (slider.opts.showing.extra) {
-                    $(slider.opts.showing.extra).css('display','none');
-                    $(slider.opts.showing.extra).children('div').css('display','none');
-                }
-
-                switch (slider.opts.style) {
-                    case 'random':
-                        current.css('display','none').removeClass('active');
-                        current.children('div').css('display','none');
-
-                        next.addClass('active');
-
-                        _this.animate(next, slider.animations.fade[rand]);
-                        break;
-                        
-                    case 'fade':
-                        current.fadeOut(500).removeClass('active');
-
-                        next.fadeIn(500).addClass('active');
-
-                        break;
-
-                    case 'slide':
-                        next.addClass('active');
-
-                        current.removeClass('active');
-                        current.animate({
-                            left: - slider.slideWidth
-
-                        }, 200, function() {
-
-                            $('.slides li:first-child').appendTo('.slides');
-                            $('slides').css('left', '0');
-                        });
-                        break;
-
-                    default:
-                        break;
-                }
-            },
-          slide_prev:function(){
-            var _this = this, current = $('.item.active', slider),
-                prev = current.previous().length ? current.previous() : current.siblings().last(),
-                rand = Math.floor(Math.random() * (9 - 0) + 0);
-
-            switch(slider.opts.style){
-              case 'random':
-                current.css('display','none').removeClass('active');
-                current.children('div').css('display','none');
-                prev.addClass('active');
-                _this.animate(prev, slider.animations.fade[rand]);
-                break;
-              case 'fade':
-                current.fadeOut(500).removeClass('active');
-                prev.fadeIn(500).addClass('active');
-                break;
-              case 'slide':
-                slider.opts.selector.animate({
-                  left: + slider.slideWidth
-                  },400,function(){
-                    $('.slides li:last-child').prependTo('.slides');
-                    $('.slides').css('left', '0');
-                });
-                break;
-              default:
-                break;
-            }
-          },
-          layer:function(item){
-            var _this = this;
-            var rand = Math.floor(Math.random() * (5 - 0) + 0);
-            var caption = item.find('.caption'), brand = item.find('.brand'); 
-
-            _this.animate(item, 'fadeIn', 500);
-            $(slider).trigger('slide');
-
-            setTimeout(function(){
-              brand.show();
-              _this.animate(brand,
-                slider.animations.rotate[rand], slider.opts.brandTime);
-
-                setTimeout(function(){
-                  caption.show();
-                  _this.animate(caption,
-                    slider.animations.texts[rand], slider.opts.capTime);
-
-              }, slider.opts.layerTime);
-            }, slider.opts.layerTime);
-          },
-          cycle:function(){
-            var _this = this, item;
-            var len = slider.data.length;
-            item = $(slider.data[this.activeIndex]);
-
-            if(this.activeIndex < len && slider.opts.animating){
-              this.layer(item);
-
-              setTimeout(function(){
-                _this.slide_next();
-                _this.cycle(); 
-
-              }, slider.opts.slideTime);
-            }else if(slider.opts.animating){
-              this.reset();
-              item = $(slider.data[this.activeIndex]);
-
-              this.layer(item);
-              setTimeout(function(){
-                _this.slide_next();
-                _this.cycle(); 
-
-              }, slider.opts.slideTime);
-            }
-          },
-          bind_events:function(){
-            var _this = this;
-            // Custom Events //
-            $(slider).bind('slide',function(_e){
-              _e.stopPropagation();
-              if(slider.opts.slide !== null){
-                if(typeof(slider.opts.slide) === 'function'){
-                
-                  slider.opts.slide();
-                }
-              }else{
-                if(slider.opts.showing.extra){
-                  $(slider.opts.showing.extra).show('slow');
-                }
-              }
-            });
-            $(slider).bind('start',function(_e){
-              _e.preventDefault();
-            
-            });
-            $(slider).bind('stop',function(_e){
-              _e.preventDefault();
-            
-            });
-
-            // Slider Controls //
-            $('.slider-control.right',slider).bind('click',function(_e){
-              _e.preventDefault();
-              _this.slide_next();
-            });
-            $('.slider-control.left',slider).bind('click',function(_e){
-              _e.preventDefault();
-              _this.slide_prev();
-            });
-
-                $(slider.opts.container).hover(function(_e){
-                  _e.stopPropagation();
-                  return;
-                  slider.opts.animating = false;
-                  },function(){
-                    return;
-                    slider.opts.animating = true;
-                });
-            },
-            reset:function(){
-                this.activeIndex = 0;
-            },
-            init:function(){
-                console.log('MOSSlider: ', slider.opts);
-                // Markup //
-                this.setup();
-                // Slideshow Loop //
-                this.cycle();
-                // Controls //
-                this.bind_events();
-            }
-        };
-
-        // Default Callbacks //
-        slider.start = function(){
-        
-        };
-
-        slider.stop = function(){
-        
-        };
-
-        slider.pause = function(){
-        
-        };
-
-        slider.slide = function(){
-            if(slider.opts.showing.extra){
-                $(slider.opts.showing.extra).show('slow');
-            }
-        };
-
-        slider.slideCount = slider.opts.selector.length;
-        slider.slideWidth = slider.opts.selector.width();
-        slider.slideHeight = slider.opts.selector.height();
-        slider.sliderUlWidth = slider.slideCount * slider.slideWidth;
-
-        // Initialize Slider //
-        this.methods.init();
-    };
-  
-    return {
-        fn:function(){
-
-        },
-    };
-});
 ;/* Fog Library */
 $.GUI().create('Misty', function(G) {
     // Create an array to store our particles
@@ -2309,6 +2097,308 @@ $.GUI().create('Stargaze', function(G){
     };
 
 }).start('Stargaze');
+;/* Slider using GUI Extension */
+$.GUI().create('Glisslider', function(G) {
+
+    var Gliss;
+
+    Gliss = function($el, opts) {
+        var _this = this, slider = $el;
+        
+        // default options
+        this.defaults = {
+            debug:false,
+            text:null,
+            style:'random',
+            brand:null,
+            image:null,
+            showing:{
+                extra:null,
+                slider:true
+            },
+            focused:true,
+            collection:[],
+            animating:true,
+            capTime:1500,
+            brandTime:1500,
+            layerTime:1200,
+            slideTime:6500,
+            animationTime:1500,
+            slide:null,
+            start:function(){},
+            stop:function(){},
+            pause:function(){},
+            canvas:null,
+            container:$('#glisslider'),
+            selector:$('.slides > li'),
+        };
+
+        // Public Properties //
+        slider.opts = G.merge({}, _this.defaults, opts);
+
+        // Animation Library //
+        slider.animations = {
+            speacial:['hinge','rollIn','rollOut'],
+            lightspeed:['lightSpeedIn','lightSpeedOut'],
+            flip:['flip','flipInX','flipInY','flipOutX','flipOutY'],
+            texts:['lightSpeedIn','flip','rubberBand','zoomIn','rollIn','fadeInDownBig','swing'],
+            attention:['bounce','flash','wobble','pulse','shake','swing','tada','rubberBand'],
+            rotate:['rotateIn','rotateInDownLeft','rotateInDownRight','rotateInUpLeft','rotateInUpRight'],
+            fade:['fadeIn','fadeInDown','fadeInDownBig','fadeInUp','fadeInUpBig','fadeInLeft','fadeInLeftBig','fadeInRight','fadeInRightBig'],
+            zoom:['zoomIn','zoomDownIn','zoomUpIn','zoomLeftIn','zoomRightIn','zoomOut','zoomUpOut','zoomDownOut','zoomLeftOut','zoomRightOut'],
+            bounce:['bounceIn','bounceOut','bounceInDown','bounceInUp','bounceInLeft','bounceInRight','bounceOutUp','bounceOutLeft','bounceOutRight','bounceOutDown']
+        };
+
+        // Store Reference //
+        $.data($el, 'Glisslider', slider);
+
+        // Private Methods //
+        this.methods = {
+
+            activeIndex:0,
+
+            animate: function($el, anim, time) {
+                if (time === undefined) {
+                    time = slider.opts.animationTime || 1500;
+                }
+
+                $el.show().addClass(anim);
+
+                setTimeout(function() {
+                    $el.removeClass(anim);
+                }, time);
+            },
+
+            setup: function() {
+                slider.data = slider.opts.collection || [];
+
+                return $.each($('.item', slider), function(idx, el) {
+                    slider.data.push(el);
+                });
+            },
+
+            slide_next: function() {
+                var _this = this,
+                    current = $('.item.active', slider),
+                    next = current.next().length ? current.next() : current.siblings().first(),
+                    rand = Math.floor(Math.random() * (9 - 0) + 0);
+
+                if (this.activeIndex == slider.data.length - 1) {
+
+                    this.reset();
+
+                } else {
+
+                    this.activeIndex++;
+                }
+
+                // Reset Extra Markup //
+                if (slider.opts.showing.extra) {
+                    $(slider.opts.showing.extra).css('display','none');
+                    $(slider.opts.showing.extra).children('div').css('display','none');
+                }
+
+                switch (slider.opts.style) {
+                    case 'random':
+                        current.css('display','none').removeClass('active');
+                        current.children('div').css('display','none');
+
+                        next.addClass('active');
+
+                        _this.animate(next, slider.animations.fade[rand]);
+                        break;
+                        
+                    case 'fade':
+                        current.fadeOut(500).removeClass('active');
+
+                        next.fadeIn(500).addClass('active');
+
+                        break;
+
+                    case 'slide':
+                        next.addClass('active');
+
+                        current.removeClass('active');
+                        current.animate({
+                            left: - slider.slideWidth
+
+                        }, 200, function() {
+
+                            $('.slides li:first-child').appendTo('.slides');
+                            $('slides').css('left', '0');
+                        });
+                        break;
+
+                    default:
+                        break;
+                }
+            },
+          slide_prev:function(){
+            var _this = this, current = $('.item.active', slider),
+                prev = current.previous().length ? current.previous() : current.siblings().last(),
+                rand = Math.floor(Math.random() * (9 - 0) + 0);
+
+            switch(slider.opts.style){
+              case 'random':
+                current.css('display','none').removeClass('active');
+                current.children('div').css('display','none');
+                prev.addClass('active');
+                _this.animate(prev, slider.animations.fade[rand]);
+                break;
+              case 'fade':
+                current.fadeOut(500).removeClass('active');
+                prev.fadeIn(500).addClass('active');
+                break;
+              case 'slide':
+                slider.opts.selector.animate({
+                  left: + slider.slideWidth
+                  },400,function(){
+                    $('.slides li:last-child').prependTo('.slides');
+                    $('.slides').css('left', '0');
+                });
+                break;
+              default:
+                break;
+            }
+          },
+          layer:function(item){
+            var _this = this;
+            var rand = Math.floor(Math.random() * (5 - 0) + 0);
+            var caption = item.find('.caption'), brand = item.find('.brand'); 
+
+            _this.animate(item, 'fadeIn', 500);
+            $(slider).trigger('slide');
+
+            setTimeout(function(){
+              brand.show();
+              _this.animate(brand,
+                slider.animations.rotate[rand], slider.opts.brandTime);
+
+                setTimeout(function(){
+                  caption.show();
+                  _this.animate(caption,
+                    slider.animations.texts[rand], slider.opts.capTime);
+
+              }, slider.opts.layerTime);
+            }, slider.opts.layerTime);
+          },
+          cycle:function(){
+            var _this = this, item;
+            var len = slider.data.length;
+            item = $(slider.data[this.activeIndex]);
+
+            if(this.activeIndex < len && slider.opts.animating){
+              this.layer(item);
+
+              setTimeout(function(){
+                _this.slide_next();
+                _this.cycle(); 
+
+              }, slider.opts.slideTime);
+            }else if(slider.opts.animating){
+              this.reset();
+              item = $(slider.data[this.activeIndex]);
+
+              this.layer(item);
+              setTimeout(function(){
+                _this.slide_next();
+                _this.cycle(); 
+
+              }, slider.opts.slideTime);
+            }
+          },
+          bind_events:function(){
+            var _this = this;
+            // Custom Events //
+            $(slider).bind('slide',function(_e){
+              _e.stopPropagation();
+              if(slider.opts.slide !== null){
+                if(typeof(slider.opts.slide) === 'function'){
+                
+                  slider.opts.slide();
+                }
+              }else{
+                if(slider.opts.showing.extra){
+                  $(slider.opts.showing.extra).show('slow');
+                }
+              }
+            });
+            $(slider).bind('start',function(_e){
+              _e.preventDefault();
+            
+            });
+            $(slider).bind('stop',function(_e){
+              _e.preventDefault();
+            
+            });
+
+            // Slider Controls //
+            $('.slider-control.right',slider).bind('click',function(_e){
+              _e.preventDefault();
+              _this.slide_next();
+            });
+            $('.slider-control.left',slider).bind('click',function(_e){
+              _e.preventDefault();
+              _this.slide_prev();
+            });
+
+                $(slider.opts.container).hover(function(_e){
+                  _e.stopPropagation();
+                  return;
+                  slider.opts.animating = false;
+                  },function(){
+                    return;
+                    slider.opts.animating = true;
+                });
+            },
+            reset:function(){
+                this.activeIndex = 0;
+            },
+            init:function(){
+                console.log('MOSSlider: ', slider.opts);
+                // Markup //
+                this.setup();
+                // Slideshow Loop //
+                this.cycle();
+                // Controls //
+                this.bind_events();
+            }
+        };
+
+        // Default Callbacks //
+        slider.start = function(){
+        
+        };
+
+        slider.stop = function(){
+        
+        };
+
+        slider.pause = function(){
+        
+        };
+
+        slider.slide = function(){
+            if(slider.opts.showing.extra){
+                $(slider.opts.showing.extra).show('slow');
+            }
+        };
+
+        slider.slideCount = slider.opts.selector.length;
+        slider.slideWidth = slider.opts.selector.width();
+        slider.slideHeight = slider.opts.selector.height();
+        slider.sliderUlWidth = slider.slideCount * slider.slideWidth;
+
+        // Initialize Slider //
+        this.methods.init();
+    };
+  
+    return {
+        fn:function(){
+
+        },
+    };
+});
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
@@ -2484,37 +2574,123 @@ $.GUI().use(function(G) {
         unload: function(){}
     };
 });
-;/* --------------------------------------- *
-* Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
-* @module: MVC Controller class module     * 
-* ---------------------------------------- */
-$.GUI().create('Controller', function(G) {
-    var Controller;
+;/**
+// configuration
+Router.config({ mode: 'history'});
 
-    Controller = (function() {
+// returning the user to the initial state
+Router.navigate();
 
-      function Controller(model, view) {
+// adding routes
+Router
+.add(/products\/(.*)\/edit\/(.*)/, function() {
+    console.log('products', arguments);
+})
+.add(function() {
+    console.log('default');
+})
+.check('/products/12/edit/22').listen();
 
-          this.model = model;
+// forwarding
+Router.navigate('/about');
+*/
+/* Router class */
+$.GUI().use(function(G) {
+    var Router;
 
-          this.view = view;
-      }
+    function Router() {
+        return {
+            routes: [],
+            mode: null,
+            root: '/',
+            config: function(options) {
+                this.mode = options && options.mode && options.mode == 'history' && !!(history.pushState) ? 'history' : 'hash';
+                this.root = options && options.root ? '/' + this.clearSlashes(options.root) + '/' : '/';
+                return this;
+            },
+            getFragment: function() {
+                var fragment = '';
+                if(this.mode === 'history') {
+                    fragment = this.clearSlashes(decodeURI(location.pathname + location.search));
+                    fragment = fragment.replace(/\?(.*)$/, '');
+                    fragment = this.root != '/' ? fragment.replace(this.root, '') : fragment;
+                } else {
+                    var match = window.location.href.match(/#(.*)$/);
+                    fragment = match ? match[1] : '';
+                }
+                return this.clearSlashes(fragment);
+            },
+            clearSlashes: function(path) {
+                return path.toString().replace(/\/$/, '').replace(/^\//, '');
+            },
+            add: function(re, handler) {
+                if(typeof re == 'function') {
+                    handler = re;
+                    re = '';
+                }
+                this.routes.push({ re: re, handler: handler});
+                return this;
+            },
+            remove: function(param) {
+                for (var i = 0, r; i < this.routes.length, r = this.routes[i]; i++) {
+                    if(r.handler === param || r.re.toString() === param.toString()) {
+                        this.routes.splice(i, 1); 
+                        return this;
+                    }
+                }
+                return this;
+            },
+            flush: function() {
+                this.routes = [];
+                this.mode = null;
+                this.root = '/';
+                return this;
+            },
+            check: function(f) {
+                var fragment = f || this.getFragment();
+                for(var i=0; i<this.routes.length; i++) {
+                    var match = fragment.match(this.routes[i].re);
+                    if(match) {
+                        match.shift();
+                        this.routes[i].handler.apply({}, match);
+                        return this;
+                    }           
+                }
+                return this;
+            },
+            listen: function() {
+                var self = this;
+                var current = self.getFragment();
+                var fn = function() {
+                    if(current !== self.getFragment()) {
+                        current = self.getFragment();
+                        self.check(current);
+                    }
+                }
+                clearInterval(this.interval);
+                this.interval = setInterval(fn, 50);
+                return this;
+            },
+            navigate: function(path) {
+                path = path ? path : '';
+                if(this.mode === 'history') {
+                    history.pushState(null, null, this.root + this.clearSlashes(path));
+                } else {
+                    window.location.href.match(/#(.*)$/);
+                    window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
+                }
+                return this;
+            }
+        };
+    }
 
-      return Controller;
 
-    })();
-
-    GUI.Model = Model;
-
-    GUI.View = View;
-
-    GUI.Controller = Controller;
+    function _load(sb) {
+        sb.Router = new Router();
+    }
 
     return {
-        load: function() {
-            console.log('Controller class :: ', Controller);
-        },
-        unload: function() {}
+        load: _load,
+        unload: function(){}
     };
 });
