@@ -20,7 +20,6 @@ Router.navigate('/about');
 */
 /* Router class */
 $.GUI().use(function(G) {
-    var Router;
 
     function Router() {
         return {
@@ -109,12 +108,11 @@ $.GUI().use(function(G) {
     }
 
 
-    function _load(sb) {
-        sb.Router = new Router();
+    function _load(api) {
+        api.Router = new Router();
     }
 
     return {
-        load: _load,
-        unload: function(){}
+        load: _load
     };
 });

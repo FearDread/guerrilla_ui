@@ -95,9 +95,9 @@ API = function() {
                     return document.createElement(el);
                 };
 
-                _ret.getFontsize = function() {
+                _ret.fontSize = function() {
                     return parseFloat(
-                        getComputedStyle($el).fontSize
+                        window.getComputedStyle($el).fontSize
                     );
                 };
 

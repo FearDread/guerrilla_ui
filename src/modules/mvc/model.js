@@ -4,7 +4,7 @@
 * @module: MVC Model object module         * 
 * ---------------------------------------- */
 $.GUI().use(function(G) {
-    var plugin, Model;
+    var plugin;
 
     Model = (function(superClass) {
 
@@ -125,9 +125,9 @@ $.GUI().use(function(G) {
     })(G.Broker);
 
     return {
-        load: function(sandbox) {
-            sandbox.Model = Model;
-        },
-        unload: function(){}
+        load: function(api) {
+            // extend api
+            api.Model = Model;
+        }
     };
 });
