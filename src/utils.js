@@ -72,6 +72,47 @@ utils = {
         return typeof arr !== "function" && ( length === 0 || typeof length === "number" && length > 0 && ( length - 1 ) in obj );
     },
 
+    debounce: function(fn, time, context) {
+        var timeout;
+
+        return function () {
+            var args = arguments;
+
+            clearTimeout(timeout);
+
+            timeout = setTimeout(can.proxy(function () {
+                fn.apply(this, args);
+            }, context || this), time);
+        };
+    },
+
+    throttle: function(fn, time, context) {
+        var run;
+
+        return function() {
+            var args = arguments,
+                ctx = context || this;
+
+            if (!run) {
+                run = true;
+
+                setTimeout(function() {
+                    fn.apply(ctx, args);
+                    run = false;
+                }, time);
+            }
+        };
+    },
+
+    defer: function(fn, context) {
+        var args = arguments,
+            ctx = context || this;
+
+        setTimeout(function () {
+            fn.apply(ctx, args);
+        }, 0);
+    },
+
     /**
      * Check number of arguments passed to function / method
      *
