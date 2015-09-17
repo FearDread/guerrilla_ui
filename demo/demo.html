@@ -118,6 +118,8 @@
     <script src='../src/modules/network/router.js'></script>
     <!-- Utils -->
     <script src='../src/modules/util/lang.js'></script>
+    <script src='../src/modules/util/array.js'></script>
+    <script src='../src/modules/util/cookie.js'></script>
     <!-- Plugins -->
     <script src='../src/plugins/glisslider.js'></script>
     <script src='../src/plugins/stargaze.js'></script>
@@ -126,10 +128,6 @@
     <script src='js/demo.js'></script>
 
     <script type='text/javascript'>
-      var $G = new $.GUI();
-
-      console.log('$.GUI :: ', $G);
-      
       // basic module with start 
       $.GUI().create('moduleA', function(G) {
           G.log('module A sandbox :: ', G);
