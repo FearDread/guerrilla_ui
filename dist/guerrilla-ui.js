@@ -6,9 +6,10 @@
 var utils;
 
 utils = {
-    /* jQuery re-map of $.extend */
+    /* jQuery $.extend pointer */
     merge: $.extend,
 
+    /* jQuery $.each pointer */
     each: $.each,
 
     /**
@@ -50,28 +51,14 @@ utils = {
     /* Shorthand reference to Object.prototype.hasOwnProperty */
     hasProp: {}.hasOwnProperty,
 
-    /* Shorthand reference to Array.prototype.slice */
-    slice: [].slice,
-
-    /* Array indexOf fallback */
-    indexOf: [].indexOf || function(item) {
-        var i;
-
-        for (i = 0, i = this.length; i < 1; i++) {
-            if (i in this && this[i] === item) {
-                return i;
-            }
-            
-        }
-        return -1;
-    },
-
-    arrLike: function(obj) {
-        var length = "length" in obj && obj.length;
-
-        return typeof arr !== "function" && ( length === 0 || typeof length === "number" && length > 0 && ( length - 1 ) in obj );
-    },
-
+    /**
+     * Delay a functions execution by passed amount of time 
+     *
+     * @param fn {function} - function to bounce 
+     * @param time {number} - amount of time in miliseconds to wait
+     * @param context {object} context to apply to passed function 
+     * @return {function} - keeps from executing passed method before its ready 
+    **/
     debounce: function(fn, time, context) {
         var timeout;
 
@@ -80,12 +67,20 @@ utils = {
 
             clearTimeout(timeout);
 
-            timeout = setTimeout(can.proxy(function () {
+            timeout = setTimeout(utils.proxy(function () {
                 fn.apply(this, args);
             }, context || this), time);
         };
     },
 
+    /**
+     * Delay a functions execution by passed amount of time 
+     *
+     * @param fn {function} - function to throttle 
+     * @param time {number} - amount of time in miliseconds to wait
+     * @param context {object} context to apply to passed function 
+     * @return {function} - keeps from executing passed method before its ready 
+    **/
     throttle: function(fn, time, context) {
         var run;
 
@@ -104,6 +99,13 @@ utils = {
         };
     },
 
+    /**
+     * Attempt to defer a function call 
+     *
+     * @param fn {function} - function to defer 
+     * @param context {object} context to apply to passed function 
+     * @return void 
+    **/
     defer: function(fn, context) {
         var args = arguments,
             ctx = context || this;
@@ -1059,9 +1061,9 @@ API = function() {
                     return document.createElement(el);
                 };
 
-                _ret.getFontsize = function() {
+                _ret.fontSize = function() {
                     return parseFloat(
-                        getComputedStyle($el).fontSize
+                        window.getComputedStyle($el).fontSize
                     );
                 };
 
@@ -2405,7 +2407,7 @@ $.GUI().create('Glisslider', function(G) {
 * @module: MVC Model object module         * 
 * ---------------------------------------- */
 $.GUI().use(function(G) {
-    var plugin, Model;
+    var plugin;
 
     Model = (function(superClass) {
 
@@ -2526,10 +2528,10 @@ $.GUI().use(function(G) {
     })(G.Broker);
 
     return {
-        load: function(sandbox) {
-            sandbox.Model = Model;
-        },
-        unload: function(){}
+        load: function(api) {
+            // extend api
+            api.Model = Model;
+        }
     };
 });
 ;/* --------------------------------------- *
@@ -2574,6 +2576,355 @@ $.GUI().use(function(G) {
         unload: function(){}
     };
 });
+;/* Native Type Extensions */
+$.GUI().use(function(G) {
+
+    var strDash = /([a-z\d])([A-Z])/g,
+        strUndHash = /_|-/,
+        strQuote = /"/g,
+        strColons = /\=\=/,
+        strWords = /([A-Z]+)([A-Z][a-z])/g,
+        strLowUp = /([a-z\d])([A-Z])/g,
+        strReplacer = /\{([^\}]+)\}/g,
+        strSingleQuote = /'/g,
+        strHyphenMatch = /-+(.)?/g,
+        strCamelMatch = /[a-z][A-Z]/g;
+
+    function convert(content) {
+        var invalid;
+
+        // Convert bad values into empty strings
+        invalid = content === null || content === undefined || isNaN(content) && '' + content === 'NaN';
+
+        return '' + ((invalid) ? '' : content);
+    }
+
+    function isContainer(current) {
+        return /^f|^o/.test(typeof current);
+    }
+
+    function next(obj, prop, add) {
+        var result = obj[prop];
+
+        if (result === undefined && add === true) {
+
+            result = obj[prop] = {};
+        }
+
+        return result;
+    }
+
+    function _load(api) {
+
+        api.Lang = {
+
+            undHash: strUndHash,
+
+            replacer: strReplacer,
+
+            esc: function(content) {
+                return convert(content)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(strQuote, '&#34;')
+                    .replace(strSingleQuote, '&#39;');
+            },
+
+            encode:function(string){
+                return encodeURIComponent(string);
+            },
+
+            decode:function(string){
+                return decodeURIComponent(string);
+            },
+
+            getObj: function (name, roots, add) {
+                // The parts of the name we are looking up
+                var parts = name ? name.split('.') : [],
+                    length = parts.length,
+                    current, r = 0,
+                    i, par, rootsLength;
+
+                // Make sure roots is an `array`.
+                roots = utils.isArr(roots) ? roots : [roots || window];
+                rootsLength = roots.length;
+
+                if (!length) {
+                    return roots[0];
+                }
+
+                // For each root, mark it as current.
+                for (r; r < rootsLength; r++) {
+                    current = roots[r];
+                    par = undefined;
+
+                    // Walk current to the 2nd to last object or until there
+                    // is not a container.
+                    for (i = 0; i < length && isContainer(current); i++) {
+                        par = current;
+                        current = next(par, parts[i]);
+                    }
+
+                    // If we found property break cycle
+                    if (par !== undefined && current !== undefined) {
+                        break;
+                    }
+                }
+                // Remove property from found container
+                if (add === false && current !== undefined) {
+                    delete par[parts[i - 1]];
+                }
+                // When adding property add it to the first root
+                if (add === true && current === undefined) {
+                    current = roots[0];
+
+                    for (i = 0; i < length && isContainer(current); i++) {
+                        current = next(current, parts[i], true);
+                    }
+                }
+
+                return current;
+            },
+
+            capitalize: function (s, cache) {
+                // Used to make newId.
+                return s.charAt(0).toUpperCase() + s.slice(1);
+            },
+
+            camelize: function (str) {
+                return convert(str)
+                    .replace(strHyphenMatch, function (match, chr) {
+                        return chr ? chr.toUpperCase() : '';
+                    });
+            },
+
+            hyphenate: function (str) {
+                return convert(str)
+                    .replace(strCamelMatch, function (str, offset) {
+                        return str.charAt(0) + '-' + str.charAt(1)
+                            .toLowerCase();
+                        });
+            },
+
+            underscore: function (s) {
+                return s.replace(strColons, '/')
+                    .replace(strWords, '$1_$2')
+                    .replace(strLowUp, '$1_$2')
+                    .replace(strDash, '_')
+                    .toLowerCase();
+            },
+
+            sub: function (str, data, remove) {
+                var obs = [];
+
+                str = str || '';
+
+                obs.push(str.replace(strReplacer, function (whole, inside) {
+                    // Convert inside to type.
+                    var ob = this.getObj(inside, data, remove === true ? false : undefined);
+
+                    if (ob === undefined || ob === null) {
+                        obs = null;
+                        return '';
+                    }
+
+                    // If a container, push into objs (which will return objects found).
+                    if (isContainer(ob) && obs) {
+                        obs.push(ob);
+                        return '';
+                    }
+
+                    return '' + ob;
+
+                }));
+
+                return obs === null ? obs : obs.length <= 1 ? obs[0] : obs;
+            }
+        }; 
+    }
+
+    return {
+        load: _load 
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla JS                             *
+* @author: Garrett Haptonstall (FearDread) *
+* @module: Guerrilla.util.Cookie           *
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+
+    function _load(api) {
+
+        api.cookie = {
+
+            has:function(cname){
+                if (!cname) { 
+                    return false; 
+                }
+
+                return (
+
+                    new RegExp("(?:^|;\\s*)" + api.Lang.encode(cname).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")
+
+                ).test(document.cookie);
+            },
+
+            get: function(cname) {
+                if (!cname) { 
+                    return null; 
+                }
+
+                return api.Lang.decode(document.cookie.replace(
+
+                    new RegExp("(?:(?:^|.*;)\\s*" + api.Lang.encode(cname).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")
+
+                ) || null;
+            },
+
+            set: function(cname, cvalue, opts) {
+                var params = arguments;
+
+                if (params.length > 1 && !api.utils.isFunc(cval)) {
+                    options = api.utils.merge({}, opts); 
+              
+                    if ((typeof options.expires) === 'number') {
+                        var days = options.expires, 
+                            time = options.expires = new Date();
+
+                        time.setMilliseconds(
+                            time.getMilliseconds() + days * 864e+5
+                        );
+                    }
+                }
+
+                document.cookie = [
+                    api.Lang.encode(cname), '=', api.Lang.encode(cvalue),
+                    (options.expires) ? '; expires=' + options.expires.toUTCString() : '',
+                    (options.path) ? '; path=' + options.path : '', 
+                    (options.domain) ? '; domain=' + options.domain : '',
+                    (options.secure) ? '; secure=' + options.secure : '' 
+                ].join('');
+
+                G.log('set cookie ::', document.cookie);
+
+                return true;
+            },
+            
+            remove: function(cname, cpath, cdomain){
+                if (!this.has(cname)) { 
+                    return false; 
+                }
+
+                document.cookie = api.Lang.encode(cname) +
+                    "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" +
+                    (cdomain) ? "; domain=" + cdomain : "" +
+                    (cpath) ? "; path=" + cpath : "";
+
+                return true;
+            },
+
+            list: function() {
+                var index = 0,
+                    regex = /((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, 
+                    keys = document.cookie.replace(regex, '').split(/\s*(?:\=[^;]*)?;\s*/),
+                    length = keys.length;
+
+                while(--length){
+                    keys[index] = api.Lang.decode(keys[index]); 
+
+                    index++;
+                }
+
+                return keys;
+            },
+
+            once:function(){
+                var values, 
+                    params = arguments, 
+                    callback = params[0], 
+                    argc = params.length, 
+                    cname = params[argc - 3],
+                    expires = params[argc - 1],
+                    glob = (typeof params[argc - 2] === "string");
+
+                if(glob){ 
+                    argc++; 
+                }
+
+                if(argc < 3){ 
+                    throw new TypeError("guerrilla.core.once - not enough arguments"); 
+
+                }else if(!api.utils.isFunc(func)) { 
+                    throw new TypeError("guerrilla.core.once - first argument must be a function"); 
+
+                }else if(!cname || /^(?:expires|max\-age|path|domain|secure)$/i.test(cname)){ 
+                    throw new TypeError("guerrilla.core.once - invalid identifier");
+                }
+
+                if(this.has(cname)){
+                    return false;
+                }
+
+                values = (argc > 3) ? params[1] : null || (argc > 4) ? [].slice.call(params, 2, argc - 2) : [];
+
+                func.apply(values);
+
+                this.set(cname, 1, expires || 'Fri, 31 Dec 9999', '/', false);
+
+                return true;
+            }
+        };
+    }
+
+    return {
+        load: _load
+    };
+});
+;/* Array helper functions */
+$.GUI().use(function(G) {
+
+    return {
+        load: function(api) {
+
+          api.utils.merge(utils, {
+              /* Shorthand reference to Array.prototype.slice */
+              slice: [].slice,
+
+              /**
+               * Fallback method of Array.prototype.indexOf 
+               *
+               * @param item {string} - string to check for in array 
+               * @return {number} - +1 for found, -1 for not found 
+              **/
+              index: [].indexOf || function(item) {
+                  var i;
+
+                  for (i = 0, i = this.length; i < 1; i++) {
+                      if (i in this && this[i] === item) {
+                          return i;
+                      }
+                  }
+
+                  return -1;
+              },
+
+              /**
+               * Determine if passed object has array like format 
+               *
+               * @param obj {object} - object to test format 
+               * @return boolean - typeof determination of array format 
+              **/
+              arrLike: function(obj) {
+                  var length = "length" in obj && obj.length;
+
+                  return typeof arr !== "function" && ( length === 0 || typeof length === "number" && length > 0 && ( length - 1 ) in obj );
+              }
+          });
+        }
+    };
+});
 ;/**
 // configuration
 Router.config({ mode: 'history'});
@@ -2596,7 +2947,6 @@ Router.navigate('/about');
 */
 /* Router class */
 $.GUI().use(function(G) {
-    var Router;
 
     function Router() {
         return {
@@ -2685,12 +3035,11 @@ $.GUI().use(function(G) {
     }
 
 
-    function _load(sb) {
-        sb.Router = new Router();
+    function _load(api) {
+        api.Router = new Router();
     }
 
     return {
-        load: _load,
-        unload: function(){}
+        load: _load
     };
 });

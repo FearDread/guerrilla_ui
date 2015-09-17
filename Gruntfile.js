@@ -24,6 +24,9 @@ module.exports = function(grunt){
                   'src/plugins/glisslider.js',
                   'src/modules/mvc/model.js',
                   'src/modules/mvc/view.js',
+                  'src/modules/util/lang.js',
+                  'src/modules/util/cookie.js',
+                  'src/modules/util/array.js',
                   'src/modules/network/router.js'
               ],
               dest: 'dist/<%= pkg.name %>.js'
