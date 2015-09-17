@@ -6,9 +6,10 @@
 var utils;
 
 utils = {
-    /* jQuery re-map of $.extend */
+    /* jQuery $.extend pointer */
     merge: $.extend,
 
+    /* jQuery $.each pointer */
     each: $.each,
 
     /**
@@ -50,28 +51,14 @@ utils = {
     /* Shorthand reference to Object.prototype.hasOwnProperty */
     hasProp: {}.hasOwnProperty,
 
-    /* Shorthand reference to Array.prototype.slice */
-    slice: [].slice,
-
-    /* Array indexOf fallback */
-    indexOf: [].indexOf || function(item) {
-        var i;
-
-        for (i = 0, i = this.length; i < 1; i++) {
-            if (i in this && this[i] === item) {
-                return i;
-            }
-            
-        }
-        return -1;
-    },
-
-    arrLike: function(obj) {
-        var length = "length" in obj && obj.length;
-
-        return typeof arr !== "function" && ( length === 0 || typeof length === "number" && length > 0 && ( length - 1 ) in obj );
-    },
-
+    /**
+     * Delay a functions execution by passed amount of time 
+     *
+     * @param fn {function} - function to bounce 
+     * @param time {number} - amount of time in miliseconds to wait
+     * @param context {object} context to apply to passed function 
+     * @return {function} - keeps from executing passed method before its ready 
+    **/
     debounce: function(fn, time, context) {
         var timeout;
 
@@ -80,12 +67,20 @@ utils = {
 
             clearTimeout(timeout);
 
-            timeout = setTimeout(can.proxy(function () {
+            timeout = setTimeout(utils.proxy(function () {
                 fn.apply(this, args);
             }, context || this), time);
         };
     },
 
+    /**
+     * Delay a functions execution by passed amount of time 
+     *
+     * @param fn {function} - function to throttle 
+     * @param time {number} - amount of time in miliseconds to wait
+     * @param context {object} context to apply to passed function 
+     * @return {function} - keeps from executing passed method before its ready 
+    **/
     throttle: function(fn, time, context) {
         var run;
 
@@ -104,6 +99,13 @@ utils = {
         };
     },
 
+    /**
+     * Attempt to defer a function call 
+     *
+     * @param fn {function} - function to defer 
+     * @param context {object} context to apply to passed function 
+     * @return void 
+    **/
     defer: function(fn, context) {
         var args = arguments,
             ctx = context || this;

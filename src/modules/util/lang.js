@@ -21,7 +21,7 @@ $.GUI().use(function(G) {
         return '' + ((invalid) ? '' : content);
     }
 
-    function container(current) {
+    function isContainer(current) {
         return /^f|^o/.test(typeof current);
     }
 
@@ -40,6 +40,10 @@ $.GUI().use(function(G) {
 
         api.Lang = {
 
+            undHash: strUndHash,
+
+            replacer: strReplacer,
+
             esc: function(content) {
                 return convert(content)
                     .replace(/&/g, '&amp;')
@@ -49,16 +53,23 @@ $.GUI().use(function(G) {
                     .replace(strSingleQuote, '&#39;');
             },
 
-            getObject: function (name, roots, add) {
+            encode:function(string){
+                return encodeURIComponent(string);
+            },
+
+            decode:function(string){
+                return decodeURIComponent(string);
+            },
+
+            getObj: function (name, roots, add) {
                 // The parts of the name we are looking up
-                // `['App','Models','Recipe']`
                 var parts = name ? name.split('.') : [],
                     length = parts.length,
                     current, r = 0,
                     i, par, rootsLength;
 
                 // Make sure roots is an `array`.
-                roots = can.isArray(roots) ? roots : [roots || window];
+                roots = utils.isArr(roots) ? roots : [roots || window];
                 rootsLength = roots.length;
 
                 if (!length) {
@@ -72,7 +83,7 @@ $.GUI().use(function(G) {
 
                     // Walk current to the 2nd to last object or until there
                     // is not a container.
-                    for (i = 0; i < length && container(current); i++) {
+                    for (i = 0; i < length && isContainer(current); i++) {
                         par = current;
                         current = next(par, parts[i]);
                     }
@@ -90,7 +101,7 @@ $.GUI().use(function(G) {
                 if (add === true && current === undefined) {
                     current = roots[0];
 
-                    for (i = 0; i < length && container(current); i++) {
+                    for (i = 0; i < length && isContainer(current); i++) {
                         current = next(current, parts[i], true);
                     }
                 }
@@ -133,7 +144,7 @@ $.GUI().use(function(G) {
 
                 obs.push(str.replace(strReplacer, function (whole, inside) {
                     // Convert inside to type.
-                    var ob = this.getObject(inside, data, remove === true ? false : undefined);
+                    var ob = this.getObj(inside, data, remove === true ? false : undefined);
 
                     if (ob === undefined || ob === null) {
                         obs = null;
@@ -141,7 +152,7 @@ $.GUI().use(function(G) {
                     }
 
                     // If a container, push into objs (which will return objects found).
-                    if (container(ob) && obs) {
+                    if (isContainer(ob) && obs) {
                         obs.push(ob);
                         return '';
                     }
@@ -151,11 +162,7 @@ $.GUI().use(function(G) {
                 }));
 
                 return obs === null ? obs : obs.length <= 1 ? obs[0] : obs;
-            },
-
-            undHash: strUndHash,
-
-            replacer: strReplacer
+            }
         }; 
     }
 
