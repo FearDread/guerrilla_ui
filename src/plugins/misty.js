@@ -1,5 +1,9 @@
-/* Fog Library */
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: GUI Fog jQuery plugin           * 
+* ---------------------------------------- */
 $.GUI().create('Misty', function(G) {
+
     // Create an array to store our particles
     var particles = [];
 

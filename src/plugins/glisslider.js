@@ -1,9 +1,10 @@
-/* Slider using GUI Extension */
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: GUI Layer Slider jQuery plugin  * 
+* ---------------------------------------- */
 $.GUI().create('Glisslider', function(G) {
 
-    var Gliss;
-
-    Gliss = function($el, opts) {
+    var Glisslider = function($el, opts) {
         var _this = this, slider = $el;
         
         // default options

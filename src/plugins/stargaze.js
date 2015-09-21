@@ -1,7 +1,10 @@
-/* Stargaze library */
-$.GUI().create('Stargaze', function(G){
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: GUI Star jQuery plugin          * 
+* ---------------------------------------- */
+$.GUI().create('Stargaze', function(G) {
 
-    var Stargaze = function(canvas, options){
+    var Stargaze = function(canvas, options) {
 
         var $canvas = $(canvas) || null,
             context = (canvas) ? canvas.getContext('2d') : null,
@@ -164,7 +167,7 @@ $.GUI().create('Stargaze', function(G){
     };
 
     return {
-        fn:function(){
+        fn: function() {
             var argc = arguments[0],
                 $elem = argc[0],
                 opts = argc[1];
@@ -172,5 +175,4 @@ $.GUI().create('Stargaze', function(G){
             return new Stargaze($elem, opts).init();
         },
     };
-
 }).start('Stargaze');
