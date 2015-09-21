@@ -1,7 +1,6 @@
 /* --------------------------------------- *
-* Guerrilla JS                             *
-* @author: Garrett Haptonstall (FearDread) *
-* @module: Guerrilla.util.Cookie           *
+* Guerrilla UI                             *
+* @module: Custom cookie api object        *
 * ---------------------------------------- */
 $.GUI().use(function(G) {
 

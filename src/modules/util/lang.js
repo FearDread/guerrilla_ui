@@ -1,4 +1,8 @@
-/* Native Type Extensions */
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Lang class extending native     * 
+* types with helper methods                * 
+* ---------------------------------------- */
 $.GUI().use(function(G) {
 
     var strDash = /([a-z\d])([A-Z])/g,

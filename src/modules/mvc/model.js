@@ -1,13 +1,13 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
-* @module: MVC Model object module         * 
+* @module: MVC Model object class          * 
 * ---------------------------------------- */
 $.GUI().use(function(G) {
     var plugin;
 
     Model = (function(superClass) {
 
+        // extend model object with superClass properties
         utils.extend(Model, superClass);
 
         function Model(obj) {

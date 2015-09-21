@@ -1,4 +1,8 @@
-/* Array helper functions */
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Array helper methods extending  * 
+* the base utils object                    * 
+* ---------------------------------------- */
 $.GUI().use(function(G) {
 
     return {

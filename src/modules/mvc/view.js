@@ -1,7 +1,6 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
-* @module: MVC View class module           * 
+* @module: MVC View object class           * 
 * ---------------------------------------- */
 $.GUI().use(function(G) {
     var plugin, View;
