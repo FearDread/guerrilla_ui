@@ -20,9 +20,9 @@ API = function() {
             this.options = (options !== null) ? options : {}; 
 
             // attach new sandbox instance
-            // core._broker.install(this);
+            core._broker.install(this);
 
-            this.Broker = core._broker;
+            // this.Broker = core._broker;
 
             // add utils object
             this.utils = utils;
@@ -64,6 +64,12 @@ API = function() {
                 }, time);
             };
 
+            this.getLocation = function() {
+                var win = core.config.win;
+
+                return win && win.location;
+            };
+
             // find selector in dom with wrapped methods
             this.query = function(selector, context) {
                 var $el, _ret = {}, _this = this;
@@ -72,7 +78,6 @@ API = function() {
                 if (context && context.find) {
                     // use dom find
                     $el = context.find(selector);
-
                 } else {
                     // wrap with jQuery
                     $el = $(selector);
@@ -88,7 +93,7 @@ API = function() {
 
                 _ret.create = function(el) {
                     if (!utils.isStr(el)) {
-                        core.log('Error :: Element must be type String.');
+                        this.log('Error :: Element must be type String.');
                         return false;
                     }
 
@@ -116,7 +121,7 @@ API = function() {
                 };
             };
 
-            this.fnCache = function(source, cache, refetch) {
+            this.memoize = function(source, cache, refetch) {
                 var key;
 
                 cache = cache || (cache = {});

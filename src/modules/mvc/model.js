@@ -111,7 +111,7 @@ $.GUI().use(function(G) {
             if (typeof cb === "function") {
 
                 // register model change event
-                return this.on(Model.CHANGED, cb, context);
+                return this.add(Model.CHANGED, cb, context);
 
             } else if (arguments.length === 0) {
 
@@ -119,6 +119,35 @@ $.GUI().use(function(G) {
                 return this.fire(Model.CHANGED);
             }
         };
+
+        Model.prototype.notify = function() {
+
+            return this.change();
+        };
+
+        Model.prototype.get = function(key) {
+
+            return this[key];
+        };
+
+        Model.prototype.toJSON = function() {
+            var json = {}, key, value;
+
+            for (key in this) {
+
+                if (!utils.hasProp.call(this, key)) {
+
+                    continue;
+                }
+
+                value = this[key];
+                json[key] = value;
+            }
+
+            return json;
+        };
+
+        Model.CHANGED = "changed";
 
         return Model;
 

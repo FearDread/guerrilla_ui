@@ -25,8 +25,7 @@ utils = {
 
         for (key in parent) { 
 
-            if (utils.hasProp.call(parent, key)) {
-                
+            if (this.hasProp.call(parent, key)) {
                 child[key] = parent[key]; 
             } 
         }
@@ -111,7 +110,7 @@ utils = {
         var args = arguments,
             ctx = context || this;
 
-        setTimeout(function () {
+        setTimeout(function() {
             fn.apply(ctx, args);
         }, 0);
     },
@@ -211,6 +210,13 @@ utils = {
         return total;
     },
 
+    /**
+    * Convert passed unit to its equiv value in pixles 
+    *
+    * @param width {number} - size of the element to convert 
+    * @param unit {string} - the unit to convert to pixels
+    * @return {number} 
+    **/
     getPxValue:function(width, unit){
         var value;
 
@@ -588,10 +594,20 @@ utils = {
         return copy;
     },
 
+    /**
+    * Compute passed value to em 
+    *
+    * @return {number} - computed em value 
+    **/
     convertToEm:function(value){
         return value * this.getFontsize();
     },
 
+    /**
+    * Compute passed value to point 
+    *
+    * @return {number} - computed point value 
+    **/
     convertToPt:function(value){
     
     },

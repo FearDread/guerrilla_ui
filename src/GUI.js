@@ -24,10 +24,11 @@ GUI = (function($) {
         // default config
         this.config = {
             name: 'Guerrilla UI',
+            logLevel: 0,
             version: '0.1.3',
-            animations: false,
             jquery: true,
-            logLevel: 0
+            animations: false,
+            win: (typeof window !== 'undefined') ? window : null
         };
 
         // ability to pass optional config object
