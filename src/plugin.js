@@ -1,6 +1,5 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
 * @module: $.GUI jQuery namespace          * 
 * ---------------------------------------- */
 ;(function($){

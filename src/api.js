@@ -37,15 +37,15 @@ API = function() {
             // add Animation reference 
             this.Animation = $.Animation;
 
-            /* --------------- */
-            // reference log function
+            // reference debug methods 
             this.log = function() {
-                return core.log(arguments);
+
+                return core.debug.log(arguments);
             };
 
-            // refrence to debug method, shows console history
-            this.debug = function() {
-                return core._debug();
+            this.warn = function() {
+
+                return core.debug.warn(arguments);
             };
 
             /**

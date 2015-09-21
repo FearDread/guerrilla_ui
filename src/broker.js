@@ -1,6 +1,5 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
 * @module: Broker pub / sub implemntation  * 
 * ---------------------------------------- */
 var Broker;

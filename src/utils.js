@@ -1,6 +1,5 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
 * @module: Utility methods for all modules * 
 * ---------------------------------------- */
 var utils;
@@ -11,6 +10,8 @@ utils = {
 
     /* jQuery $.each pointer */
     each: $.each,
+
+    slice: [].slice,
 
     /**
      * Attach child object prototype to parent object prototype 
