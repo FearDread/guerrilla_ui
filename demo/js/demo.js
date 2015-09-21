@@ -6,12 +6,12 @@
 $.GUI().create('App', function(G) {
     console.log('Demo app :: ', G);
 
-    G.Broker.add('navclick', function(args) {
+    G.add('navclick', function(args) {
         console.log('navclick args = ', args);
     }, this);
 
     function _load(opts) {
-        G.Broker.add('scrollPage', function() {
+        G.add('scrollPage', function() {
             console.log('fired scroll page channel');
         });
 
@@ -28,7 +28,7 @@ $.GUI().create('App', function(G) {
 
         G.query('.navbar-top').click(showPage);
         G.query('.btn').click(function(e) {
-            G.Broker.fire('scrollPage');
+            G.fire('scrollPage');
         });
     }
 
@@ -65,7 +65,7 @@ $.GUI().create('App', function(G) {
         }
 
         console.log('href = ' + href);
-        G.Broker.fire('navclick', {page:href});
+        G.fire('navclick', {page:href});
     }
 
     return {
