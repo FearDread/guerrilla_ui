@@ -1,7 +1,7 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
-* @module: GUI Core library class          * 
+* @module: GUI Core                        * 
 * ---------------------------------------- */
 var GUI;
 
@@ -21,15 +21,13 @@ GUI = (function($) {
     // GUI Constructor
     function GUI() {
 
-        // console log history
-        this.history = [];
-
         // default config
         this.config = {
             name: 'Guerrilla UI',
             version: '0.1.3',
             animations: false,
-            jquery: true 
+            jquery: true,
+            logLevel: 0
         };
 
         // ability to pass optional config object
@@ -38,6 +36,9 @@ GUI = (function($) {
             if (options !== null && utils.isObj(options)) {
                 // set custom config options
                 this.config = utils.extend(this.config, options);
+
+                // set logging verbosity
+                this.debug.level = this.config.logLevel || 0;
             }
         };
         
@@ -54,17 +55,75 @@ GUI = (function($) {
     }
 
     // console log wrapper
-    GUI.prototype.log = function() {
-        this.history.push(arguments);
+    GUI.prototype.debug = {
+        level: 0,
+        history: [],
+        timeout: 5000,
 
-        if (console) {
-            console.log([].slice.call(arguments));
-        }
-    };
+        /**
+         * Adds a warning message to the console.
+         *
+         * @param {String} out the message
+        **/
+        warn: function(out) {
+            if (this.level < 2) {
 
-    GUI.prototype._debug = function() {
-        if (this.config.debug) {
-            console.log(this.history);
+                [].unshift.call(arguments, 'WARN:');
+
+                if (typeof window !== undefined && window.console && console.warn) {
+
+                    this._logger("warn", [].slice.call(arguments));
+
+                } else if (window.console && console.log) {
+
+                    this._logger("log", [].slice.call(arguments));
+
+                } else if (window.opera && window.opera.postError) {
+
+                    window.opera.postError("WARNING: " + out);
+
+                }
+            }
+        },
+        
+        /**
+         * Adds a message to the console.
+         *
+         * @param {String} out the message
+        **/
+        log: function(out) {
+            if (this.level < 1) {
+                if (window.console && console.log) {
+
+                    [].unshift.call(arguments, 'Debug:');
+
+                    this._logger("log", [].slice.call(arguments));
+
+                } else if (window.opera && window.opera.postError) {
+
+                    window.opera.postError("DEBUG: " + out);
+
+                }
+            }
+        },
+
+        _logger: function(type, arr) {
+
+            this.history.push({type:arr});
+
+            if (console.log.apply) {
+
+                console[type].apply(console, arr);
+
+            } else {
+
+                console[type](arr);
+            }
+        },
+        
+        _stackTrace: function() {
+
+            this.log(this.history);
         }
     };
 
@@ -89,12 +148,12 @@ GUI = (function($) {
         error = utils.isType("string", id, "module ID") || utils.isType("function", creator, "creator") || utils.isType("object", options, "option parameter");
 
         if (error) {
-          this.log("could not register module '" + id + "': " + error);
+          this.debug.warn("could not register module '" + id + "': " + error);
           return this;
         }
 
         if (id in this._modules) {
-          this.log("module " + id + " was already registered");
+          this.debug.log("module " + id + " was already registered");
           return this;
         }
 
@@ -409,7 +468,7 @@ GUI = (function($) {
       * @return this {object}
     **/
     GUI.prototype._fail = function(ev, cb) {
-        this.log(ev);
+        this.debug.warn(ev);
 
         cb(new Error("could not start module: " + ev.message));
 

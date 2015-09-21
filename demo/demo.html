@@ -120,6 +120,7 @@
     <script src='../src/modules/util/lang.js'></script>
     <script src='../src/modules/util/array.js'></script>
     <script src='../src/modules/util/cookie.js'></script>
+    <script src='../src/modules/util/cache.js'></script>
     <!-- Plugins -->
     <script src='../src/plugins/glisslider.js'></script>
     <script src='../src/plugins/stargaze.js'></script>
@@ -172,7 +173,6 @@
       $.GUI().create('moduleC', function(G) {
 
           function printHistory() {
-              G.debug();
               G.log('Module C sandbox :: ', G);
           }
 
@@ -199,6 +199,27 @@
 
       // start instance of all modules
       $.GUI().start(['moduleA','moduleB']);
+
+      /**
+      // configuration
+      Router.config({ mode: 'history'});
+
+      // returning the user to the initial state
+      Router.navigate();
+
+      // adding routes
+      Router
+      .add(/products\/(.*)\/edit\/(.*)/, function() {
+          console.log('products', arguments);
+      })
+      .add(function() {
+          console.log('default');
+      })
+      .check('/products/12/edit/22').listen();
+
+      // forwarding
+      Router.navigate('/about');
+      **/
 
     </script>
   </body>
