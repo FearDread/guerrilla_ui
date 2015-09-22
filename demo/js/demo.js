@@ -6,9 +6,13 @@
 $.GUI().create('App', function(G) {
     console.log('Demo app :: ', G);
 
-    G.add('navclick', function(args) {
-        console.log('navclick args = ', args);
-    }, this);
+    var navHandler = function(data) {
+
+        G.log('nav handler event fired.');
+        G.log('data = ', data);
+    };
+
+    G.add('navclick', navHandler); 
 
     function _load(opts) {
         G.add('scrollPage', function() {
@@ -65,7 +69,10 @@ $.GUI().create('App', function(G) {
         }
 
         console.log('href = ' + href);
-        G.fire('navclick', {page:href});
+        G.fire('navclick', {page:href}, function() {
+
+          alert('done with navclick event!');
+        });
     }
 
     return {

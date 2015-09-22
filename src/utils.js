@@ -338,7 +338,7 @@ utils = {
         },
 
         /**
-        * Run all modules one after another 
+        * Run asynchronous tasks in parallel 
         *
         * @param args {array} - arguments list 
         * @return void
@@ -407,7 +407,7 @@ utils = {
         },
 
         /**
-        * Run all modules one after another 
+        * Run asynchronous tasks one after another 
         *
         * @param args {array} - arguments list 
         * @return void
@@ -423,6 +423,7 @@ utils = {
             }
 
             i = -1;
+
             count = tasks.length;
             results = [];
 
@@ -432,6 +433,7 @@ utils = {
 
             errors = [];
             hasErr = false;
+
             next = function() {
                 var e, err, res;
 
@@ -470,34 +472,39 @@ utils = {
         },
 
         /**
-        * Run all modules one after another 
+        * Run first task, which does not return an error 
         *
-        * @param args {array} - arguments list 
-        * @return void
+        * @param tasks {array} - tasks list 
+        * @param cb {function} - callback method
+        * @param force {boolean} - optional force errors
+        * @return {function} execute 
         **/
         first: function(tasks, cb, force) {
             var count, errors, i, next, result;
 
-            if (tasks === null) {
+            if (!tasks || tasks === null) {
                 tasks = [];
             }
-            if (cb === null) {
+            if (!cb || cb === null) {
                 cb = (function() {});
             }
 
             i = -1;
+
             count = tasks.length;
             result = null;
 
-            if (count === 0) {
+            if (!count || count === 0) {
                 return cb(null);
             }
 
             errors = [];
+
             next = function() {
                 var e, err, res;
 
-                err = (arguments[0], res = 2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+                err = arguments[0];
+                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
 
                 if (err) {
                     errors[i] = err;
@@ -506,28 +513,37 @@ utils = {
                         return cb(errors);
                     }
                 } else {
+
                     if (i > -1) {
+
                         return cb(null, res.length < 2 ? res[0] : res);
                     }
                 }
 
                 if (++i >= count) {
+
                     return cb(errors);
+
                 } else {
 
                     try {
+
                         return tasks[i](next);
+
                     } catch (_error) {
+
                         e = _error;
                         return next(e);
                     }
                 }
             };
+
             return next();
         },
 
         /**
-        * Run all modules one after another 
+        * Run asynchronous tasks one after another
+        * and pass the argument
         *
         * @param args {array} - arguments list 
         * @return void

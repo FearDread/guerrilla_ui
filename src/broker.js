@@ -128,6 +128,7 @@ Broker = (function() {
                     }
 
                     return results1;
+
                 })()).join('; '));
 
                 return cb(e);
@@ -163,7 +164,6 @@ Broker = (function() {
         }
 
         tasks = this._setup(data, channel, origin, this);
-        console.log('tasks = ', tasks);
 
         utils.run.series(tasks, (function(errors, series) {
             if (errors) {
@@ -252,7 +252,7 @@ Broker = (function() {
     };
 
     Broker.prototype._setup = function(data, channel, origin, context) {
-        var i, len, results = [], sub, subscribers;
+        var i = 0, len, results = [], sub, subscribers;
 
         subscribers = context.channels[channel] || [];
         len = subscribers.length;
