@@ -1,7 +1,6 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
-* @module: Array helper methods extending  * 
-* the base utils object                    * 
+* @module: Array extended helper methods   * 
 * ---------------------------------------- */
 $.GUI().use(function(G) {
 
@@ -9,6 +8,24 @@ $.GUI().use(function(G) {
         load: function(api) {
 
             api.Array = [];
+
+            /**
+             * Create new array instance with passed array / object 
+             *
+             * @param arr {array} - array or object to create new instance from 
+             * @return {array} - new array instance 
+            **/
+            api.Array.create = function(arr) {
+                var _ret = [];
+
+                api.each(arr, function(property, index) {
+
+                    _ret[index] = property;
+
+                });
+
+                return _ret;
+            };
 
             /**
              * Fallback method of Array.prototype.indexOf 
