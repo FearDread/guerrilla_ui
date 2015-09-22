@@ -90,8 +90,58 @@ Broker = (function() {
 
         return this;
     };
+
+    Broker.prototype.fire = function(channel, data, cb) {
+        var tasks;
+
+        if (!cb || cb === null) {
+            cb = function() {};
+        }
+
+        if (typeof data === "function") {
+            cb = data;
+            data = void 0;
+        }
+
+        if (typeof channel !== "string") {
+            return false;
+        }
+
+        tasks = this._setup(data, channel, channel, this);
+
+        utils.run.first(tasks, (function(errors, result) {
+            var e, x;
+
+            if (errors) {
+
+                e = new Error(((function() {
+                    var i, len, results1;
+
+                    results1 = [];
+
+                    for (i = 0, len = errors.length; i < len; i++) {
+                        x = errors[i];
+
+                        if (x !== null) {
+                            results1.push(x.message);
+                        }
+                    }
+
+                    return results1;
+                })()).join('; '));
+
+                return cb(e);
+
+            } else {
+
+                return cb(null, result);
+            }
+        }), true);
+
+        return this;
+    };
         
-    Broker.prototype.fire = function(channel, data, cb, origin) {
+    Broker.prototype.emit = function(channel, data, cb, origin) {
         var o, e, x, chnls;
 
         if (!cb || cb === null) {
@@ -113,6 +163,7 @@ Broker = (function() {
         }
 
         tasks = this._setup(data, channel, origin, this);
+        console.log('tasks = ', tasks);
 
         utils.run.series(tasks, (function(errors, series) {
             if (errors) {
@@ -236,6 +287,28 @@ Broker = (function() {
         } while(--len);
 
         return results;
+    };
+
+    Broker.prototype.pipe = function(src, target, broker) {
+        if (target instanceof Broker) {
+            mediator = target;
+            target = src;
+        }
+
+        if (broker === null) {
+            return this.pipe(src, target, this);
+        }
+
+        if (broker === this && src === target) {
+            return this;
+        }
+
+        this.add(src, function() {
+
+            return broker.fire.apply(broker, [target].concat(slice.call(arguments)));
+        });
+
+        return this;
     };
 
     return Broker;
