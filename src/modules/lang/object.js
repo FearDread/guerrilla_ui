@@ -11,23 +11,28 @@ $.GUI().use(function(G) {
             api.Object = {};
 
             /**
-             * Compare methods used to compare with two objects
+             * Compare methods used to compare two objects
             **/
             api.Object.compare = {
                 'null': function() {
-
+                    return true;
                 },
                 i: function(a, b) {
-
+                    return ('' + a).toLowerCase() === ('' + b).toLowerCase();
                 },
                 eq: function(a, b) {
-
+                    return a === b;
                 },
-                eqeq: this.similar,
+                eqeq: function(a, b) {
+                    return a == b;
+                },
                 similar: function(a, b) {
-
+                    return a == b;
                 }
             };
+
+            /* Shorthand call to jQuery isPlainObject */
+            api.Object.isPlain = $.isPlainObject;
 
             /**
              * Shorthand method to the native hasOwnProperty call 
@@ -37,7 +42,6 @@ $.GUI().use(function(G) {
              * @return {boolean}
             **/
             api.Object.has = function(obj, prop) {
-            
                 return Object.hasOwnProperty.call(obj, prop);
             };
 
@@ -55,7 +59,7 @@ $.GUI().use(function(G) {
                 for (var prop in set) {
                     if (!same(subset[prop], set[prop], compare[prop], subset, set)) {
                         return false;
-                        }
+                    }
                 }
 
                 return true;
@@ -121,64 +125,82 @@ $.GUI().use(function(G) {
              * @param {Object} [compares] An object that specifies how to compare properties.
              * @return {boolean}
             **/
-            api.Object.same = function(a, b, compare, aParent, bParent, deep) {
-                var aType = typeof a,
-                        aArray = isArray(a),
-                        comparesType = typeof compares,
-                        compare;
-                if (comparesType === 'string' || compares === null) {
-                        compares = compareMethods[compares];
-                        comparesType = 'function';
+            api.Object.same = function(a, b, compares, aParent, bParent, deep) {
+                var i, bCopy, prop, aType = typeof a,
+                    aArray = api.utils.isArr(a),
+                    comparesType = typeof compares,
+                    compare;
+
+                if (api.utils.isStr(comparesType) || compares === null) {
+
+                    compares = this.compare[compares];
+                    comparesType = 'function';
                 }
-                if (comparesType === 'function') {
-                        return compares(a, b, aParent, bParent);
+
+                if (api.utils.isFunc(comparesType)) {
+                    return compares(a, b, aParent, bParent);
                 }
+
                 compares = compares || {};
+
+                // run compare tests
                 if (a === null || b === null) {
-                        return a === b;
+                    return a === b;
                 }
                 if (a instanceof Date || b instanceof Date) {
-                        return a === b;
+                    return a === b;
                 }
                 if (deep === -1) {
-                        return aType === 'object' || a === b;
+                    return aType === 'object' || a === b;
                 }
                 if (aType !== typeof b || aArray !== isArray(b)) {
-                        return false;
+                    return false;
                 }
                 if (a === b) {
-                        return true;
+                    return true;
                 }
                 if (aArray) {
-                        if (a.length !== b.length) {
-                                return false;
-                        }
-                        for (var i = 0; i < a.length; i++) {
-                                compare = compares[i] === undefined ? compares['*'] : compares[i];
-                                if (!same(a[i], b[i], a, b, compare)) {
-                                        return false;
-                                }
-                        }
-                        return true;
-                } else if (aType === 'object' || aType === 'function') {
-                        var bCopy = can.extend({}, b);
-                        for (var prop in a) {
-                                compare = compares[prop] === undefined ? compares['*'] : compares[prop];
-                                if (!same(a[prop], b[prop], compare, a, b, deep === false ? -1 : undefined)) {
-                                        return false;
-                                }
-                                delete bCopy[prop];
-                        }
-                        // go through bCopy props ... if there is no compare .. return false
-                        for (prop in bCopy) {
-                                if (compares[prop] === undefined || !same(undefined, b[prop], compares[prop], a, b, deep === false ? -1 : undefined)) {
-                                        return false;
-                                }
-                        }
-                        return true;
-                }
-                return false;
+                    if (a.length !== b.length) {
+                        return false;
+                    }
 
+                    for (i = 0; i < a.length; i++) {
+                        compare = compares[i] === undefined ? compares['*'] : compares[i];
+
+                        if (!same(a[i], b[i], a, b, compare)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+
+                } else if (api.utils.isObj(aType) || api.utils.isFunc(aType)) {
+                    // merge b obj with new object instance
+                    bCopy = api.utils.merge({}, b);
+
+                    for (prop in a) {
+                        compare = compares[prop] === undefined ? compares['*'] : compares[prop];
+
+                        if (!same(a[prop], b[prop], compare, a, b, deep === false ? -1 : undefined)) {
+
+                            return false;
+                        }
+
+                        delete bCopy[prop];
+                    }
+
+                    // go through bCopy props ... if there is no compare .. return false
+                    for (prop in bCopy) {
+
+                        if (compares[prop] === undefined || !same(undefined, b[prop], compares[prop], a, b, deep === false ? -1 : undefined)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                return false;
             };
         }
     };
