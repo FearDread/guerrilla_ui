@@ -103,7 +103,7 @@ Broker = (function() {
         }
 
         if (data && utils.isFunc(data)) {
-            return cb = data;
+            cb = data;
         }
 
         data = void 0;
@@ -117,7 +117,7 @@ Broker = (function() {
         utils.run.series(tasks, (function(errors, series) {
             if (errors) {
 
-                return e = new Error(((function() {
+                e = new Error(((function() {
                     var i, len, results;
 
                     results = [];
@@ -133,6 +133,8 @@ Broker = (function() {
                     return results;
 
                 })()).join('; '));
+
+                return e;
             }
         }, cb(e)), true);
 
@@ -173,9 +175,9 @@ Broker = (function() {
     Broker.prototype._delete = function(obj, channel, cb, context) {
         var s;
 
-        if (obj.channels[channel] == null) {
+        if (obj.channels[channel] === null) {
 
-            return obj.channels[channel] = (function() {
+            obj.channels[channel] = (function() {
                 var i, len, ref, results;
 
                 ref = obj.channels[ch];
@@ -193,6 +195,8 @@ Broker = (function() {
                 return results;
 
             })();
+
+            return obj.channels[channel];
         }
     };
 

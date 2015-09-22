@@ -11,6 +11,9 @@ utils = {
     /* jQuery $.each pointer */
     each: $.each,
 
+    /**
+     *
+    **/
     slice: [].slice,
 
     /**
@@ -713,31 +716,5 @@ utils = {
         }
 
         return id.substr(0, length);
-    },
-
-    /**
-    * Turn passed object into array 
-    *
-    * @param arr {object} - object to convert to array 
-    * @return ret {array} - created array 
-    **/
-    toArr: function(arr) {
-        var ret = [];
-
-        this.each(arr, function (a, i) {
-            ret[i] = a;
-        });
-
-        return ret;
-    },
-
-    /**
-    * Generate random unique identifier string
-    *
-    * @param length {number} - how long the random string should be
-    * @return id {string} - unique identifier 
-    **/
-    toObj: function(obj) {
-      
     }
 };

@@ -167,7 +167,6 @@ $.GUI().create('Misty', function(G) {
 
     return {
         fn: function() {
-            console.log('starting misty library.');
             // Initialize the scene
             init();
 

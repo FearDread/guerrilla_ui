@@ -30,44 +30,20 @@ API = function() {
             /* jQuery wrappers */
             // Ajax shorthand reference
             this.xhr = $.ajax;
+            this.data = $.data;
+            this.Deferred = $.Deferred;
+            this.Animation = $.Animation;
 
             // each loop reference
             this.each = utils.each;
 
-            // add Animation reference 
-            this.Animation = $.Animation;
-
             // reference debug methods 
             this.log = function() {
-
                 return core.debug.log(arguments);
             };
 
             this.warn = function() {
-
                 return core.debug.warn(arguments);
-            };
-
-            /**
-             * Animate method utalizing animate.css library
-             *
-            **/
-            this.animate = function($el, anim, time) {
-                if (time === undefined) {
-                    time = 1500;
-                }
-
-                $el.show().addClass(anim);
-
-                setTimeout(function() {
-                    $el.removeClass(anim);
-                }, time);
-            };
-
-            this.getLocation = function() {
-                var win = core.config.win;
-
-                return win && win.location;
             };
 
             // find selector in dom with wrapped methods
@@ -93,14 +69,14 @@ API = function() {
 
                 _ret.create = function(el) {
                     if (!utils.isStr(el)) {
-                        this.log('Error :: Element must be type String.');
+                        this.warn('Error :: Element must be type String.');
                         return false;
                     }
 
                     return document.createElement(el);
                 };
 
-                _ret.fontSize = function() {
+                _ret.size = function() {
                     return parseFloat(
                         window.getComputedStyle($el).fontSize
                     );
@@ -109,6 +85,23 @@ API = function() {
                 return _ret;
             };
 
+            /**
+             * Get location with stored reference to window object 
+             *
+             * @return {object} - window ref
+            **/
+            this.getLocation = function() {
+                var win = core.config.win;
+
+                return win && win.location;
+            };
+
+            /**
+             * Take function and apply new context when executed 
+             * 
+             * @param fn {function} - the function to swap contexts 
+             * @return {function} - executes fn 
+            **/
             this.hitch = function(fn) {
                 var argc, all;
 
@@ -121,6 +114,14 @@ API = function() {
                 };
             };
 
+            /**
+             * Cache the results of a function call 
+             * 
+             * @param source {function} - the function to execute and store 
+             * @param cache {object} - optional store to keep cached results 
+             * @param refetch {string} - optional key to update in cache
+             * @return {object} - the stored results 
+            **/
             this.memoize = function(source, cache, refetch) {
                 var key;
 
