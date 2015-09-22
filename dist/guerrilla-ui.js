@@ -1,6 +1,5 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
 * @module: Utility methods for all modules * 
 * ---------------------------------------- */
 var utils;
@@ -11,6 +10,11 @@ utils = {
 
     /* jQuery $.each pointer */
     each: $.each,
+
+    /**
+     *
+    **/
+    slice: [].slice,
 
     /**
      * Attach child object prototype to parent object prototype 
@@ -24,8 +28,7 @@ utils = {
 
         for (key in parent) { 
 
-            if (utils.hasProp.call(parent, key)) {
-                
+            if (this.hasProp.call(parent, key)) {
                 child[key] = parent[key]; 
             } 
         }
@@ -110,7 +113,7 @@ utils = {
         var args = arguments,
             ctx = context || this;
 
-        setTimeout(function () {
+        setTimeout(function() {
             fn.apply(ctx, args);
         }, 0);
     },
@@ -210,6 +213,13 @@ utils = {
         return total;
     },
 
+    /**
+    * Convert passed unit to its equiv value in pixles 
+    *
+    * @param width {number} - size of the element to convert 
+    * @param unit {string} - the unit to convert to pixels
+    * @return {number} 
+    **/
     getPxValue:function(width, unit){
         var value;
 
@@ -328,7 +338,7 @@ utils = {
         },
 
         /**
-        * Run all modules one after another 
+        * Run asynchronous tasks in parallel 
         *
         * @param args {array} - arguments list 
         * @return void
@@ -397,7 +407,7 @@ utils = {
         },
 
         /**
-        * Run all modules one after another 
+        * Run asynchronous tasks one after another 
         *
         * @param args {array} - arguments list 
         * @return void
@@ -413,6 +423,7 @@ utils = {
             }
 
             i = -1;
+
             count = tasks.length;
             results = [];
 
@@ -422,6 +433,7 @@ utils = {
 
             errors = [];
             hasErr = false;
+
             next = function() {
                 var e, err, res;
 
@@ -460,34 +472,39 @@ utils = {
         },
 
         /**
-        * Run all modules one after another 
+        * Run first task, which does not return an error 
         *
-        * @param args {array} - arguments list 
-        * @return void
+        * @param tasks {array} - tasks list 
+        * @param cb {function} - callback method
+        * @param force {boolean} - optional force errors
+        * @return {function} execute 
         **/
         first: function(tasks, cb, force) {
             var count, errors, i, next, result;
 
-            if (tasks === null) {
+            if (!tasks || tasks === null) {
                 tasks = [];
             }
-            if (cb === null) {
+            if (!cb || cb === null) {
                 cb = (function() {});
             }
 
             i = -1;
+
             count = tasks.length;
             result = null;
 
-            if (count === 0) {
+            if (!count || count === 0) {
                 return cb(null);
             }
 
             errors = [];
+
             next = function() {
                 var e, err, res;
 
-                err = (arguments[0], res = 2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+                err = arguments[0];
+                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
 
                 if (err) {
                     errors[i] = err;
@@ -496,28 +513,37 @@ utils = {
                         return cb(errors);
                     }
                 } else {
+
                     if (i > -1) {
+
                         return cb(null, res.length < 2 ? res[0] : res);
                     }
                 }
 
                 if (++i >= count) {
+
                     return cb(errors);
+
                 } else {
 
                     try {
+
                         return tasks[i](next);
+
                     } catch (_error) {
+
                         e = _error;
                         return next(e);
                     }
                 }
             };
+
             return next();
         },
 
         /**
-        * Run all modules one after another 
+        * Run asynchronous tasks one after another
+        * and pass the argument
         *
         * @param args {array} - arguments list 
         * @return void
@@ -587,10 +613,20 @@ utils = {
         return copy;
     },
 
+    /**
+    * Compute passed value to em 
+    *
+    * @return {number} - computed em value 
+    **/
     convertToEm:function(value){
         return value * this.getFontsize();
     },
 
+    /**
+    * Compute passed value to point 
+    *
+    * @return {number} - computed point value 
+    **/
     convertToPt:function(value){
     
     },
@@ -696,37 +732,10 @@ utils = {
         }
 
         return id.substr(0, length);
-    },
-
-    /**
-    * Turn passed object into array 
-    *
-    * @param arr {object} - object to convert to array 
-    * @return ret {array} - created array 
-    **/
-    toArr: function(arr) {
-        var ret = [];
-
-        this.each(arr, function (a, i) {
-            ret[i] = a;
-        });
-
-        return ret;
-    },
-
-    /**
-    * Generate random unique identifier string
-    *
-    * @param length {number} - how long the random string should be
-    * @return id {string} - unique identifier 
-    **/
-    toObj: function(obj) {
-      
     }
 };
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
 * @module: Broker pub / sub implemntation  * 
 * ---------------------------------------- */
 var Broker;
@@ -817,8 +826,59 @@ Broker = (function() {
 
         return this;
     };
+
+    Broker.prototype.fire = function(channel, data, cb) {
+        var tasks;
+
+        if (!cb || cb === null) {
+            cb = function() {};
+        }
+
+        if (typeof data === "function") {
+            cb = data;
+            data = void 0;
+        }
+
+        if (typeof channel !== "string") {
+            return false;
+        }
+
+        tasks = this._setup(data, channel, channel, this);
+
+        utils.run.first(tasks, (function(errors, result) {
+            var e, x;
+
+            if (errors) {
+
+                e = new Error(((function() {
+                    var i, len, results1;
+
+                    results1 = [];
+
+                    for (i = 0, len = errors.length; i < len; i++) {
+                        x = errors[i];
+
+                        if (x !== null) {
+                            results1.push(x.message);
+                        }
+                    }
+
+                    return results1;
+
+                })()).join('; '));
+
+                return cb(e);
+
+            } else {
+
+                return cb(null, result);
+            }
+        }), true);
+
+        return this;
+    };
         
-    Broker.prototype.fire = function(channel, data, cb, origin) {
+    Broker.prototype.emit = function(channel, data, cb, origin) {
         var o, e, x, chnls;
 
         if (!cb || cb === null) {
@@ -830,7 +890,7 @@ Broker = (function() {
         }
 
         if (data && utils.isFunc(data)) {
-            return cb = data;
+            cb = data;
         }
 
         data = void 0;
@@ -844,7 +904,7 @@ Broker = (function() {
         utils.run.series(tasks, (function(errors, series) {
             if (errors) {
 
-                return e = new Error(((function() {
+                e = new Error(((function() {
                     var i, len, results;
 
                     results = [];
@@ -860,6 +920,8 @@ Broker = (function() {
                     return results;
 
                 })()).join('; '));
+
+                return e;
             }
         }, cb(e)), true);
 
@@ -900,9 +962,9 @@ Broker = (function() {
     Broker.prototype._delete = function(obj, channel, cb, context) {
         var s;
 
-        if (obj.channels[channel] == null) {
+        if (obj.channels[channel] === null) {
 
-            return obj.channels[channel] = (function() {
+            obj.channels[channel] = (function() {
                 var i, len, ref, results;
 
                 ref = obj.channels[ch];
@@ -920,11 +982,13 @@ Broker = (function() {
                 return results;
 
             })();
+
+            return obj.channels[channel];
         }
     };
 
     Broker.prototype._setup = function(data, channel, origin, context) {
-        var i, len, results = [], sub, subscribers;
+        var i = 0, len, results = [], sub, subscribers;
 
         subscribers = context.channels[channel] || [];
         len = subscribers.length;
@@ -961,6 +1025,28 @@ Broker = (function() {
         return results;
     };
 
+    Broker.prototype.pipe = function(src, target, broker) {
+        if (target instanceof Broker) {
+            mediator = target;
+            target = src;
+        }
+
+        if (broker === null) {
+            return this.pipe(src, target, this);
+        }
+
+        if (broker === this && src === target) {
+            return this;
+        }
+
+        this.add(src, function() {
+
+            return broker.fire.apply(broker, [target].concat(slice.call(arguments)));
+        });
+
+        return this;
+    };
+
     return Broker;
 
 })(this);
@@ -986,9 +1072,9 @@ API = function() {
             this.options = (options !== null) ? options : {}; 
 
             // attach new sandbox instance
-            // core._broker.install(this);
+            core._broker.install(this);
 
-            this.Broker = core._broker;
+            // this.Broker = core._broker;
 
             // add utils object
             this.utils = utils;
@@ -996,38 +1082,20 @@ API = function() {
             /* jQuery wrappers */
             // Ajax shorthand reference
             this.xhr = $.ajax;
+            this.data = $.data;
+            this.Deferred = $.Deferred;
+            this.Animation = $.Animation;
 
             // each loop reference
             this.each = utils.each;
 
-            // add Animation reference 
-            this.Animation = $.Animation;
-
-            /* --------------- */
-            // reference log function
+            // reference debug methods 
             this.log = function() {
-                return core.log(arguments);
+                return core.debug.log(arguments);
             };
 
-            // refrence to debug method, shows console history
-            this.debug = function() {
-                return core._debug();
-            };
-
-            /**
-             * Animate method utalizing animate.css library
-             *
-            **/
-            this.animate = function($el, anim, time) {
-                if (time === undefined) {
-                    time = 1500;
-                }
-
-                $el.show().addClass(anim);
-
-                setTimeout(function() {
-                    $el.removeClass(anim);
-                }, time);
+            this.warn = function() {
+                return core.debug.warn(arguments);
             };
 
             // find selector in dom with wrapped methods
@@ -1038,7 +1106,6 @@ API = function() {
                 if (context && context.find) {
                     // use dom find
                     $el = context.find(selector);
-
                 } else {
                     // wrap with jQuery
                     $el = $(selector);
@@ -1054,14 +1121,14 @@ API = function() {
 
                 _ret.create = function(el) {
                     if (!utils.isStr(el)) {
-                        core.log('Error :: Element must be type String.');
+                        this.warn('Error :: Element must be type String.');
                         return false;
                     }
 
                     return document.createElement(el);
                 };
 
-                _ret.fontSize = function() {
+                _ret.size = function() {
                     return parseFloat(
                         window.getComputedStyle($el).fontSize
                     );
@@ -1070,6 +1137,23 @@ API = function() {
                 return _ret;
             };
 
+            /**
+             * Get location with stored reference to window object 
+             *
+             * @return {object} - window ref
+            **/
+            this.getLocation = function() {
+                var win = core.config.win;
+
+                return win && win.location;
+            };
+
+            /**
+             * Take function and apply new context when executed 
+             * 
+             * @param fn {function} - the function to swap contexts 
+             * @return {function} - executes fn 
+            **/
             this.hitch = function(fn) {
                 var argc, all;
 
@@ -1082,7 +1166,15 @@ API = function() {
                 };
             };
 
-            this.fnCache = function(source, cache, refetch) {
+            /**
+             * Cache the results of a function call 
+             * 
+             * @param source {function} - the function to execute and store 
+             * @param cache {object} - optional store to keep cached results 
+             * @param refetch {string} - optional key to update in cache
+             * @return {object} - the stored results 
+            **/
+            this.memoize = function(source, cache, refetch) {
                 var key;
 
                 cache = cache || (cache = {});
@@ -1107,7 +1199,7 @@ API = function() {
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
-* @module: GUI Core library class          * 
+* @module: GUI Core                        * 
 * ---------------------------------------- */
 var GUI;
 
@@ -1127,15 +1219,14 @@ GUI = (function($) {
     // GUI Constructor
     function GUI() {
 
-        // console log history
-        this.history = [];
-
         // default config
         this.config = {
             name: 'Guerrilla UI',
+            logLevel: 0,
             version: '0.1.3',
+            jquery: true,
             animations: false,
-            jquery: true 
+            win: (typeof window !== 'undefined') ? window : null
         };
 
         // ability to pass optional config object
@@ -1144,6 +1235,9 @@ GUI = (function($) {
             if (options !== null && utils.isObj(options)) {
                 // set custom config options
                 this.config = utils.extend(this.config, options);
+
+                // set logging verbosity
+                this.debug.level = this.config.logLevel || 0;
             }
         };
         
@@ -1160,17 +1254,75 @@ GUI = (function($) {
     }
 
     // console log wrapper
-    GUI.prototype.log = function() {
-        this.history.push(arguments);
+    GUI.prototype.debug = {
+        level: 0,
+        history: [],
+        timeout: 5000,
 
-        if (console) {
-            console.log([].slice.call(arguments));
-        }
-    };
+        /**
+         * Adds a warning message to the console.
+         *
+         * @param {String} out the message
+        **/
+        warn: function(out) {
+            if (this.level < 2) {
 
-    GUI.prototype._debug = function() {
-        if (this.config.debug) {
-            console.log(this.history);
+                [].unshift.call(arguments, 'WARN:');
+
+                if (typeof window !== undefined && window.console && console.warn) {
+
+                    this._logger("warn", [].slice.call(arguments));
+
+                } else if (window.console && console.log) {
+
+                    this._logger("log", [].slice.call(arguments));
+
+                } else if (window.opera && window.opera.postError) {
+
+                    window.opera.postError("WARNING: " + out);
+
+                }
+            }
+        },
+        
+        /**
+         * Adds a message to the console.
+         *
+         * @param {String} out the message
+        **/
+        log: function(out) {
+            if (this.level < 1) {
+                if (window.console && console.log) {
+
+                    [].unshift.call(arguments, 'Debug:');
+
+                    this._logger("log", [].slice.call(arguments));
+
+                } else if (window.opera && window.opera.postError) {
+
+                    window.opera.postError("DEBUG: " + out);
+
+                }
+            }
+        },
+
+        _logger: function(type, arr) {
+
+            this.history.push({type:arr});
+
+            if (console.log.apply) {
+
+                console[type].apply(console, arr);
+
+            } else {
+
+                console[type](arr);
+            }
+        },
+        
+        _stackTrace: function() {
+
+            this.log(this.history);
         }
     };
 
@@ -1195,12 +1347,12 @@ GUI = (function($) {
         error = utils.isType("string", id, "module ID") || utils.isType("function", creator, "creator") || utils.isType("object", options, "option parameter");
 
         if (error) {
-          this.log("could not register module '" + id + "': " + error);
+          this.debug.warn("could not register module '" + id + "': " + error);
           return this;
         }
 
         if (id in this._modules) {
-          this.log("module " + id + " was already registered");
+          this.debug.log("module " + id + " was already registered");
           return this;
         }
 
@@ -1515,7 +1667,7 @@ GUI = (function($) {
       * @return this {object}
     **/
     GUI.prototype._fail = function(ev, cb) {
-        this.log(ev);
+        this.debug.warn(ev);
 
         cb(new Error("could not start module: " + ev.message));
 
@@ -1709,7 +1861,6 @@ GUI = (function($) {
 })(jQuery);
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
 * @module: $.GUI jQuery namespace          * 
 * ---------------------------------------- */
 ;(function($){
@@ -1741,370 +1892,1263 @@ GUI = (function($) {
     };
 
 })(jQuery);
-;/* Fog Library */
-$.GUI().create('Misty', function(G) {
-    // Create an array to store our particles
-    var particles = [];
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: MVC Model object class          * 
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+    var plugin;
 
-    // The amount of particles to render
-    var particleCount = 30;
+    Model = (function(superClass) {
 
-    // The maximum velocity in each direction
-    var maxVelocity = 2;
+        // extend model object with superClass properties
+        utils.extend(Model, superClass);
 
-    // The target frames per second (how often do we want to update / redraw the scene)
-    var targetFPS = 33;
+        function Model(obj) {
+            // call super class ctor
+            Model.__super__.constructor.call(this);
 
-    // Set the dimensions of the canvas as variables so they can be used.
-    var canvasWidth = 400;
-    var canvasHeight = 400;
+            // combine model object with passed model
+            this.combine(obj);
 
-    // Create an image object (only need one instance)
-    var imageObj = new Image();
+            /** 
+             * Set property of current Model object
+             *
+             * @param key {object} {string} - the object or string to merge into Model class 
+             * @param val {various} = value of key and can be any super type 
+             * @param silent {boolean} - rather or not to fire model change event 
+             * @return this {object} 
+            **/
+            this.set = function(key, val, silent) {
+                var k;
 
-    // Once the image has been downloaded then set the image on all of the particles
-    imageObj.onload = function() {
-        particles.forEach(function(particle) {
-                particle.setImage(imageObj);
-        });
-    };
-
-    // Once the callback is arranged then set the source of the image
-    imageObj.src = "img/fog.png";
-
-    // A function to create a particle object.
-    function Particle(context) {
-
-        // Set the initial x and y positions
-        this.x = 0;
-        this.y = 0;
-
-        // Set the initial velocity
-        this.xVelocity = 0;
-        this.yVelocity = 0;
-
-        // Set the radius
-        this.radius = 5;
-
-        // Store the context which will be used to draw the particle
-        this.context = context;
-
-        // The function to draw the particle on the canvas.
-        this.draw = function() {
-            
-            // If an image is set draw it
-            if(this.image){
-                this.context.drawImage(this.image, this.x-128, this.y-128);         
-                // If the image is being rendered do not draw the circle so break out of the draw function                
-                return;
-            }
-            // Draw the circle as before, with the addition of using the position and the radius from this object.
-            this.context.beginPath();
-            this.context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-            this.context.fillStyle = "rgba(0, 255, 255, 0)";
-            this.context.fill();
-            this.context.closePath();
-        };
-
-        // Update the particle.
-        this.update = function() {
-            // Update the position of the particle with the addition of the velocity.
-            this.x += this.xVelocity;
-            this.y += this.yVelocity;
-
-            // Check if has crossed the right edge
-            if (this.x >= canvasWidth) {
-                this.xVelocity = -this.xVelocity;
-                this.x = canvasWidth;
-            }
-            // Check if has crossed the left edge
-            else if (this.x <= 0) {
-                this.xVelocity = -this.xVelocity;
-                this.x = 0;
-            }
-
-            // Check if has crossed the bottom edge
-            if (this.y >= canvasHeight) {
-                this.yVelocity = -this.yVelocity;
-                this.y = canvasHeight;
-            }
-            
-            // Check if has crossed the top edge
-            else if (this.y <= 0) {
-                this.yVelocity = -this.yVelocity;
-                this.y = 0;
-            }
-        };
-
-        // A function to set the position of the particle.
-        this.setPosition = function(x, y) {
-            this.x = x;
-            this.y = y;
-        };
-
-        // Function to set the velocity.
-        this.setVelocity = function(x, y) {
-            this.xVelocity = x;
-            this.yVelocity = y;
-        };
-        
-        this.setImage = function(image){
-            this.image = image;
-        }
-    }
-
-    // A function to generate a random number between 2 values
-    function generateRandom(min, max){
-        return Math.random() * (max - min) + min;
-    }
-
-    // The canvas context if it is defined.
-    var context;
-
-    // Initialise the scene and set the context if possible
-    function init() {
-        var canvas = document.getElementById('bg-canvas');
-        if (canvas.getContext) {
-
-            // Set the context variable so it can be re-used
-            context = canvas.getContext('2d');
-
-            // Create the particles and set their initial positions and velocities
-            for(var i=0; i < particleCount; ++i){
-                var particle = new Particle(context);
-                
-                // Set the position to be inside the canvas bounds
-                particle.setPosition(generateRandom(0, canvasWidth), generateRandom(0, canvasHeight));
-                
-                // Set the initial velocity to be either random and either negative or positive
-                particle.setVelocity(generateRandom(-maxVelocity, maxVelocity), generateRandom(-maxVelocity, maxVelocity));
-                particles.push(particle);            
-            }
-        }
-        else {
-            alert("Please use a modern browser");
-        }
-    }
-
-    // The function to draw the scene
-    function draw() {
-        // draw clear canvas 
-        context.clearRect(0,0,canvasWidth,canvasHeight);
-
-        // Go through all of the particles and draw them.
-        particles.forEach(function(particle) {
-            particle.draw();
-        });
-    }
-
-    // Update the scene
-    function update() {
-        particles.forEach(function(particle) {
-            particle.update();
-        });
-    }
-
-    return {
-        fn: function() {
-            console.log('starting misty library.');
-            // Initialize the scene
-            init();
-
-            // If the context is set then we can draw the scene (if not then the browser does not support canvas)
-            if (context) {
-                setInterval(function() {
-                    // Update the scene befoe drawing
-                    update();
-
-                    // Draw the scene
-                    draw();
-                }, 1000 / targetFPS);
-            }
-        },
-    };
-}).start('Misty');
-;/* Stargaze library */
-$.GUI().create('Stargaze', function(G){
-
-    var Stargaze = function(canvas, options){
-
-        var $canvas = $(canvas) || null,
-            context = (canvas) ? canvas.getContext('2d') : null,
-            defaults = {
-                star: {
-                    color: 'rgba(255, 255, 255, .7)',
-                    width: 1
-                },
-                line: {
-                    color: 'rgba(255, 255, 255, .7)',
-                    width: 0.2
-                },
-                position: {
-                    x: 0, 
-                    y: 0 
-                },
-                width: window.innerWidth,
-                height: window.innerHeight,
-                velocity: 0.1,
-                length: 100,
-                distance: 100,
-                radius: 150,
-                stars: []
-            },
-            config = $.extend(true, {}, defaults, options);
-
-        function Star (){
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-
-            this.vx = (config.velocity - (Math.random() * 0.5));
-            this.vy = (config.velocity - (Math.random() * 0.5));
-
-            this.radius = Math.random() * config.star.width;
-        }
-
-        Star.prototype = {
-
-            create: function(){
-                context.beginPath();
-                context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                context.fill();
-            },
-
-            animate: function(){
-                var i;
-
-                for(i = 0; i < config.length; i++){
-                    var star = config.stars[i];
-
-                    if(star.y < 0 || star.y > canvas.height){
-                        star.vx = star.vx;
-                        star.vy = - star.vy;
-
-                    }else if (star.x < 0 || star.x > canvas.width){
-                        star.vx = - star.vx;
-                        star.vy = star.vy;
-                    }
-
-                    star.x += star.vx;
-                    star.y += star.vy;
+                if (!silent || silent === null) {
+                    silent = false;
                 }
-            },
 
-            line:function(){
-                var length = config.length,
-                    iStar,
-                    jStar,
-                    i,
-                    j;
+                switch (typeof key) {
 
-                for(i = 0; i < length; i++){
-                    for(j = 0; j < length; j++){
-                        iStar = config.stars[i];
-                        jStar = config.stars[j];
+                    case "object":
 
-                        if (
-                            (iStar.x - jStar.x) < config.distance &&
-                            (iStar.y - jStar.y) < config.distance &&
-                            (iStar.x - jStar.x) > - config.distance &&
-                            (iStar.y - jStar.y) > - config.distance
-                        ) {
-                            if (
-                                (iStar.x - config.position.x) < config.radius &&
-                                (iStar.y - config.position.y) < config.radius &&
-                                (iStar.x - config.position.x) > - config.radius &&
-                                (iStar.y - config.position.y) > - config.radius
-                            ) {
-                                context.beginPath();
-                                context.moveTo(iStar.x, iStar.y);
-                                context.lineTo(jStar.x, jStar.y);
-                                context.stroke();
-                                context.closePath();
+                        for (k in key) {
+
+                            v = key[k];
+                            this.set(k, v, true);
+                        }
+
+                        if (!silent) {
+                            return this.fire(Model.CHANGED, (function() {
+                                var results = [], k;
+
+                                for (k in key) {
+                                    v = key[k];
+                                    results.push(k);
+                                }
+
+                                return results;
+
+                            })());
+                        }
+                        break;
+
+                    case "string":
+                        if (!(key === "set" || key === "get") && this[key] !== val) {
+                            this[key] = val;
+
+                            if (!silent) {
+                                this.fire(Model.CHANGED, [key]);
+                            }
+                        } else {
+
+                            if (typeof console !== "undefined" && console !== null) {
+
+                                if (typeof console.error === "function") {
+                                    console.error("key is not a string");
+                                }
                             }
                         }
-                    }
+
+                    return this;
+                }
+            };
+        }
+
+        /** 
+         * Extend Model object with passed object properies 
+         *
+         * @param obj {object} - the object to merge into Model class 
+         * @return this {object} 
+        **/
+        Model.prototype.combine = function(obj) {
+            var k, v;
+
+            for (k in obj) {
+                v = obj[k];
+
+                if (this[k] === null) {
+
+                    this[k] = v;
                 }
             }
+
+            return this;
         };
 
-        this.createStars = function(){
-            var length = config.length,
-                star, i;
+        /** 
+         * Handler that executes when Model object changes 
+         *
+         * @param cb {function} - callback method for event register 
+         * @param context {object} - context to use when registering event 
+         * @return {function} - executed pub / sub 
+        **/
+        Model.prototype.change = function(cb, context) {
+            if (typeof cb === "function") {
 
-            context.clearRect(0, 0, canvas.width, canvas.height);
+                // register model change event
+                return this.add(Model.CHANGED, cb, context);
 
-            for(i = 0; i < length; i++){
-                config.stars.push(new Star());
+            } else if (arguments.length === 0) {
 
-                star = config.stars[i];
-                star.create();
-            }
-
-            star.line();
-            star.animate();
-        };
-
-        this.setCanvas = function(){
-            canvas.width = config.width;
-            canvas.height = config.height;
-        };
-
-        this.setContext = function(){
-            context.fillStyle = config.star.color;
-            context.strokeStyle = config.line.color;
-            context.lineWidth = config.line.width;
-        };
-
-        this.setInitialPosition = function(){
-            if(!options || !options.hasOwnProperty('position')){
-                config.position = {
-                    x: canvas.width * 0.5,
-                    y: canvas.height * 0.5
-                };
+                // publish model change event
+                return this.fire(Model.CHANGED);
             }
         };
 
-        this.loop = function(callback){
-            callback();
+        Model.prototype.notify = function() {
 
-            window.requestAnimationFrame(function(){
-                this.loop(callback);
-            }.bind(this));
+            return this.change();
         };
 
-        this.bind = function(){
-            $(document).on('mousemove', function(e){
-                config.position.x = e.pageX - $canvas.offset().left;
-                config.position.y = e.pageY - $canvas.offset().top;
-            });
+        Model.prototype.get = function(key) {
+
+            return this[key];
         };
 
-        this.init = function(){
-            this.setCanvas();
-            this.setContext();
-            this.setInitialPosition();
-            this.loop(this.createStars);
-            this.bind();
+        Model.prototype.toJSON = function() {
+            var json = {}, key, value;
+
+            for (key in this) {
+
+                if (!utils.hasProp.call(this, key)) {
+
+                    continue;
+                }
+
+                value = this[key];
+                json[key] = value;
+            }
+
+            return json;
         };
-    };
+
+        Model.CHANGED = "changed";
+
+        return Model;
+
+    })(G.Broker);
 
     return {
-        fn:function(){
-            var argc = arguments[0],
-                $elem = argc[0],
-                opts = argc[1];
-
-            return new Stargaze($elem, opts).init();
-        },
+        load: function(api) {
+            // extend api
+            api.Model = Model;
+        }
     };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: MVC View object class           * 
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+    var plugin, View;
 
-}).start('Stargaze');
-;/* Slider using GUI Extension */
+    View = (function() {
+
+        function View(model) {
+
+            if (model) {
+                return this.setModel(model);
+            }
+      
+            this.setModel = function(obj) {
+                this.model = obj;
+
+                return this.model.change((function() {
+
+                    return this.render();
+
+                }), this);
+            };
+
+            this.render = function() {
+                console.log('Render method called in View.');
+            };
+        }
+
+        return View;
+
+    })();
+
+    return {
+        load: function(sandbox) {
+            sandbox.View = View;
+        },
+        unload: function(){}
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @author: Garrett Haptonstall (FearDread) *
+* @module: MVC Controller class module     * 
+* ---------------------------------------- */
+$.GUI().create('Controller', function(G) {
+    var Controller;
+
+    Controller = (function() {
+
+      function Controller(model, view) {
+
+          this.model = model;
+
+          this.view = view;
+      }
+
+      return Controller;
+
+    })();
+
+    GUI.Model = Model;
+
+    GUI.View = View;
+
+    GUI.Controller = Controller;
+
+    return {
+        load: function() {
+            console.log('Controller class :: ', Controller);
+        },
+        unload: function() {}
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Basic Router implementation     * 
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+
+    function Router() {
+        return {
+            routes: [],
+            mode: null,
+            root: '/',
+            config: function(options) {
+                this.mode = options && options.mode && options.mode == 'history' && !!(history.pushState) ? 'history' : 'hash';
+                this.root = options && options.root ? '/' + this.clearSlashes(options.root) + '/' : '/';
+
+                return this;
+            },
+
+            getFragment: function() {
+                var match, fragment = '';
+
+                if(this.mode === 'history') {
+                    fragment = this.clearSlashes(decodeURI(location.pathname + location.search));
+                    fragment = fragment.replace(/\?(.*)$/, '');
+                    fragment = this.root != '/' ? fragment.replace(this.root, '') : fragment;
+
+                } else {
+                    match = window.location.href.match(/#(.*)$/);
+                    fragment = match ? match[1] : '';
+                }
+                
+                return this.clearSlashes(fragment);
+            },
+
+            clearSlashes: function(path) {
+
+                return path.toString().replace(/\/$/, '').replace(/^\//, '');
+            },
+
+            add: function(re, handler) {
+                if(utils.isFunc(re)) {
+                    handler = re;
+                    re = '';
+                }
+
+                this.routes.push({ re: re, handler: handler});
+
+                return this;
+            },
+
+            remove: function(param) {
+                var i, route;
+
+                for (i = 0; i < this.routes.length; i++) {
+                    route = this.routes[i];
+
+                    if(route.handler === param || route.re.toString() === param.toString()) {
+                        this.routes.splice(i, 1); 
+
+                        return this;
+                    }
+                }
+
+                return this;
+            },
+
+            flush: function() {
+                this.routes = [];
+                this.mode = null;
+                this.root = '/';
+
+                return this;
+            },
+
+            check: function(f) {
+                var i, match,
+                    fragment = f || this.getFragment();
+
+                for(i = 0; i < this.routes.length; i++) {
+                    match = fragment.match(this.routes[i].re);
+
+                    if(match) {
+                        match.shift();
+                        
+                        this.routes[i].handler.apply({}, match);
+
+                        return this;
+                    }           
+                }
+
+                return this;
+            },
+
+            listen: function() {
+                var self = this,
+                    current = self.getFragment(),
+                    fn = function() {
+                        if(current !== self.getFragment()) {
+
+                            current = self.getFragment();
+
+                            self.check(current);
+                        }
+                    };
+
+                clearInterval(this.interval);
+                this.interval = setInterval(fn, 50);
+
+                return this;
+            },
+
+            navigate: function(path) {
+                path = path ? path : '';
+
+                if(this.mode === 'history') {
+
+                    history.pushState(null, null, this.root + this.clearSlashes(path));
+
+                } else {
+
+                    window.location.href.match(/#(.*)$/);
+                    window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
+                }
+
+                return this;
+            }
+        };
+    }
+
+
+    function _load(api) {
+        api.Router = new Router();
+    }
+
+    return {
+        load: _load
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Lang class extending native     * 
+* types with helper methods                * 
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+
+    var strDash = /([a-z\d])([A-Z])/g,
+        strUndHash = /_|-/,
+        strQuote = /"/g,
+        strColons = /\=\=/,
+        strWords = /([A-Z]+)([A-Z][a-z])/g,
+        strLowUp = /([a-z\d])([A-Z])/g,
+        strReplacer = /\{([^\}]+)\}/g,
+        strSingleQuote = /'/g,
+        strHyphenMatch = /-+(.)?/g,
+        strCamelMatch = /[a-z][A-Z]/g;
+
+    function convert(content) {
+        var invalid;
+
+        // Convert bad values into empty strings
+        invalid = content === null || content === undefined || isNaN(content) && '' + content === 'NaN';
+
+        return '' + ((invalid) ? '' : content);
+    }
+
+    function isContainer(current) {
+        return /^f|^o/.test(typeof current);
+    }
+
+    function next(obj, prop, add) {
+        var result = obj[prop];
+
+        if (result === undefined && add === true) {
+
+            result = obj[prop] = {};
+        }
+
+        return result;
+    }
+
+    function _load(api) {
+
+        api.Lang = {
+
+            undHash: strUndHash,
+
+            replacer: strReplacer,
+
+            esc: function(content) {
+                return convert(content)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(strQuote, '&#34;')
+                    .replace(strSingleQuote, '&#39;');
+            },
+
+            encode:function(string){
+                return encodeURIComponent(string);
+            },
+
+            decode:function(string){
+                return decodeURIComponent(string);
+            },
+
+            getObj: function (name, roots, add) {
+                // The parts of the name we are looking up
+                var parts = name ? name.split('.') : [],
+                    length = parts.length,
+                    current, r = 0,
+                    i, par, rootsLength;
+
+                // Make sure roots is an `array`.
+                roots = utils.isArr(roots) ? roots : [roots || window];
+                rootsLength = roots.length;
+
+                if (!length) {
+                    return roots[0];
+                }
+
+                // For each root, mark it as current.
+                for (r; r < rootsLength; r++) {
+                    current = roots[r];
+                    par = undefined;
+
+                    // Walk current to the 2nd to last object or until there
+                    // is not a container.
+                    for (i = 0; i < length && isContainer(current); i++) {
+                        par = current;
+                        current = next(par, parts[i]);
+                    }
+
+                    // If we found property break cycle
+                    if (par !== undefined && current !== undefined) {
+                        break;
+                    }
+                }
+                // Remove property from found container
+                if (add === false && current !== undefined) {
+                    delete par[parts[i - 1]];
+                }
+                // When adding property add it to the first root
+                if (add === true && current === undefined) {
+                    current = roots[0];
+
+                    for (i = 0; i < length && isContainer(current); i++) {
+                        current = next(current, parts[i], true);
+                    }
+                }
+
+                return current;
+            },
+
+            capitalize: function (s, cache) {
+                // Used to make newId.
+                return s.charAt(0).toUpperCase() + s.slice(1);
+            },
+
+            camelize: function (str) {
+                return convert(str)
+                    .replace(strHyphenMatch, function (match, chr) {
+                        return chr ? chr.toUpperCase() : '';
+                    });
+            },
+
+            hyphenate: function (str) {
+                return convert(str)
+                    .replace(strCamelMatch, function (str, offset) {
+                        return str.charAt(0) + '-' + str.charAt(1)
+                            .toLowerCase();
+                        });
+            },
+
+            underscore: function (s) {
+                return s.replace(strColons, '/')
+                    .replace(strWords, '$1_$2')
+                    .replace(strLowUp, '$1_$2')
+                    .replace(strDash, '_')
+                    .toLowerCase();
+            },
+
+            sub: function (str, data, remove) {
+                var obs = [];
+
+                str = str || '';
+
+                obs.push(str.replace(strReplacer, function (whole, inside) {
+                    // Convert inside to type.
+                    var ob = this.getObj(inside, data, remove === true ? false : undefined);
+
+                    if (ob === undefined || ob === null) {
+                        obs = null;
+                        return '';
+                    }
+
+                    // If a container, push into objs (which will return objects found).
+                    if (isContainer(ob) && obs) {
+                        obs.push(ob);
+                        return '';
+                    }
+
+                    return '' + ob;
+
+                }));
+
+                return obs === null ? obs : obs.length <= 1 ? obs[0] : obs;
+            }
+        }; 
+    }
+
+    return {
+        load: _load 
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Array extended helper methods   * 
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+
+    return {
+
+        load: function(api) {
+
+            api.Array = [];
+
+            /**
+             * Create new array instance with passed array / object 
+             *
+             * @param arr {array} - array or object to create new instance from 
+             * @return {array} - new array instance 
+            **/
+            api.Array.create = function(arr) {
+                var _ret = [];
+
+                api.each(arr, function(property, index) {
+
+                    _ret[index] = property;
+
+                });
+
+                return _ret;
+            };
+
+            /**
+             * Fallback method of Array.prototype.indexOf 
+             *
+             * @param item {string} - string to check for in array 
+             * @return {number} - +1 for found, -1 for not found 
+            **/
+            api.Array.index = function(item) {
+                var i;
+
+                for (i = 0, i = this.length; i < 1; i++) {
+                    if (i in this && this[i] === item) {
+                        return i;
+                    }
+                }
+
+                return -1;
+            };
+
+            /**
+             * Determine if passed object has array like format 
+             *
+             * @param obj {object} - object to test format 
+             * @return boolean - typeof determination of array format 
+            **/
+            api.Array.isLike = function(obj) {
+                var length = "length" in obj && obj.length;
+
+                return typeof arr !== "function" && ( length === 0 || typeof length === "number" && length > 0 && ( length - 1 ) in obj );
+
+            };
+        }
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Object extended helper methods  * 
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+
+    return {
+
+        load: function(api) {
+            
+            api.Object = {};
+
+            /**
+             * Compare methods used to compare two objects
+            **/
+            api.Object.compare = {
+                'null': function() {
+                    return true;
+                },
+                i: function(a, b) {
+                    return ('' + a).toLowerCase() === ('' + b).toLowerCase();
+                },
+                eq: function(a, b) {
+                    return a === b;
+                },
+                eqeq: function(a, b) {
+                    return a == b;
+                },
+                similar: function(a, b) {
+                    return a == b;
+                }
+            };
+
+            /* Shorthand call to jQuery isPlainObject */
+            api.Object.isPlain = $.isPlainObject;
+
+            /**
+             * Shorthand method to the native hasOwnProperty call 
+             * 
+             * @param obj {object} - the object to look through
+             * @param prop {string} - the property to check for
+             * @return {boolean}
+            **/
+            api.Object.has = function(obj, prop) {
+                return Object.hasOwnProperty.call(obj, prop);
+            };
+
+            /**
+             * Returns true if an Object is a subset of another Object
+             *
+             * @param {object} subset
+             * @param {object} set
+             * @param {object} compare
+             * @returns {boolean} Whether or not subset is a subset of set
+            **/
+            api.Object.subset = function(subset, set, compare) {
+                compare = compare || {};
+
+                for (var prop in set) {
+                    if (!same(subset[prop], set[prop], compare[prop], subset, set)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            };
+
+            /**
+             * Returns the sets in 'sets' that are a subset of checkSet
+             *
+             * @param {object} check
+             * @param {object} sets
+             * @param {object} compare
+             * @return {object}
+            **/
+            api.Object.subsets = function(check, sets, compare) {
+                var len = sets.length,
+                        subsets = [];
+                for (var i = 0; i < len; i++) {
+                        //check this subset
+                        var set = sets[i];
+                        if (can.Object.subset(checkSet, set, compares)) {
+                                subsets.push(set);
+                        }
+                }
+                return subsets;
+
+            };
+
+            /**
+             * Limit the number of keys that an object can have 
+             *
+             * @param obj {object} - the object to limit keys on
+             * @param limit {number} - how many keys obj is allowed
+             * @return {object}
+            **/
+            api.Object.limit = function(obj, limit) {
+                var _ret, keys, count;
+
+                keys = Object.keys(obj);
+
+                if (keys.length < 1) return [];
+
+                _ret = {};
+                count = 0;
+
+                api.each(keys, function(key, index) {
+                    if (count >= limit) {
+                        return false;
+                    }
+
+                    _ret[key] = obj[key];
+
+                    count += 1;
+                });
+
+                return _ret;
+            };
+
+            /**
+             * Checks if two objects are the same.
+             *
+             * @param {Object} a An object to compare against `b`.
+             * @param {Object} b An object to compare against `a`.
+             * @param {Object} [compares] An object that specifies how to compare properties.
+             * @return {boolean}
+            **/
+            api.Object.same = function(a, b, compares, aParent, bParent, deep) {
+                var i, bCopy, prop, aType = typeof a,
+                    aArray = api.utils.isArr(a),
+                    comparesType = typeof compares,
+                    compare;
+
+                if (api.utils.isStr(comparesType) || compares === null) {
+
+                    compares = this.compare[compares];
+                    comparesType = 'function';
+                }
+
+                if (api.utils.isFunc(comparesType)) {
+                    return compares(a, b, aParent, bParent);
+                }
+
+                compares = compares || {};
+
+                // run compare tests
+                if (a === null || b === null) {
+                    return a === b;
+                }
+                if (a instanceof Date || b instanceof Date) {
+                    return a === b;
+                }
+                if (deep === -1) {
+                    return aType === 'object' || a === b;
+                }
+                if (aType !== typeof b || aArray !== isArray(b)) {
+                    return false;
+                }
+                if (a === b) {
+                    return true;
+                }
+                if (aArray) {
+                    if (a.length !== b.length) {
+                        return false;
+                    }
+
+                    for (i = 0; i < a.length; i++) {
+                        compare = compares[i] === undefined ? compares['*'] : compares[i];
+
+                        if (!same(a[i], b[i], a, b, compare)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+
+                } else if (api.utils.isObj(aType) || api.utils.isFunc(aType)) {
+                    // merge b obj with new object instance
+                    bCopy = api.utils.merge({}, b);
+
+                    for (prop in a) {
+                        compare = compares[prop] === undefined ? compares['*'] : compares[prop];
+
+                        if (!same(a[prop], b[prop], compare, a, b, deep === false ? -1 : undefined)) {
+
+                            return false;
+                        }
+
+                        delete bCopy[prop];
+                    }
+
+                    // go through bCopy props ... if there is no compare .. return false
+                    for (prop in bCopy) {
+
+                        if (compares[prop] === undefined || !same(undefined, b[prop], compares[prop], a, b, deep === false ? -1 : undefined)) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                return false;
+            };
+        }
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Cache, handle reading & writing * 
+* to local storage                         * 
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+
+    return {
+
+        load: function(api) {
+
+            api.cache = {
+
+                _cached: {},
+                
+                setup: function() {
+                    // setup data
+                    if (typeof window.localStorage !== 'undefined') {
+
+                        this._cached = JSON.parse(window.localStorage.getItem(this.cachedKey())) || {};
+
+                    } else {
+
+                        this._cached = {};
+                    }
+                },
+
+                compare: {},
+
+                _compare: function(prop, itemData, paramData) {
+
+                    return api.Object.same(itemData, paramData, this.compare[prop]);
+                },
+
+                cachedKey: function() {
+
+                    return 'cached' + this._shortName;
+                },
+
+                cacheClear: function() {
+                    window.localStorage.removeItem(this.cachedKey());
+
+                    this._cached = {};
+                },
+
+                cacheItems: function(items) {
+                    var data = this._cached,
+                        id = this.id;
+
+                    api.each(items, function (item) {
+                        var idVal = item[id],
+
+                        obj = data[idVal];
+
+                        if (obj) {
+
+                            api.utils.merge(obj, item);
+
+                        } else {
+
+                            data[idVal] = item;
+                        }
+                    });
+
+                    window.localStorage.setItem(this.cachedKey(), JSON.stringify(data));
+                },
+
+                findAllCached: function(params) {
+                    // remove anything not filtering ....
+                    //   - sorting, grouping, limit, and offset
+                    var id, list = [], item,
+                        data = this._cached;
+
+                    for (id in data) {
+                        item = data[id];
+
+                        if (this.filter(item, params) !== false) {
+
+                            list.push(item);
+
+                        }
+                    }
+
+                    // do sorting / grouping
+                    list = this.pagination(this.sort(list, params), params);
+
+                    // take limit and offset ...
+                    return list;
+                },
+
+                pagination: function(items, params) {
+                    var offset = parseInt(params.offset, 10) || 0,
+                        limit = parseInt(params.limit, 10) || items.length - offset;
+
+                    return items.slice(offset, offset + limit);
+                },
+
+                /**
+                 * Sorts the object in place
+                 *
+                 * By default uses an order property in the param
+                 * @param {Object} items
+                 */
+                sort: function(items, params) {
+                    api.each((params.order || [])
+                        .slice(0)
+                        .reverse(), function(name, i) {
+                            var split = name.split(' ');
+
+                            items = items.sort(function (a, b) {
+                                if (split[1].toUpperCase() !== 'ASC') {
+
+                                    if (a[split[0]] < b[split[0]]) {
+
+                                        return 1;
+
+                                    } else if (a[split[0]] === b[split[0]]) {
+
+                                        return 0;
+
+                                    } else {
+
+                                        return -1;
+                                    }
+
+                                } else {
+
+                                    if (a[split[0]] < b[split[0]]) {
+
+                                        return -1;
+
+                                    } else if (a[split[0]] === b[split[0]]) {
+
+                                        return 0;
+
+                                    } else {
+
+                                        return 1;
+                                    }
+                                }
+                            });
+                        });
+
+                    return items;
+                },
+
+                /**
+                 * Called with the item and the current params.
+                 * Should return __false__ if the item should be filtered out of the result.
+                 *
+                 * By default this goes through each param in params and see if it matches the
+                 * same property in item (if item has the property defined).
+                 * @param {Object} item
+                 * @param {Object} params
+                 */
+                filter: function (item, params) {
+                    // go through each param in params
+                    var param, paramValue;
+
+                    for (param in params) {
+                        paramValue = params[param];
+
+                        // in fixtures we ignore null, I don't want to now
+                        if (paramValue !== undefined && item[param] !== undefined && !this._compare(param, item[param], paramValue)) {
+                            return false;
+                        }
+                    }
+                },
+
+                makeFindAll: function (findAll) {
+                    return function (params, success, error) {
+                        var list, 
+                            def = new api.utils.defer(),
+                            // make the ajax request right away
+                            findAllDeferred = findAll(params),
+                            data = this.findAllCached(params);
+
+                        def.then(success, error);
+
+                        if (data.length) {
+                            list = this.models(data);
+
+                            findAllDeferred.then(can.proxy(function(json) {
+
+                                this.cacheItems(json);
+
+                                list.attr(json, true); // TODO: update cached instances
+
+                            }, this), function() {
+
+                                can.trigger(list, 'error', arguments);
+                            });
+
+                            def.resolve(list);
+
+                        } else {
+                            findAllDeferred.then(can.proxy(function (data) {
+                                // Create our model instance
+                                list = this.models(data);
+
+                                // Save the data to local storage
+                                this.cacheItems(data);
+
+                                // Resolve the deferred with our instance
+                                def.resolve(list);
+
+                            }, this), function(data) {
+
+                                def.reject(data);
+                            });
+                        }
+
+                        return def;
+                    };
+                },
+
+                makeFindOne: function(findOne) {
+                    return function (params, success, error) {
+                        var instance, 
+                            def = new api.utils.defer(),
+                            // Make the ajax request right away
+                            findOneDeferred = findOne(params),
+                            // grab instance from cached data
+                            data = this._cached[params[this.id]];
+
+                        // or try to load it
+                        data = data || this.findAllCached(params)[0];
+
+                        // Bind success and error callbacks to the deferred
+                        def.then(success, error);
+
+                        // If we had existing local storage data...
+                        if (data) {
+                            // Create our model instance
+                            instance = this.model(data);
+
+                            findOneDeferred.then(function(json) {
+
+                                // Update the instance when the ajax respone returns
+                                instance.updated(json);
+
+                            }, function (data) {
+
+                                can.trigger(instance, 'error', data);
+                            });
+
+                            // Resolve the deferred with our instance
+                            def.resolve(instance); // Otherwise hand off the deferred to the ajax request
+                        } else {
+                            findOneDeferred.then(can.proxy(function (data) {
+                                // Save the data to local storage
+                                this.cacheItems([data]);
+
+                                // Create our model instance
+                                instance = this.model(data);
+
+                                // Resolve the deferred with our instance
+                                def.resolve(instance);
+
+                            }, this), function (data) {
+
+                                def.reject(data);
+                            });
+                        }
+
+                        return def;
+                    };
+                },
+
+                updated: function(attrs) {
+                    // Save the model to local storage
+                    this.constructor.cacheItems([this.attr()]);
+
+                    // Update our model
+                    can.Model.prototype.updated.apply(this, arguments);
+                },
+
+                created: function(attrs) {
+                    // Save the model to local storage
+                    this.constructor.cacheItems([this.attr()]);
+
+                    // Update our model
+                    can.Model.prototype.created.apply(this, arguments);
+                },
+
+                destroyed: function(attrs) {
+                    // Save the model to local storage
+                    delete this.constructor._cached[this[this.constructor.id]];
+
+                    // Update our model
+                    can.Model.prototype.destroyed.apply(this, arguments);
+                }
+            };
+        }
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Custom cookie api object        *
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+
+    function _load(api) {
+
+        api.cookie = {
+
+            has:function(cname){
+                if (!cname) { 
+                    return false; 
+                }
+
+                return (
+
+                    new RegExp("(?:^|;\\s*)" + api.Lang.encode(cname).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")
+
+                ).test(document.cookie);
+            },
+
+            get: function(cname) {
+                if (!cname) { 
+                    return null; 
+                }
+
+                return api.Lang.decode(document.cookie.replace(
+
+                    new RegExp("(?:(?:^|.*;)\\s*" + api.Lang.encode(cname).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")
+
+                ) || null;
+            },
+
+            set: function(cname, cvalue, opts) {
+                var params = arguments;
+
+                if (params.length > 1 && !api.utils.isFunc(cval)) {
+                    options = api.utils.merge({}, opts); 
+              
+                    if ((typeof options.expires) === 'number') {
+                        var days = options.expires, 
+                            time = options.expires = new Date();
+
+                        time.setMilliseconds(
+                            time.getMilliseconds() + days * 864e+5
+                        );
+                    }
+                }
+
+                document.cookie = [
+                    api.Lang.encode(cname), '=', api.Lang.encode(cvalue),
+                    (options.expires) ? '; expires=' + options.expires.toUTCString() : '',
+                    (options.path) ? '; path=' + options.path : '', 
+                    (options.domain) ? '; domain=' + options.domain : '',
+                    (options.secure) ? '; secure=' + options.secure : '' 
+                ].join('');
+
+                G.log('set cookie ::', document.cookie);
+
+                return true;
+            },
+            
+            remove: function(cname, cpath, cdomain){
+                if (!this.has(cname)) { 
+                    return false; 
+                }
+
+                document.cookie = api.Lang.encode(cname) +
+                    "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" +
+                    (cdomain) ? "; domain=" + cdomain : "" +
+                    (cpath) ? "; path=" + cpath : "";
+
+                return true;
+            },
+
+            list: function() {
+                var index = 0,
+                    regex = /((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, 
+                    keys = document.cookie.replace(regex, '').split(/\s*(?:\=[^;]*)?;\s*/),
+                    length = keys.length;
+
+                while(--length){
+                    keys[index] = api.Lang.decode(keys[index]); 
+
+                    index++;
+                }
+
+                return keys;
+            },
+
+            once:function(){
+                var values, 
+                    params = arguments, 
+                    callback = params[0], 
+                    argc = params.length, 
+                    cname = params[argc - 3],
+                    expires = params[argc - 1],
+                    glob = (typeof params[argc - 2] === "string");
+
+                if(glob){ 
+                    argc++; 
+                }
+
+                if(argc < 3){ 
+                    throw new TypeError("guerrilla.core.once - not enough arguments"); 
+
+                }else if(!api.utils.isFunc(func)) { 
+                    throw new TypeError("guerrilla.core.once - first argument must be a function"); 
+
+                }else if(!cname || /^(?:expires|max\-age|path|domain|secure)$/i.test(cname)){ 
+                    throw new TypeError("guerrilla.core.once - invalid identifier");
+                }
+
+                if(this.has(cname)){
+                    return false;
+                }
+
+                values = (argc > 3) ? params[1] : null || (argc > 4) ? [].slice.call(params, 2, argc - 2) : [];
+
+                func.apply(values);
+
+                this.set(cname, 1, expires || 'Fri, 31 Dec 9999', '/', false);
+
+                return true;
+            }
+        };
+    }
+
+    return {
+        load: _load
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: GUI Layer Slider jQuery plugin  * 
+* ---------------------------------------- */
 $.GUI().create('Glisslider', function(G) {
 
-    var Gliss;
-
-    Gliss = function($el, opts) {
+    var Glisslider = function($el, opts) {
         var _this = this, slider = $el;
         
         // default options
@@ -2403,643 +3447,364 @@ $.GUI().create('Glisslider', function(G) {
 });
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
-* @module: MVC Model object module         * 
+* @module: GUI Star jQuery plugin          * 
 * ---------------------------------------- */
-$.GUI().use(function(G) {
-    var plugin;
+$.GUI().create('Stargaze', function(G) {
 
-    Model = (function(superClass) {
+    var Stargaze = function(canvas, options) {
 
-        utils.extend(Model, superClass);
+        var $canvas = $(canvas) || null,
+            context = (canvas) ? canvas.getContext('2d') : null,
+            defaults = {
+                star: {
+                    color: 'rgba(255, 255, 255, .7)',
+                    width: 1
+                },
+                line: {
+                    color: 'rgba(255, 255, 255, .7)',
+                    width: 0.2
+                },
+                position: {
+                    x: 0, 
+                    y: 0 
+                },
+                width: window.innerWidth,
+                height: window.innerHeight,
+                velocity: 0.1,
+                length: 100,
+                distance: 100,
+                radius: 150,
+                stars: []
+            },
+            config = $.extend(true, {}, defaults, options);
 
-        function Model(obj) {
-            // call super class ctor
-            Model.__super__.constructor.call(this);
+        function Star (){
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
 
-            // combine model object with passed model
-            this.combine(obj);
+            this.vx = (config.velocity - (Math.random() * 0.5));
+            this.vy = (config.velocity - (Math.random() * 0.5));
 
-            /** 
-             * Set property of current Model object
-             *
-             * @param key {object} {string} - the object or string to merge into Model class 
-             * @param val {various} = value of key and can be any super type 
-             * @param silent {boolean} - rather or not to fire model change event 
-             * @return this {object} 
-            **/
-            this.set = function(key, val, silent) {
-                var k;
-
-                if (!silent || silent === null) {
-                    silent = false;
-                }
-
-                switch (typeof key) {
-
-                    case "object":
-
-                        for (k in key) {
-
-                            v = key[k];
-                            this.set(k, v, true);
-                        }
-
-                        if (!silent) {
-                            return this.fire(Model.CHANGED, (function() {
-                                var results = [], k;
-
-                                for (k in key) {
-                                    v = key[k];
-                                    results.push(k);
-                                }
-
-                                return results;
-
-                            })());
-                        }
-                        break;
-
-                    case "string":
-                        if (!(key === "set" || key === "get") && this[key] !== val) {
-                            this[key] = val;
-
-                            if (!silent) {
-                                this.fire(Model.CHANGED, [key]);
-                            }
-                        } else {
-
-                            if (typeof console !== "undefined" && console !== null) {
-
-                                if (typeof console.error === "function") {
-                                    console.error("key is not a string");
-                                }
-                            }
-                        }
-
-                    return this;
-                }
-            };
+            this.radius = Math.random() * config.star.width;
         }
 
-        /** 
-         * Extend Model object with passed object properies 
-         *
-         * @param obj {object} - the object to merge into Model class 
-         * @return this {object} 
-        **/
-        Model.prototype.combine = function(obj) {
-            var k, v;
+        Star.prototype = {
 
-            for (k in obj) {
-                v = obj[k];
+            create: function(){
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                context.fill();
+            },
 
-                if (this[k] === null) {
+            animate: function(){
+                var i;
 
-                    this[k] = v;
+                for(i = 0; i < config.length; i++){
+                    var star = config.stars[i];
+
+                    if(star.y < 0 || star.y > canvas.height){
+                        star.vx = star.vx;
+                        star.vy = - star.vy;
+
+                    }else if (star.x < 0 || star.x > canvas.width){
+                        star.vx = - star.vx;
+                        star.vy = star.vy;
+                    }
+
+                    star.x += star.vx;
+                    star.y += star.vy;
+                }
+            },
+
+            line:function(){
+                var length = config.length,
+                    iStar,
+                    jStar,
+                    i,
+                    j;
+
+                for(i = 0; i < length; i++){
+                    for(j = 0; j < length; j++){
+                        iStar = config.stars[i];
+                        jStar = config.stars[j];
+
+                        if (
+                            (iStar.x - jStar.x) < config.distance &&
+                            (iStar.y - jStar.y) < config.distance &&
+                            (iStar.x - jStar.x) > - config.distance &&
+                            (iStar.y - jStar.y) > - config.distance
+                        ) {
+                            if (
+                                (iStar.x - config.position.x) < config.radius &&
+                                (iStar.y - config.position.y) < config.radius &&
+                                (iStar.x - config.position.x) > - config.radius &&
+                                (iStar.y - config.position.y) > - config.radius
+                            ) {
+                                context.beginPath();
+                                context.moveTo(iStar.x, iStar.y);
+                                context.lineTo(jStar.x, jStar.y);
+                                context.stroke();
+                                context.closePath();
+                            }
+                        }
+                    }
                 }
             }
-
-            return this;
         };
 
-        /** 
-         * Handler that executes when Model object changes 
-         *
-         * @param cb {function} - callback method for event register 
-         * @param context {object} - context to use when registering event 
-         * @return {function} - executed pub / sub 
-        **/
-        Model.prototype.change = function(cb, context) {
-            if (typeof cb === "function") {
+        this.createStars = function(){
+            var length = config.length,
+                star, i;
 
-                // register model change event
-                return this.on(Model.CHANGED, cb, context);
+            context.clearRect(0, 0, canvas.width, canvas.height);
 
-            } else if (arguments.length === 0) {
+            for(i = 0; i < length; i++){
+                config.stars.push(new Star());
 
-                // publish model change event
-                return this.fire(Model.CHANGED);
+                star = config.stars[i];
+                star.create();
+            }
+
+            star.line();
+            star.animate();
+        };
+
+        this.setCanvas = function(){
+            canvas.width = config.width;
+            canvas.height = config.height;
+        };
+
+        this.setContext = function(){
+            context.fillStyle = config.star.color;
+            context.strokeStyle = config.line.color;
+            context.lineWidth = config.line.width;
+        };
+
+        this.setInitialPosition = function(){
+            if(!options || !options.hasOwnProperty('position')){
+                config.position = {
+                    x: canvas.width * 0.5,
+                    y: canvas.height * 0.5
+                };
             }
         };
 
-        return Model;
+        this.loop = function(callback){
+            callback();
 
-    })(G.Broker);
+            window.requestAnimationFrame(function(){
+                this.loop(callback);
+            }.bind(this));
+        };
+
+        this.bind = function(){
+            $(document).on('mousemove', function(e){
+                config.position.x = e.pageX - $canvas.offset().left;
+                config.position.y = e.pageY - $canvas.offset().top;
+            });
+        };
+
+        this.init = function(){
+            this.setCanvas();
+            this.setContext();
+            this.setInitialPosition();
+            this.loop(this.createStars);
+            this.bind();
+        };
+    };
 
     return {
-        load: function(api) {
-            // extend api
-            api.Model = Model;
-        }
+        fn: function() {
+            var argc = arguments[0],
+                $elem = argc[0],
+                opts = argc[1];
+
+            return new Stargaze($elem, opts).init();
+        },
     };
-});
+}).start('Stargaze');
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
-* @module: MVC View class module           * 
+* @module: GUI Fog jQuery plugin           * 
 * ---------------------------------------- */
-$.GUI().use(function(G) {
-    var plugin, View;
+$.GUI().create('Misty', function(G) {
 
-    View = (function() {
+    // Create an array to store our particles
+    var particles = [];
 
-        function View(model) {
+    // The amount of particles to render
+    var particleCount = 30;
 
-            if (model) {
-                return this.setModel(model);
-            }
-      
-            this.setModel = function(obj) {
-                this.model = obj;
+    // The maximum velocity in each direction
+    var maxVelocity = 2;
 
-                return this.model.change((function() {
+    // The target frames per second (how often do we want to update / redraw the scene)
+    var targetFPS = 33;
 
-                    return this.render();
+    // Set the dimensions of the canvas as variables so they can be used.
+    var canvasWidth = 400;
+    var canvasHeight = 400;
 
-                }), this);
-            };
+    // Create an image object (only need one instance)
+    var imageObj = new Image();
 
-            this.render = function() {
-                console.log('Render method called in View.');
-            };
-        }
-
-        return View;
-
-    })();
-
-    return {
-        load: function(sandbox) {
-            sandbox.View = View;
-        },
-        unload: function(){}
+    // Once the image has been downloaded then set the image on all of the particles
+    imageObj.onload = function() {
+        particles.forEach(function(particle) {
+                particle.setImage(imageObj);
+        });
     };
-});
-;/* Native Type Extensions */
-$.GUI().use(function(G) {
 
-    var strDash = /([a-z\d])([A-Z])/g,
-        strUndHash = /_|-/,
-        strQuote = /"/g,
-        strColons = /\=\=/,
-        strWords = /([A-Z]+)([A-Z][a-z])/g,
-        strLowUp = /([a-z\d])([A-Z])/g,
-        strReplacer = /\{([^\}]+)\}/g,
-        strSingleQuote = /'/g,
-        strHyphenMatch = /-+(.)?/g,
-        strCamelMatch = /[a-z][A-Z]/g;
+    // Once the callback is arranged then set the source of the image
+    imageObj.src = "img/fog.png";
 
-    function convert(content) {
-        var invalid;
+    // A function to create a particle object.
+    function Particle(context) {
 
-        // Convert bad values into empty strings
-        invalid = content === null || content === undefined || isNaN(content) && '' + content === 'NaN';
+        // Set the initial x and y positions
+        this.x = 0;
+        this.y = 0;
 
-        return '' + ((invalid) ? '' : content);
-    }
+        // Set the initial velocity
+        this.xVelocity = 0;
+        this.yVelocity = 0;
 
-    function isContainer(current) {
-        return /^f|^o/.test(typeof current);
-    }
+        // Set the radius
+        this.radius = 5;
 
-    function next(obj, prop, add) {
-        var result = obj[prop];
+        // Store the context which will be used to draw the particle
+        this.context = context;
 
-        if (result === undefined && add === true) {
-
-            result = obj[prop] = {};
-        }
-
-        return result;
-    }
-
-    function _load(api) {
-
-        api.Lang = {
-
-            undHash: strUndHash,
-
-            replacer: strReplacer,
-
-            esc: function(content) {
-                return convert(content)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(strQuote, '&#34;')
-                    .replace(strSingleQuote, '&#39;');
-            },
-
-            encode:function(string){
-                return encodeURIComponent(string);
-            },
-
-            decode:function(string){
-                return decodeURIComponent(string);
-            },
-
-            getObj: function (name, roots, add) {
-                // The parts of the name we are looking up
-                var parts = name ? name.split('.') : [],
-                    length = parts.length,
-                    current, r = 0,
-                    i, par, rootsLength;
-
-                // Make sure roots is an `array`.
-                roots = utils.isArr(roots) ? roots : [roots || window];
-                rootsLength = roots.length;
-
-                if (!length) {
-                    return roots[0];
-                }
-
-                // For each root, mark it as current.
-                for (r; r < rootsLength; r++) {
-                    current = roots[r];
-                    par = undefined;
-
-                    // Walk current to the 2nd to last object or until there
-                    // is not a container.
-                    for (i = 0; i < length && isContainer(current); i++) {
-                        par = current;
-                        current = next(par, parts[i]);
-                    }
-
-                    // If we found property break cycle
-                    if (par !== undefined && current !== undefined) {
-                        break;
-                    }
-                }
-                // Remove property from found container
-                if (add === false && current !== undefined) {
-                    delete par[parts[i - 1]];
-                }
-                // When adding property add it to the first root
-                if (add === true && current === undefined) {
-                    current = roots[0];
-
-                    for (i = 0; i < length && isContainer(current); i++) {
-                        current = next(current, parts[i], true);
-                    }
-                }
-
-                return current;
-            },
-
-            capitalize: function (s, cache) {
-                // Used to make newId.
-                return s.charAt(0).toUpperCase() + s.slice(1);
-            },
-
-            camelize: function (str) {
-                return convert(str)
-                    .replace(strHyphenMatch, function (match, chr) {
-                        return chr ? chr.toUpperCase() : '';
-                    });
-            },
-
-            hyphenate: function (str) {
-                return convert(str)
-                    .replace(strCamelMatch, function (str, offset) {
-                        return str.charAt(0) + '-' + str.charAt(1)
-                            .toLowerCase();
-                        });
-            },
-
-            underscore: function (s) {
-                return s.replace(strColons, '/')
-                    .replace(strWords, '$1_$2')
-                    .replace(strLowUp, '$1_$2')
-                    .replace(strDash, '_')
-                    .toLowerCase();
-            },
-
-            sub: function (str, data, remove) {
-                var obs = [];
-
-                str = str || '';
-
-                obs.push(str.replace(strReplacer, function (whole, inside) {
-                    // Convert inside to type.
-                    var ob = this.getObj(inside, data, remove === true ? false : undefined);
-
-                    if (ob === undefined || ob === null) {
-                        obs = null;
-                        return '';
-                    }
-
-                    // If a container, push into objs (which will return objects found).
-                    if (isContainer(ob) && obs) {
-                        obs.push(ob);
-                        return '';
-                    }
-
-                    return '' + ob;
-
-                }));
-
-                return obs === null ? obs : obs.length <= 1 ? obs[0] : obs;
-            }
-        }; 
-    }
-
-    return {
-        load: _load 
-    };
-});
-;/* --------------------------------------- *
-* Guerrilla JS                             *
-* @author: Garrett Haptonstall (FearDread) *
-* @module: Guerrilla.util.Cookie           *
-* ---------------------------------------- */
-$.GUI().use(function(G) {
-
-    function _load(api) {
-
-        api.cookie = {
-
-            has:function(cname){
-                if (!cname) { 
-                    return false; 
-                }
-
-                return (
-
-                    new RegExp("(?:^|;\\s*)" + api.Lang.encode(cname).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")
-
-                ).test(document.cookie);
-            },
-
-            get: function(cname) {
-                if (!cname) { 
-                    return null; 
-                }
-
-                return api.Lang.decode(document.cookie.replace(
-
-                    new RegExp("(?:(?:^|.*;)\\s*" + api.Lang.encode(cname).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")
-
-                ) || null;
-            },
-
-            set: function(cname, cvalue, opts) {
-                var params = arguments;
-
-                if (params.length > 1 && !api.utils.isFunc(cval)) {
-                    options = api.utils.merge({}, opts); 
-              
-                    if ((typeof options.expires) === 'number') {
-                        var days = options.expires, 
-                            time = options.expires = new Date();
-
-                        time.setMilliseconds(
-                            time.getMilliseconds() + days * 864e+5
-                        );
-                    }
-                }
-
-                document.cookie = [
-                    api.Lang.encode(cname), '=', api.Lang.encode(cvalue),
-                    (options.expires) ? '; expires=' + options.expires.toUTCString() : '',
-                    (options.path) ? '; path=' + options.path : '', 
-                    (options.domain) ? '; domain=' + options.domain : '',
-                    (options.secure) ? '; secure=' + options.secure : '' 
-                ].join('');
-
-                G.log('set cookie ::', document.cookie);
-
-                return true;
-            },
+        // The function to draw the particle on the canvas.
+        this.draw = function() {
             
-            remove: function(cname, cpath, cdomain){
-                if (!this.has(cname)) { 
-                    return false; 
-                }
+            // If an image is set draw it
+            if(this.image){
+                this.context.drawImage(this.image, this.x-128, this.y-128);         
+                // If the image is being rendered do not draw the circle so break out of the draw function                
+                return;
+            }
+            // Draw the circle as before, with the addition of using the position and the radius from this object.
+            this.context.beginPath();
+            this.context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+            this.context.fillStyle = "rgba(0, 255, 255, 0)";
+            this.context.fill();
+            this.context.closePath();
+        };
 
-                document.cookie = api.Lang.encode(cname) +
-                    "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" +
-                    (cdomain) ? "; domain=" + cdomain : "" +
-                    (cpath) ? "; path=" + cpath : "";
+        // Update the particle.
+        this.update = function() {
+            // Update the position of the particle with the addition of the velocity.
+            this.x += this.xVelocity;
+            this.y += this.yVelocity;
 
-                return true;
-            },
+            // Check if has crossed the right edge
+            if (this.x >= canvasWidth) {
+                this.xVelocity = -this.xVelocity;
+                this.x = canvasWidth;
+            }
+            // Check if has crossed the left edge
+            else if (this.x <= 0) {
+                this.xVelocity = -this.xVelocity;
+                this.x = 0;
+            }
 
-            list: function() {
-                var index = 0,
-                    regex = /((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, 
-                    keys = document.cookie.replace(regex, '').split(/\s*(?:\=[^;]*)?;\s*/),
-                    length = keys.length;
-
-                while(--length){
-                    keys[index] = api.Lang.decode(keys[index]); 
-
-                    index++;
-                }
-
-                return keys;
-            },
-
-            once:function(){
-                var values, 
-                    params = arguments, 
-                    callback = params[0], 
-                    argc = params.length, 
-                    cname = params[argc - 3],
-                    expires = params[argc - 1],
-                    glob = (typeof params[argc - 2] === "string");
-
-                if(glob){ 
-                    argc++; 
-                }
-
-                if(argc < 3){ 
-                    throw new TypeError("guerrilla.core.once - not enough arguments"); 
-
-                }else if(!api.utils.isFunc(func)) { 
-                    throw new TypeError("guerrilla.core.once - first argument must be a function"); 
-
-                }else if(!cname || /^(?:expires|max\-age|path|domain|secure)$/i.test(cname)){ 
-                    throw new TypeError("guerrilla.core.once - invalid identifier");
-                }
-
-                if(this.has(cname)){
-                    return false;
-                }
-
-                values = (argc > 3) ? params[1] : null || (argc > 4) ? [].slice.call(params, 2, argc - 2) : [];
-
-                func.apply(values);
-
-                this.set(cname, 1, expires || 'Fri, 31 Dec 9999', '/', false);
-
-                return true;
+            // Check if has crossed the bottom edge
+            if (this.y >= canvasHeight) {
+                this.yVelocity = -this.yVelocity;
+                this.y = canvasHeight;
+            }
+            
+            // Check if has crossed the top edge
+            else if (this.y <= 0) {
+                this.yVelocity = -this.yVelocity;
+                this.y = 0;
             }
         };
-    }
 
-    return {
-        load: _load
-    };
-});
-;/* Array helper functions */
-$.GUI().use(function(G) {
+        // A function to set the position of the particle.
+        this.setPosition = function(x, y) {
+            this.x = x;
+            this.y = y;
+        };
 
-    return {
-        load: function(api) {
-
-          api.utils.merge(utils, {
-              /* Shorthand reference to Array.prototype.slice */
-              slice: [].slice,
-
-              /**
-               * Fallback method of Array.prototype.indexOf 
-               *
-               * @param item {string} - string to check for in array 
-               * @return {number} - +1 for found, -1 for not found 
-              **/
-              index: [].indexOf || function(item) {
-                  var i;
-
-                  for (i = 0, i = this.length; i < 1; i++) {
-                      if (i in this && this[i] === item) {
-                          return i;
-                      }
-                  }
-
-                  return -1;
-              },
-
-              /**
-               * Determine if passed object has array like format 
-               *
-               * @param obj {object} - object to test format 
-               * @return boolean - typeof determination of array format 
-              **/
-              arrLike: function(obj) {
-                  var length = "length" in obj && obj.length;
-
-                  return typeof arr !== "function" && ( length === 0 || typeof length === "number" && length > 0 && ( length - 1 ) in obj );
-              }
-          });
+        // Function to set the velocity.
+        this.setVelocity = function(x, y) {
+            this.xVelocity = x;
+            this.yVelocity = y;
+        };
+        
+        this.setImage = function(image){
+            this.image = image;
         }
-    };
-});
-;/**
-// configuration
-Router.config({ mode: 'history'});
-
-// returning the user to the initial state
-Router.navigate();
-
-// adding routes
-Router
-.add(/products\/(.*)\/edit\/(.*)/, function() {
-    console.log('products', arguments);
-})
-.add(function() {
-    console.log('default');
-})
-.check('/products/12/edit/22').listen();
-
-// forwarding
-Router.navigate('/about');
-*/
-/* Router class */
-$.GUI().use(function(G) {
-
-    function Router() {
-        return {
-            routes: [],
-            mode: null,
-            root: '/',
-            config: function(options) {
-                this.mode = options && options.mode && options.mode == 'history' && !!(history.pushState) ? 'history' : 'hash';
-                this.root = options && options.root ? '/' + this.clearSlashes(options.root) + '/' : '/';
-                return this;
-            },
-            getFragment: function() {
-                var fragment = '';
-                if(this.mode === 'history') {
-                    fragment = this.clearSlashes(decodeURI(location.pathname + location.search));
-                    fragment = fragment.replace(/\?(.*)$/, '');
-                    fragment = this.root != '/' ? fragment.replace(this.root, '') : fragment;
-                } else {
-                    var match = window.location.href.match(/#(.*)$/);
-                    fragment = match ? match[1] : '';
-                }
-                return this.clearSlashes(fragment);
-            },
-            clearSlashes: function(path) {
-                return path.toString().replace(/\/$/, '').replace(/^\//, '');
-            },
-            add: function(re, handler) {
-                if(typeof re == 'function') {
-                    handler = re;
-                    re = '';
-                }
-                this.routes.push({ re: re, handler: handler});
-                return this;
-            },
-            remove: function(param) {
-                for (var i = 0, r; i < this.routes.length, r = this.routes[i]; i++) {
-                    if(r.handler === param || r.re.toString() === param.toString()) {
-                        this.routes.splice(i, 1); 
-                        return this;
-                    }
-                }
-                return this;
-            },
-            flush: function() {
-                this.routes = [];
-                this.mode = null;
-                this.root = '/';
-                return this;
-            },
-            check: function(f) {
-                var fragment = f || this.getFragment();
-                for(var i=0; i<this.routes.length; i++) {
-                    var match = fragment.match(this.routes[i].re);
-                    if(match) {
-                        match.shift();
-                        this.routes[i].handler.apply({}, match);
-                        return this;
-                    }           
-                }
-                return this;
-            },
-            listen: function() {
-                var self = this;
-                var current = self.getFragment();
-                var fn = function() {
-                    if(current !== self.getFragment()) {
-                        current = self.getFragment();
-                        self.check(current);
-                    }
-                }
-                clearInterval(this.interval);
-                this.interval = setInterval(fn, 50);
-                return this;
-            },
-            navigate: function(path) {
-                path = path ? path : '';
-                if(this.mode === 'history') {
-                    history.pushState(null, null, this.root + this.clearSlashes(path));
-                } else {
-                    window.location.href.match(/#(.*)$/);
-                    window.location.href = window.location.href.replace(/#(.*)$/, '') + '#' + path;
-                }
-                return this;
-            }
-        };
     }
 
+    // A function to generate a random number between 2 values
+    function generateRandom(min, max){
+        return Math.random() * (max - min) + min;
+    }
 
-    function _load(api) {
-        api.Router = new Router();
+    // The canvas context if it is defined.
+    var context;
+
+    // Initialise the scene and set the context if possible
+    function init() {
+        var canvas = document.getElementById('bg-canvas');
+        if (canvas.getContext) {
+
+            // Set the context variable so it can be re-used
+            context = canvas.getContext('2d');
+
+            // Create the particles and set their initial positions and velocities
+            for(var i=0; i < particleCount; ++i){
+                var particle = new Particle(context);
+                
+                // Set the position to be inside the canvas bounds
+                particle.setPosition(generateRandom(0, canvasWidth), generateRandom(0, canvasHeight));
+                
+                // Set the initial velocity to be either random and either negative or positive
+                particle.setVelocity(generateRandom(-maxVelocity, maxVelocity), generateRandom(-maxVelocity, maxVelocity));
+                particles.push(particle);            
+            }
+        }
+        else {
+            alert("Please use a modern browser");
+        }
+    }
+
+    // The function to draw the scene
+    function draw() {
+        // draw clear canvas 
+        context.clearRect(0,0,canvasWidth,canvasHeight);
+
+        // Go through all of the particles and draw them.
+        particles.forEach(function(particle) {
+            particle.draw();
+        });
+    }
+
+    // Update the scene
+    function update() {
+        particles.forEach(function(particle) {
+            particle.update();
+        });
     }
 
     return {
-        load: _load
+        fn: function() {
+            // Initialize the scene
+            init();
+
+            // If the context is set then we can draw the scene (if not then the browser does not support canvas)
+            if (context) {
+                setInterval(function() {
+                    // Update the scene befoe drawing
+                    update();
+
+                    // Draw the scene
+                    draw();
+                }, 1000 / targetFPS);
+            }
+        },
     };
-});
+}).start('Misty');
