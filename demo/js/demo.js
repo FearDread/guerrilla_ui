@@ -23,7 +23,7 @@ $.GUI().create('App', function(G) {
 
         G.Router.config({ mode: 'history'});
 
-        G.Router.add(/about/, function() {
+        G.Router.add(/#about/, function() {
             console.log('about');
         });
     }
@@ -46,7 +46,7 @@ $.GUI().create('App', function(G) {
         });
 
         view = new G.View();
-        // view.setModel(user);
+        view.setModel(user);
 
         console.log('model = ', user);
         console.log('view = ', view);
@@ -68,10 +68,9 @@ $.GUI().create('App', function(G) {
             href = page.attr('href').split('#')[1];
         }
 
-        console.log('href = ' + href);
         G.fire('navclick', {page:href}, function() {
 
-          alert('done with navclick event!');
+            G.Router.navigate();
         });
     }
 

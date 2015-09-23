@@ -122,10 +122,10 @@
     <script src='../src/modules/lang/object.js'></script>
     <script src='../src/modules/lang/function.js'></script>
     <!-- Utils -->
-    <script src='../src/modules/util/cache.js'></script>
+    <script src='../src/modules/util/cellar.js'></script>
     <script src='../src/modules/util/cookie.js'></script>
     <!-- Plugins -->
-    <script src='../src/plugins/glisslider.js'></script>
+    <script src='../src/plugins/layers.js'></script>
     <script src='../src/plugins/stargaze.js'></script>
     <script src='../src/plugins/misty.js'></script>
     <!-- Demo App -->
@@ -137,7 +137,7 @@
           G.log('module A sandbox :: ', G);
 
           var el = G.query('.btn');
-          console.log('G elem = ', el);
+          G.log('G elem = ', el);
 
           function print() {
             console.log('load called in mod A');
