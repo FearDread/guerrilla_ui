@@ -346,9 +346,12 @@ utils = {
         parallel: function(tasks, cb, force) {
             var count, errors, hasErr, i, j, len, results, paralleled, task;
 
-            if (tasks === null) {
+            if (!tasks || tasks === null) {
+
                 tasks = [];
-            }else if (cb === null) {
+
+            }else if (!cb || cb === null) {
+
                 cb = (function() {});
             }
 
@@ -360,6 +363,7 @@ utils = {
             }
 
             errors = [];
+
             hasErr = false;
             paralleled = [];
 
@@ -372,7 +376,8 @@ utils = {
                     next = function() {
                         var err, res;
 
-                        err = (arguments[0], res = 2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+                        err = arguments[0];
+                        res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
 
                         if (err) {
                             errors[idx] = err;
@@ -394,16 +399,18 @@ utils = {
                         }
                     };
 
-                try {
-                    return t(next);
-                } catch (_error) {
-                    e = _error;
-                    return next(e);
-                }
-            })(task, i));
-          }
+                    try {
 
-          return paralleled;
+                        return t(next);
+
+                    } catch (_error) {
+                        e = _error;
+                        return next(e);
+                    }
+                })(task, i));
+            }
+
+            return paralleled;
         },
 
         /**
@@ -437,7 +444,8 @@ utils = {
             next = function() {
                 var e, err, res;
 
-                err = (arguments[0], res = 2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+                err = arguments[0];
+                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
 
                 if (err) {
                     errors[i] = err;
@@ -451,7 +459,9 @@ utils = {
                         results[i] = res.length < 2 ? res[0] : res;
                     }
                 }
+
                 if (++i >= count) {
+
                     if (hasErr) {
                         return cb(errors, results);
                     } else {
@@ -459,16 +469,16 @@ utils = {
                     }
                 } else {
 
-                  try {
-                      return tasks[i](next);
-                  } catch (_error) {
-                      e = _error;
-                      return next(e);
-                  }
-              }
-          };
+                    try {
+                        return tasks[i](next);
+                    } catch (_error) {
+                        e = _error;
+                        return next(e);
+                    }
+                }
+            };
 
-          return next();
+            return next();
         },
 
         /**
@@ -552,6 +562,7 @@ utils = {
             var i, next;
 
             i = -1;
+
             if (tasks.length === 0) {
                 return cb();
             }
@@ -559,15 +570,19 @@ utils = {
             next = function() {
                 var err, res;
 
-                err = (arguments[0], res = 2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+                err = arguments[0];
+                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
 
                 if (err !== null) {
                     return cb(err);
                 }
 
                 if (++i >= tasks.length) {
+
                     return cb.apply(null, [null].concat(utils.slice.call(res)));
+
                 } else {
+
                     return tasks[i].apply(tasks, utils.slice.call(res).concat([next]));
                 }
             };

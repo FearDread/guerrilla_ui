@@ -24,10 +24,15 @@ GUI = (function($) {
         // default config
         this.config = {
             name: 'Guerrilla UI',
+            /* Logging verbosity */
             logLevel: 0,
+            /* Single page app or Multiple page site */
+            mode: 'single',
+            /* GUI library version */
             version: '0.1.3',
             jquery: true,
             animations: false,
+            /* Stored window reference */
             win: (typeof window !== 'undefined') ? window : null
         };
 
@@ -173,6 +178,8 @@ GUI = (function($) {
      * @param plugin {string} - plugin identifier 
      * @param creator {function} - function containing plugin class logic 
      * @return this {object} 
+     *
+     * dont think we need this
     **/
     GUI.prototype.extend = function(plugin, creator, opts) {
 
@@ -266,7 +273,9 @@ GUI = (function($) {
         })(this);
 
         return this.boot((function(_this) {
+
             return function(err) {
+
                 if (err) {
                     return _this._fail(err, cb);
                 }
@@ -366,6 +375,7 @@ GUI = (function($) {
                             return cb(err || err2);
                         });
                     } else {
+
                         if (typeof instance.unload === "function") {
                             instance.unload();
                         }
