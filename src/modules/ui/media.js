@@ -1,7 +1,6 @@
 /* --------------------------------------- *
 * Guerrilla JS                             *
-* @author: Garrett Haptonstall (FearDread) *
-* @module: Guerrilla.ui GUI Core           *
+* @module: Dynamic media screen sizes      *
 * ---------------------------------------- */
 $.GUI().use(function(G) {
 
@@ -128,8 +127,8 @@ $.GUI().use(function(G) {
     };
   
     return {
-        load: function(sb, args) {
-            sb.Media = new Media(args);
+        load: function(api) {
+            api.Media = new Media();
         },
         unload: function() {
             G.cleanup();

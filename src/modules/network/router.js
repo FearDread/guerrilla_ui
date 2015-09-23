@@ -4,18 +4,26 @@
 * ---------------------------------------- */
 $.GUI().use(function(G) {
 
-    function Router() {
+    function Router(sb) {
+
         return {
             routes: [],
             mode: null,
             root: '/',
+
+            /**
+            *
+            **/
             config: function(options) {
-                this.mode = options && options.mode && options.mode == 'history' && !!(history.pushState) ? 'history' : 'hash';
+                this.mode = options && options.mode && options.mode === 'history' && !!(history.pushState) ? 'history' : 'hash';
                 this.root = options && options.root ? '/' + this.clearSlashes(options.root) + '/' : '/';
 
                 return this;
             },
 
+            /**
+            *
+            **/
             getFragment: function() {
                 var match, fragment = '';
 
@@ -32,11 +40,17 @@ $.GUI().use(function(G) {
                 return this.clearSlashes(fragment);
             },
 
+            /**
+            *
+            **/
             clearSlashes: function(path) {
 
                 return path.toString().replace(/\/$/, '').replace(/^\//, '');
             },
 
+            /**
+            *
+            **/
             add: function(re, handler) {
                 if(utils.isFunc(re)) {
                     handler = re;
@@ -48,6 +62,9 @@ $.GUI().use(function(G) {
                 return this;
             },
 
+            /**
+            *
+            **/
             remove: function(param) {
                 var i, route;
 
@@ -64,6 +81,9 @@ $.GUI().use(function(G) {
                 return this;
             },
 
+            /**
+            *
+            **/
             flush: function() {
                 this.routes = [];
                 this.mode = null;
@@ -72,6 +92,9 @@ $.GUI().use(function(G) {
                 return this;
             },
 
+            /**
+            *
+            **/
             check: function(f) {
                 var i, match,
                     fragment = f || this.getFragment();
@@ -129,7 +152,7 @@ $.GUI().use(function(G) {
 
 
     function _load(api) {
-        api.Router = new Router();
+        api.Router = new Router(api);
     }
 
     return {

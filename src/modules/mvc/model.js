@@ -15,7 +15,7 @@ $.GUI().use(function(G) {
             Model.__super__.constructor.call(this);
 
             // combine model object with passed model
-            this.combine(obj);
+            this.extend(obj);
 
             /** 
              * Set property of current Model object
@@ -85,7 +85,7 @@ $.GUI().use(function(G) {
          * @param obj {object} - the object to merge into Model class 
          * @return this {object} 
         **/
-        Model.prototype.combine = function(obj) {
+        Model.prototype.extend = function(obj) {
             var k, v;
 
             for (k in obj) {

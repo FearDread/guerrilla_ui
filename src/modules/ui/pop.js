@@ -1,4 +1,8 @@
-
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Pop, timed animations based on  * 
+* scrolling and page location              *
+* ---------------------------------------- */
 $.GUI().create('Pop', function(GUI){
                
     var WOW = (function(){
