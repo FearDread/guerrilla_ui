@@ -34,6 +34,9 @@ $.GUI().use(function(G) {
             /* Shorthand call to jQuery isPlainObject */
             api.Object.isPlain = $.isPlainObject;
 
+            /* Shorthand call to jQuery isEmptyObject */
+            api.Object.isEmpty = $.isEmptyObject;
+
             /**
              * Shorthand method to the native hasOwnProperty call 
              * 

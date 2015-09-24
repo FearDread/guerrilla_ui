@@ -10,6 +10,9 @@ $.GUI().use(function(G) {
 
             api.Array = [];
 
+            /* Shorthand call to jQuery isEmptyObject */
+            api.Array.isEmpty = $.isEmptyObject;
+
             /**
              * Create new array instance with passed array / object 
              *
