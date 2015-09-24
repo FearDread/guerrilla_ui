@@ -32,6 +32,7 @@ $.GUI().create('App', function(G) {
 
         G.query('.navbar-top').click(showPage);
         G.query('.btn').click(function(e) {
+            e.preventDefault();
             G.fire('scrollPage');
         });
     }
@@ -70,7 +71,8 @@ $.GUI().create('App', function(G) {
 
         G.fire('navclick', {page:href}, function() {
 
-            G.Router.navigate();
+            // G.Router.navigate();
+            G.log('callback after fired navclick event.');
         });
     }
 

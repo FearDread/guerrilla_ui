@@ -79,10 +79,11 @@ $.GUI().use(function(G) {
 
         load: function(api) {
 
-            if (checkStorage('localStorage') === false ||
-                checkStorage('sessionStorage') === false) {
+            if (checkStorage('localStorage') === false || checkStorage('sessionStorage') === false) {
 
-                throw new Error('Sorry but this browser cannot use storage objects.');
+                api.warn('Sorry but this browser does not support storage objects.');
+
+                return false;
             }
 
             /**

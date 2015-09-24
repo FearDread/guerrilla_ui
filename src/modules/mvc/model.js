@@ -2,8 +2,8 @@
 * Guerrilla UI                             *
 * @module: MVC Model object class          * 
 * ---------------------------------------- */
+
 $.GUI().use(function(G) {
-    var plugin;
 
     Model = (function(superClass) {
 
@@ -11,11 +11,12 @@ $.GUI().use(function(G) {
         utils.extend(Model, superClass);
 
         function Model(obj) {
+
             // call super class ctor
             Model.__super__.constructor.call(this);
 
             // combine model object with passed model
-            this.extend(obj);
+            utils.merge(this, obj);
 
             /** 
              * Set property of current Model object

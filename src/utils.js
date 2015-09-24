@@ -11,9 +11,7 @@ utils = {
     /* jQuery $.each pointer */
     each: $.each,
 
-    /**
-     *
-    **/
+    /* Array.prototype.slice */
     slice: [].slice,
 
     /**
@@ -28,7 +26,7 @@ utils = {
 
         for (key in parent) { 
 
-            if (this.hasProp.call(parent, key)) {
+            if (utils.hasProp.call(parent, key)) {
                 child[key] = parent[key]; 
             } 
         }
@@ -37,9 +35,9 @@ utils = {
             this.constructor = child; 
         }
 
-        child.prototype = new ctor();
-
         ctor.prototype = parent.prototype;
+
+        child.prototype = new ctor();
         child.__super__ = parent.prototype;
 
         return child;
