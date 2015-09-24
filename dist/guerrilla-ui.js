@@ -11,9 +11,7 @@ utils = {
     /* jQuery $.each pointer */
     each: $.each,
 
-    /**
-     *
-    **/
+    /* Array.prototype.slice */
     slice: [].slice,
 
     /**
@@ -28,7 +26,7 @@ utils = {
 
         for (key in parent) { 
 
-            if (this.hasProp.call(parent, key)) {
+            if (utils.hasProp.call(parent, key)) {
                 child[key] = parent[key]; 
             } 
         }
@@ -37,9 +35,9 @@ utils = {
             this.constructor = child; 
         }
 
-        child.prototype = new ctor();
-
         ctor.prototype = parent.prototype;
+
+        child.prototype = new ctor();
         child.__super__ = parent.prototype;
 
         return child;
@@ -53,70 +51,6 @@ utils = {
 
     /* Shorthand reference to Object.prototype.hasOwnProperty */
     hasProp: {}.hasOwnProperty,
-
-    /**
-     * Delay a functions execution by passed amount of time 
-     *
-     * @param fn {function} - function to bounce 
-     * @param time {number} - amount of time in miliseconds to wait
-     * @param context {object} context to apply to passed function 
-     * @return {function} - keeps from executing passed method before its ready 
-    **/
-    debounce: function(fn, time, context) {
-        var timeout;
-
-        return function () {
-            var args = arguments;
-
-            clearTimeout(timeout);
-
-            timeout = setTimeout(utils.proxy(function () {
-                fn.apply(this, args);
-            }, context || this), time);
-        };
-    },
-
-    /**
-     * Delay a functions execution by passed amount of time 
-     *
-     * @param fn {function} - function to throttle 
-     * @param time {number} - amount of time in miliseconds to wait
-     * @param context {object} context to apply to passed function 
-     * @return {function} - keeps from executing passed method before its ready 
-    **/
-    throttle: function(fn, time, context) {
-        var run;
-
-        return function() {
-            var args = arguments,
-                ctx = context || this;
-
-            if (!run) {
-                run = true;
-
-                setTimeout(function() {
-                    fn.apply(ctx, args);
-                    run = false;
-                }, time);
-            }
-        };
-    },
-
-    /**
-     * Attempt to defer a function call 
-     *
-     * @param fn {function} - function to defer 
-     * @param context {object} context to apply to passed function 
-     * @return void 
-    **/
-    defer: function(fn, context) {
-        var args = arguments,
-            ctx = context || this;
-
-        setTimeout(function() {
-            fn.apply(ctx, args);
-        }, 0);
-    },
 
     /**
      * Check number of arguments passed to function / method
@@ -346,9 +280,12 @@ utils = {
         parallel: function(tasks, cb, force) {
             var count, errors, hasErr, i, j, len, results, paralleled, task;
 
-            if (tasks === null) {
+            if (!tasks || tasks === null) {
+
                 tasks = [];
-            }else if (cb === null) {
+
+            }else if (!cb || cb === null) {
+
                 cb = (function() {});
             }
 
@@ -360,6 +297,7 @@ utils = {
             }
 
             errors = [];
+
             hasErr = false;
             paralleled = [];
 
@@ -372,7 +310,8 @@ utils = {
                     next = function() {
                         var err, res;
 
-                        err = (arguments[0], res = 2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+                        err = arguments[0];
+                        res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
 
                         if (err) {
                             errors[idx] = err;
@@ -394,16 +333,18 @@ utils = {
                         }
                     };
 
-                try {
-                    return t(next);
-                } catch (_error) {
-                    e = _error;
-                    return next(e);
-                }
-            })(task, i));
-          }
+                    try {
 
-          return paralleled;
+                        return t(next);
+
+                    } catch (_error) {
+                        e = _error;
+                        return next(e);
+                    }
+                })(task, i));
+            }
+
+            return paralleled;
         },
 
         /**
@@ -437,7 +378,8 @@ utils = {
             next = function() {
                 var e, err, res;
 
-                err = (arguments[0], res = 2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+                err = arguments[0];
+                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
 
                 if (err) {
                     errors[i] = err;
@@ -451,7 +393,9 @@ utils = {
                         results[i] = res.length < 2 ? res[0] : res;
                     }
                 }
+
                 if (++i >= count) {
+
                     if (hasErr) {
                         return cb(errors, results);
                     } else {
@@ -459,16 +403,16 @@ utils = {
                     }
                 } else {
 
-                  try {
-                      return tasks[i](next);
-                  } catch (_error) {
-                      e = _error;
-                      return next(e);
-                  }
-              }
-          };
+                    try {
+                        return tasks[i](next);
+                    } catch (_error) {
+                        e = _error;
+                        return next(e);
+                    }
+                }
+            };
 
-          return next();
+            return next();
         },
 
         /**
@@ -552,6 +496,7 @@ utils = {
             var i, next;
 
             i = -1;
+
             if (tasks.length === 0) {
                 return cb();
             }
@@ -559,15 +504,19 @@ utils = {
             next = function() {
                 var err, res;
 
-                err = (arguments[0], res = 2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+                err = arguments[0];
+                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
 
                 if (err !== null) {
                     return cb(err);
                 }
 
                 if (++i >= tasks.length) {
+
                     return cb.apply(null, [null].concat(utils.slice.call(res)));
+
                 } else {
+
                     return tasks[i].apply(tasks, utils.slice.call(res).concat([next]));
                 }
             };
@@ -1222,10 +1171,15 @@ GUI = (function($) {
         // default config
         this.config = {
             name: 'Guerrilla UI',
+            /* Logging verbosity */
             logLevel: 0,
+            /* Single page app or Multiple page site */
+            mode: 'single',
+            /* GUI library version */
             version: '0.1.3',
             jquery: true,
             animations: false,
+            /* Stored window reference */
             win: (typeof window !== 'undefined') ? window : null
         };
 
@@ -1371,6 +1325,8 @@ GUI = (function($) {
      * @param plugin {string} - plugin identifier 
      * @param creator {function} - function containing plugin class logic 
      * @return this {object} 
+     *
+     * dont think we need this
     **/
     GUI.prototype.extend = function(plugin, creator, opts) {
 
@@ -1464,7 +1420,9 @@ GUI = (function($) {
         })(this);
 
         return this.boot((function(_this) {
+
             return function(err) {
+
                 if (err) {
                     return _this._fail(err, cb);
                 }
@@ -1564,6 +1522,7 @@ GUI = (function($) {
                             return cb(err || err2);
                         });
                     } else {
+
                         if (typeof instance.unload === "function") {
                             instance.unload();
                         }
@@ -1896,8 +1855,8 @@ GUI = (function($) {
 * Guerrilla UI                             *
 * @module: MVC Model object class          * 
 * ---------------------------------------- */
+
 $.GUI().use(function(G) {
-    var plugin;
 
     Model = (function(superClass) {
 
@@ -1905,11 +1864,12 @@ $.GUI().use(function(G) {
         utils.extend(Model, superClass);
 
         function Model(obj) {
+
             // call super class ctor
             Model.__super__.constructor.call(this);
 
             // combine model object with passed model
-            this.combine(obj);
+            utils.merge(this, obj);
 
             /** 
              * Set property of current Model object
@@ -1979,7 +1939,7 @@ $.GUI().use(function(G) {
          * @param obj {object} - the object to merge into Model class 
          * @return this {object} 
         **/
-        Model.prototype.combine = function(obj) {
+        Model.prototype.extend = function(obj) {
             var k, v;
 
             for (k in obj) {
@@ -2135,18 +2095,26 @@ $.GUI().create('Controller', function(G) {
 * ---------------------------------------- */
 $.GUI().use(function(G) {
 
-    function Router() {
+    function Router(sb) {
+
         return {
             routes: [],
             mode: null,
             root: '/',
+
+            /**
+            *
+            **/
             config: function(options) {
-                this.mode = options && options.mode && options.mode == 'history' && !!(history.pushState) ? 'history' : 'hash';
+                this.mode = options && options.mode && options.mode === 'history' && !!(history.pushState) ? 'history' : 'hash';
                 this.root = options && options.root ? '/' + this.clearSlashes(options.root) + '/' : '/';
 
                 return this;
             },
 
+            /**
+            *
+            **/
             getFragment: function() {
                 var match, fragment = '';
 
@@ -2163,11 +2131,17 @@ $.GUI().use(function(G) {
                 return this.clearSlashes(fragment);
             },
 
+            /**
+            *
+            **/
             clearSlashes: function(path) {
 
                 return path.toString().replace(/\/$/, '').replace(/^\//, '');
             },
 
+            /**
+            *
+            **/
             add: function(re, handler) {
                 if(utils.isFunc(re)) {
                     handler = re;
@@ -2179,6 +2153,9 @@ $.GUI().use(function(G) {
                 return this;
             },
 
+            /**
+            *
+            **/
             remove: function(param) {
                 var i, route;
 
@@ -2195,6 +2172,9 @@ $.GUI().use(function(G) {
                 return this;
             },
 
+            /**
+            *
+            **/
             flush: function() {
                 this.routes = [];
                 this.mode = null;
@@ -2203,6 +2183,9 @@ $.GUI().use(function(G) {
                 return this;
             },
 
+            /**
+            *
+            **/
             check: function(f) {
                 var i, match,
                     fragment = f || this.getFragment();
@@ -2260,7 +2243,7 @@ $.GUI().use(function(G) {
 
 
     function _load(api) {
-        api.Router = new Router();
+        api.Router = new Router(api);
     }
 
     return {
@@ -2455,6 +2438,9 @@ $.GUI().use(function(G) {
 
             api.Array = [];
 
+            /* Shorthand call to jQuery isEmptyObject */
+            api.Array.isEmpty = $.isEmptyObject;
+
             /**
              * Create new array instance with passed array / object 
              *
@@ -2541,6 +2527,9 @@ $.GUI().use(function(G) {
 
             /* Shorthand call to jQuery isPlainObject */
             api.Object.isPlain = $.isPlainObject;
+
+            /* Shorthand call to jQuery isEmptyObject */
+            api.Object.isEmpty = $.isEmptyObject;
 
             /**
              * Shorthand method to the native hasOwnProperty call 
@@ -2715,8 +2704,7 @@ $.GUI().use(function(G) {
 });
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
-* @module: Cache, handle reading & writing * 
-* to local storage                         * 
+* @module: Function based utility methods  * 
 * ---------------------------------------- */
 $.GUI().use(function(G) {
 
@@ -2724,288 +2712,73 @@ $.GUI().use(function(G) {
 
         load: function(api) {
 
-            api.cache = {
-
-                _cached: {},
-                
-                setup: function() {
-                    // setup data
-                    if (typeof window.localStorage !== 'undefined') {
-
-                        this._cached = JSON.parse(window.localStorage.getItem(this.cachedKey())) || {};
-
-                    } else {
-
-                        this._cached = {};
-                    }
-                },
-
-                compare: {},
-
-                _compare: function(prop, itemData, paramData) {
-
-                    return api.Object.same(itemData, paramData, this.compare[prop]);
-                },
-
-                cachedKey: function() {
-
-                    return 'cached' + this._shortName;
-                },
-
-                cacheClear: function() {
-                    window.localStorage.removeItem(this.cachedKey());
-
-                    this._cached = {};
-                },
-
-                cacheItems: function(items) {
-                    var data = this._cached,
-                        id = this.id;
-
-                    api.each(items, function (item) {
-                        var idVal = item[id],
-
-                        obj = data[idVal];
-
-                        if (obj) {
-
-                            api.utils.merge(obj, item);
-
-                        } else {
-
-                            data[idVal] = item;
-                        }
-                    });
-
-                    window.localStorage.setItem(this.cachedKey(), JSON.stringify(data));
-                },
-
-                findAllCached: function(params) {
-                    // remove anything not filtering ....
-                    //   - sorting, grouping, limit, and offset
-                    var id, list = [], item,
-                        data = this._cached;
-
-                    for (id in data) {
-                        item = data[id];
-
-                        if (this.filter(item, params) !== false) {
-
-                            list.push(item);
-
-                        }
-                    }
-
-                    // do sorting / grouping
-                    list = this.pagination(this.sort(list, params), params);
-
-                    // take limit and offset ...
-                    return list;
-                },
-
-                pagination: function(items, params) {
-                    var offset = parseInt(params.offset, 10) || 0,
-                        limit = parseInt(params.limit, 10) || items.length - offset;
-
-                    return items.slice(offset, offset + limit);
-                },
+            // Extend api object
+            api.utils.merge(api.utils, {
 
                 /**
-                 * Sorts the object in place
+                 * Delay a functions execution by passed amount of time 
                  *
-                 * By default uses an order property in the param
-                 * @param {Object} items
-                 */
-                sort: function(items, params) {
-                    api.each((params.order || [])
-                        .slice(0)
-                        .reverse(), function(name, i) {
-                            var split = name.split(' ');
+                 * @param fn {function} - function to bounce 
+                 * @param time {number} - amount of time in miliseconds to wait
+                 * @param context {object} context to apply to passed function 
+                 * @return {function} - keeps from executing passed method before its ready 
+                **/
+                debounce: function(fn, time, context) {
+                    var timeout;
 
-                            items = items.sort(function (a, b) {
-                                if (split[1].toUpperCase() !== 'ASC') {
+                    return function () {
+                        var args = arguments;
 
-                                    if (a[split[0]] < b[split[0]]) {
+                        clearTimeout(timeout);
 
-                                        return 1;
-
-                                    } else if (a[split[0]] === b[split[0]]) {
-
-                                        return 0;
-
-                                    } else {
-
-                                        return -1;
-                                    }
-
-                                } else {
-
-                                    if (a[split[0]] < b[split[0]]) {
-
-                                        return -1;
-
-                                    } else if (a[split[0]] === b[split[0]]) {
-
-                                        return 0;
-
-                                    } else {
-
-                                        return 1;
-                                    }
-                                }
-                            });
-                        });
-
-                    return items;
-                },
-
-                /**
-                 * Called with the item and the current params.
-                 * Should return __false__ if the item should be filtered out of the result.
-                 *
-                 * By default this goes through each param in params and see if it matches the
-                 * same property in item (if item has the property defined).
-                 * @param {Object} item
-                 * @param {Object} params
-                 */
-                filter: function (item, params) {
-                    // go through each param in params
-                    var param, paramValue;
-
-                    for (param in params) {
-                        paramValue = params[param];
-
-                        // in fixtures we ignore null, I don't want to now
-                        if (paramValue !== undefined && item[param] !== undefined && !this._compare(param, item[param], paramValue)) {
-                            return false;
-                        }
-                    }
-                },
-
-                makeFindAll: function (findAll) {
-                    return function (params, success, error) {
-                        var list, 
-                            def = new api.utils.defer(),
-                            // make the ajax request right away
-                            findAllDeferred = findAll(params),
-                            data = this.findAllCached(params);
-
-                        def.then(success, error);
-
-                        if (data.length) {
-                            list = this.models(data);
-
-                            findAllDeferred.then(can.proxy(function(json) {
-
-                                this.cacheItems(json);
-
-                                list.attr(json, true); // TODO: update cached instances
-
-                            }, this), function() {
-
-                                can.trigger(list, 'error', arguments);
-                            });
-
-                            def.resolve(list);
-
-                        } else {
-                            findAllDeferred.then(can.proxy(function (data) {
-                                // Create our model instance
-                                list = this.models(data);
-
-                                // Save the data to local storage
-                                this.cacheItems(data);
-
-                                // Resolve the deferred with our instance
-                                def.resolve(list);
-
-                            }, this), function(data) {
-
-                                def.reject(data);
-                            });
-                        }
-
-                        return def;
+                        timeout = setTimeout(utils.proxy(function () {
+                            fn.apply(this, args);
+                        }, context || this), time);
                     };
                 },
 
-                makeFindOne: function(findOne) {
-                    return function (params, success, error) {
-                        var instance, 
-                            def = new api.utils.defer(),
-                            // Make the ajax request right away
-                            findOneDeferred = findOne(params),
-                            // grab instance from cached data
-                            data = this._cached[params[this.id]];
+                /**
+                 * Delay a functions execution by passed amount of time 
+                 *
+                 * @param fn {function} - function to throttle 
+                 * @param time {number} - amount of time in miliseconds to wait
+                 * @param context {object} context to apply to passed function 
+                 * @return {function} - keeps from executing passed method before its ready 
+                **/
+                throttle: function(fn, time, context) {
+                    var run;
 
-                        // or try to load it
-                        data = data || this.findAllCached(params)[0];
+                    return function() {
+                        var args = arguments,
+                            ctx = context || this;
 
-                        // Bind success and error callbacks to the deferred
-                        def.then(success, error);
+                        if (!run) {
+                            run = true;
 
-                        // If we had existing local storage data...
-                        if (data) {
-                            // Create our model instance
-                            instance = this.model(data);
-
-                            findOneDeferred.then(function(json) {
-
-                                // Update the instance when the ajax respone returns
-                                instance.updated(json);
-
-                            }, function (data) {
-
-                                can.trigger(instance, 'error', data);
-                            });
-
-                            // Resolve the deferred with our instance
-                            def.resolve(instance); // Otherwise hand off the deferred to the ajax request
-                        } else {
-                            findOneDeferred.then(can.proxy(function (data) {
-                                // Save the data to local storage
-                                this.cacheItems([data]);
-
-                                // Create our model instance
-                                instance = this.model(data);
-
-                                // Resolve the deferred with our instance
-                                def.resolve(instance);
-
-                            }, this), function (data) {
-
-                                def.reject(data);
-                            });
+                            setTimeout(function() {
+                                fn.apply(ctx, args);
+                                run = false;
+                            }, time);
                         }
-
-                        return def;
                     };
                 },
 
-                updated: function(attrs) {
-                    // Save the model to local storage
-                    this.constructor.cacheItems([this.attr()]);
+                /**
+                 * Attempt to defer a function call 
+                 *
+                 * @param fn {function} - function to defer 
+                 * @param context {object} context to apply to passed function 
+                 * @return void 
+                **/
+                defer: function(fn, context) {
+                    var args = arguments,
+                        ctx = context || this;
 
-                    // Update our model
-                    can.Model.prototype.updated.apply(this, arguments);
-                },
-
-                created: function(attrs) {
-                    // Save the model to local storage
-                    this.constructor.cacheItems([this.attr()]);
-
-                    // Update our model
-                    can.Model.prototype.created.apply(this, arguments);
-                },
-
-                destroyed: function(attrs) {
-                    // Save the model to local storage
-                    delete this.constructor._cached[this[this.constructor.id]];
-
-                    // Update our model
-                    can.Model.prototype.destroyed.apply(this, arguments);
+                    setTimeout(function() {
+                        fn.apply(ctx, args);
+                    }, 0);
                 }
-            };
+            });
         }
     };
 });
@@ -3140,6 +2913,528 @@ $.GUI().use(function(G) {
 
     return {
         load: _load
+    };
+});
+;/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Cellar, handle local & session  * 
+* storage api's                            *
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+
+    /* Private methods */
+    /**
+     * Check for browser compatibility of passed storage object
+     *
+     * @param storage {string} - the storage object to check
+     * @return {boolean}
+    **/
+    function checkStorage(storage) {
+        var gui = 'guerrilla';
+
+        try {
+
+            if (window === 'undefined' || !window[storage]) {
+                return false;
+            }
+
+            window[storage].setItem(gui, gui);
+            window[storage].removeItem(gui);
+
+            return true;
+
+        } catch(e) {
+
+            return false;
+        }
+    }
+
+    /**
+     * Remove all items from a storage
+     *
+     * @param storage {string} - the storage object to remove all items from 
+     * @return {void}
+    **/
+    function _removeAll(storage) {
+        var i, keys = _keys(storage);
+
+        for (i in keys) {
+            _remove(storage, keys[i]);
+        }
+    }
+
+    /**
+     * Return array of keys from passed storage object  
+     *
+     * @param store {string} - the storage object to get keys from 
+     * @return {array} - keys 
+    **/
+    function _keys(store) {
+        var i, keys = [], obj = {}, length, storage, argc;
+
+        argc = arguments;
+        length = argc.length;
+
+        storage = window[store];
+        // If more than 1 argument, get value from storage to retrieve keys
+        // Else, use storage to retrieve keys
+        if (length > 1) {
+
+            obj = _get.apply(this, argc);
+        } else {
+            obj = storage;
+        }
+
+        for (i in obj) {
+           keys.push(i);
+        }
+
+        return keys;
+    }
+
+    return {
+
+        load: function(api) {
+
+            if (checkStorage('localStorage') === false || checkStorage('sessionStorage') === false) {
+
+                api.warn('Sorry but this browser does not support storage objects.');
+
+                return false;
+            }
+
+            /**
+             * Get value from passed storage object and key 
+             *
+             * @param store {string} - the storage object to search
+             * @param sname {string} - the key to check for and return value of
+             * @return {object} - value of passed key
+            **/
+            function _get(store){
+                var i, length, sname, storage, argc, vi, _ret, tmp, j; 
+
+                argc = arguments;
+                length = argc.length;
+
+                storage = window[store];
+                sname = argc[1];
+
+                if (length < 2) throw new Error('Minimum 2 arguments must be given');
+
+                else if (api.utils.isArr(sname)) {
+                    // If second argument is an array, return an object with value of storage for each item in this array
+                    _ret = {};
+
+                    for (i in a1) {
+                        vi = sname[i];
+
+                        try {
+                            _ret[vi] = JSON.parse(storage.getItem(vi));
+
+                        } catch(e) {
+                            _ret[vi] = storage.getItem(vi);
+                        }
+                    }
+
+                    return _ret;
+
+                } else if (length === 2) {
+                    // If only 2 arguments, return value directly
+                    try {
+
+                        return JSON.parse(storage.getItem(sname));
+
+                    } catch(e) {
+                        return storage.getItem(sname);
+                    }
+                } else {
+                    // If more than 2 arguments, parse storage to retrieve final value to return it
+                    // Get first level
+                    try {
+
+                        _ret = JSON.parse(storage.getItem(sname));
+
+                    } catch(e) {
+                        throw new ReferenceError(sname + ' is not defined in this storage');
+                    }
+
+                    // Parse next levels
+                    for (i = 2; i < length - 1; i++) {
+                        _ret = _ret[argc[i]];
+
+                        if (_ret === undefined) throw new ReferenceError(api.utils.slice.call(argc, 1, i + 1).join('.') + ' is not defined in this storage');
+                    }
+                    // If last argument is an array, return an object with value for each item in this array
+                    // Else return value normally
+                    if(api.utils.isArr(argc[i])) {
+                        tmp = _ret;
+                        _ret = {};
+
+                        for (j in argc[i]) {
+
+                            _ret[argc[i][j]] = tmp[argc[i][j]];
+                        }
+
+                        return _ret;
+
+                    } else {
+                        return _ret[argc[i]];
+                    }
+                }
+            }
+
+            /**
+             * Set value to passed storage object and key 
+             *
+             * @param store {string} - the storage object to search
+             * @param sname {string} - the key to store data value under 
+             * @param data {object} - optional data object or string to store
+             * @return {object} - cellar data 
+            **/
+            function _set(store) {
+                var i, length, argc, sname, data, vi, to_cellar = {}, tmp;
+
+                argc = arguments;
+                length = argc.length;
+
+                storage = window[store];
+
+                sname = argc[1];
+                data = argc[2];
+
+                if (length < 2 || !api.Object.isPlain(sname) && length < 3) throw new Error('Minimum 3 arguments must be given or second parameter must be an object');
+
+                else if(api.Object.isPlain(sname)) {
+                    // If first argument is an object, set values of storage for each property of this object
+                    for (i in sname) {
+                        vi = sname[i];
+
+                        if (!api.Object.isPlain(vi)) {
+                          
+                            storage.setItem(i, vi);
+                        } else {
+                            storage.setItem(i, JSON.stringify(vi));
+                        }
+                    }
+
+                    return sname;
+
+                } else if (length === 3) {
+                    // If only 3 arguments, set value of storage directly
+                    if (api.utils.isObj(data)) {
+                      
+                        storage.setItem(sname, JSON.stringify(data));
+                    } else {
+                      
+                        storage.setItem(sname, data);
+                    }
+
+                    return data;
+
+                } else {
+                    // If more than 3 arguments, parse storage to retrieve final node and set value
+                    // Get first level
+                    try {
+                        tmp = storage.getItem(sname);
+
+                        if (tmp !== null) {
+                            to_cellar = JSON.parse(tmp);
+                        }
+                    } catch(e) {}
+                    
+                    tmp = to_cellar;
+                    // Parse next levels and set value
+                    for(i = 2; i < length - 2; i++) {
+                        vi = argc[i];
+
+                        if (!tmp[vi] || !api.Object.isPlain(tmp[vi])) {
+
+                          tmp[vi] = {};
+                        }
+
+                        tmp = tmp[vi];
+                    }
+
+                    tmp[argc[i]] = argc[i + 1];
+                    storage.setItem(sname, JSON.stringify(to_cellar));
+
+                    return to_cellar;
+                }
+            }
+
+            /**
+             * Check wether or not a value is set in passed storage object
+             *
+             * @param store {string} - the storage object to check
+             * @param snamem {string} - the key to search storage object for
+             * @return {boolean}
+             *
+            **/
+            function _isSet(store) {
+                var i, value, length, argc, storage, sname;
+
+                argc = arguments;
+                length = argc.length;
+
+                sname = argc[1];
+                storage = window[store];
+
+                if (length < 2) throw new Error('Minimum 2 arguments must be given');
+
+                if (api.utils.isArr(sname)) {
+                    // If first argument is an array, test each item of this array and return true only if all items exist
+                    for(i = 0; i < sname.length; i++) {
+
+                        if (!_isSet(storage, sname[i])) {
+
+                            return false;
+                        }
+                    }
+
+                    return true;
+                } else {
+                    // For other case, try to get value and test it
+                    try {
+                        value = _get.apply(this, arguments);
+
+                        // Convert result to an object (if last argument is an array, _get return already an object) and test each item
+                        if (!api.utils.isArr(argc[length - 1])) {
+                          
+                          value = {'totest': value};
+                        }
+
+                        for (i in value) {
+                            if (!(value[i] !== undefined && value[i] !== null)) {
+                                return false;
+                            }
+                        }
+
+                        return true;
+
+                    } catch(e) {
+                        return false;
+                    }
+                }
+            }
+
+            /**
+             * Check to see if passed storage is empty
+             *
+             * @param store {string} - the storage object to check
+             * @param sname {string} - the key to search storage object for
+             * @return {boolean}
+            **/
+            function _isEmpty(store) {
+                var i, value, length, argc, storage, sname;
+
+                argc = arguments; 
+                length = argc.length;
+
+                storage = window[store];
+                sname = argc[1];
+
+                if (length === 1) {
+                    // If only one argument, test if storage is empty
+                    return (_keys(storage).length === 0);
+
+                } else if (api.utils.isArr(sname)) {
+
+                    // If first argument is an array, test each item of this array and return true only if all items are empty
+                    for(i = 0; i < sname.length; i++){
+
+                        if(!_isEmpty(storage, sname[i])) {
+
+                            return false;
+                        }
+                    }
+
+                    return true;
+
+                } else {
+
+                    // If more than 1 argument, try to get value and test it
+                    try {
+                        value = _get.apply(this, arguments);
+                        // Convert result to an object (if last argument is an array, _get return already an object) and test each item
+                        if(!api.utils.isArr(argc[length - 1])) value = {'totest': value};
+
+                        for (i in value) {
+
+                            if (!(
+                                (api.Object.isPlain(value[i]) && api.Object.isEmpty(value[i])) ||
+
+                                (api.utils.isArr(value[i]) && !value[i].length) ||
+
+                                (!value[i])
+                            )) return false;
+                        }
+
+                        return true;
+
+                    } catch(e) {
+
+                        return true;
+                    }
+                }
+            }
+
+            /**
+             * Remove items from a storage 
+             *
+             * @param store {string} - the storage object to use
+             * @param sname {string} - the key to remove from storage object
+             * @return {boolean}
+            **/
+            function _remove(store) {
+                var i, j, length, storage, argc, sname, to_cellar, tmp;
+
+                argc = arguments;
+                length = argc.length;
+
+                storage = window[store];
+                sname = argc[1];
+
+                if (length < 2) throw new Error('Minimum 2 arguments must be given');
+
+                else if (api.utils.isArr(sname)) {
+                    // If first argument is an array, remove values from storage for each item of this array
+                    for(i in sname){
+                        storage.removeItem(sname[i]);
+                    }
+
+                    return true;
+
+                } else if (length === 2) {
+                    // If only 2 arguments, remove value from storage directly
+                    storage.removeItem(a1);
+
+                    return true;
+
+                } else {
+                    // If more than 2 arguments, parse storage to retrieve final node and remove value
+                    // Get first level
+                    try {
+
+                        to_cellar = tmp = JSON.parse(storage.getItem(sname));
+
+                    } catch(e) {
+                        throw new ReferenceError(sname + ' is not defined in this storage');
+                    }
+
+                    // Parse next levels and remove value
+                    for (i = 2; i < length - 1; i++) {
+                        tmp = tmp[argc[i]];
+
+                        if (tmp === undefined) throw new ReferenceError(api.utils.slice.call(argc, 1, i).join('.') + ' is not defined in this storage');
+                    }
+
+                    // If last argument is an array,remove value for each item in this array
+                    // Else remove value normally
+                    if (api.utils.isArr(argc[i])) {
+
+                        for(j in argc[i]) {
+
+                            delete tmp[argc[i][j]];
+                        }
+                    } else {
+                        delete tmp[argc[i]];
+                    }
+
+                    storage.setItem(sname, JSON.stringify(to_store));
+
+                    return true;
+                }
+            }
+
+            /* Public methods */
+            api.cellar = {
+                _type: '',
+                _cached: {},
+                ls: window.localStorage,
+                ws: window.sessionStorage,
+
+               /**
+                * Method to directly call specified function with arguments
+                *
+                * @param fn {function} - the function to execute
+                * @param args {array} - optional arguments array to be applied to function
+                * @return {function} execute
+                **/
+                _call: function(fn, args) {
+                    var type, argc, sname;
+
+                    type = [this._type];
+                    argc = api.utils.slice.call(args);
+
+                    sname = argc[0];
+
+                    if (api.utils.isStr(sname) && api.Array.index('.') !== -1) {
+
+                        argc.shift();
+
+                        [].unshift.apply(argc, sname.split('.'));
+                    }
+
+                    [].push.apply(type, argc);
+
+                    return fn.apply(this, type);
+                },
+
+                /* get data from cellar */
+                get: function() {
+                    return this._call(_get, arguments);
+                },
+
+                /* store data in cellar */
+                set: function() {
+                    var length, argc, sname;
+
+                    agrc = arguments;
+                    length = argc.length;
+
+                    sname = argc[0];
+
+                    if (length < 1 || !api.Object.isPlain(sname) && length < 2) {
+                        throw new Error('Minimum 2 arguments must be given or first parameter must be an object');
+                    }
+
+                    return this._call(_set, argc);
+                },
+                
+                /* return array of keys from s cellar */
+                keys: function() {
+                    return this._call(_keys, arguments);
+                },
+
+                /* remove item from cellar */
+                remove: function() {
+                    if (arguments.length < 1) {
+                      throw new Error('Minimum 1 argument must be given');
+                    }
+
+                    return this._call(_remove, arguments);
+                },
+
+                /* remove all items from cellar */
+                removeAll: function() {
+                    return _removeAll(this._type, reinit);
+                },
+
+                /* check if cellar is empty */
+                isEmpty: function() {
+                    return this._call(_isEmpty, arguments);
+                },
+                
+                /* check if value is stored in cellar */
+                isSet: function() {
+                    if (arguments.length < 1) {
+                      throw new Error('Minimum 1 argument must be given');
+                    }
+
+                    return this._call(_isSet, arguments);
+                }
+            };
+        }
     };
 });
 ;/* --------------------------------------- *
