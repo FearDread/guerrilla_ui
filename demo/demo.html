@@ -116,6 +116,8 @@
     <script src='../src/modules/mvc/controller.js'></script>
     <!-- Network -->
     <script src='../src/modules/network/router.js'></script>
+    <!-- UI -->
+    <script src='../src/modules/ui/media.js'></script>
     <!-- Lang -->
     <script src='../src/modules/lang/lang.js'></script>
     <script src='../src/modules/lang/array.js'></script>
@@ -154,6 +156,7 @@
       // module with config object
       $.GUI({
           debug: true,
+          mode: 'single',
           animated: true,
           instanceId: 'instance2'
 
@@ -165,8 +168,8 @@
               load: function() {
                   console.log('load called in mod B');
 
-                  // G.query('.canvas').stargaze();
-                  G.query('.canvas').misty();
+                  G.query('.canvas').stargaze();
+                  // G.query('.canvas').misty();
               },
               unload: function() {}
           }

@@ -52,6 +52,8 @@ $.GUI().create('App', function(G) {
         console.log('model = ', user);
         console.log('view = ', view);
 
+        // view.fire('change');
+
         bind();
     }
 
