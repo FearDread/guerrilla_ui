@@ -1,137 +1,162 @@
 /* --------------------------------------- *
 * Guerrilla JS                             *
-* @module: Dynamic media screen sizes      *
+* @module: Dynamic media query callbacks   *
 * ---------------------------------------- */
 $.GUI().use(function(G) {
 
-    var Media = function(options){
-        var self = this,
-            breaks, media_change, add_listener, matches,
-            hasMatch = window.media_matches !== undefined && !!window.media_matches('!').add_listener,
+    return {
+        
+        load: function(api) {
+            var Media;
 
-        proto = {
+            Media = function(options) {
+                var _this = this.prototype, breaks, change, listen, matches,
+                    hasMatch = window.mediaMatches !== undefined && !!window.mediaMatches('!').listen;
 
-            media_change:function(query, options){
-                if(query.matches){
+                this.prototype = {
 
-                    if((typeof options.in) === 'function'){
-                        options.in(query);
-                    }
-                }else{
-            
-                    if((typeof options.out) === 'function'){
-                        options.out(query);
-                    }
-                }
+                    /**
+                     * Event handler that checks and fires callbacks based on passed media query 
+                     *
+                     * @param query {string} - the media query to execute on
+                     * @param options {object} - options object with media callbacks 
+                     * @return {function} - execute callbacks 
+                    **/
+                    change: function(query, options) {
+                        if (query.matches) {
 
-                if((typeof options.both) === 'function'){
+                            if (api.utils.isFunc(options.in)) {
+                                options.in(query);
+                            }
+                        } else {
+                    
+                            if (api.utils.isFunc(options.out)) {
+                                options.out(query);
+                            }
+                        }
 
-                    return options.both(query);
-                }
-            }, 
+                        if (api.utils.isFunc(options.both)) {
+                            return options.both(query);
+                        }
+                    }, 
 
-            add_listener:function(options){
-                var self = this,
-                    query = window.media_matches(options.media),
-                    query_cb = function(){
-                        return proto.media_change(query, options);
+                    /**
+                     * Add media listener to query and window orientation events 
+                     *
+                     * @param options {object} - options object with media queries 
+                     * @return {function} - execute change event 
+                    **/
+                    listen: function(options) {
+                        var query, query_cb, window_cb;
+
+                        query = window.mediaMatches(options.media);
+
+                        query_cb = function() {
+                            return _this.change(query, options);
+                        };
+
+                        window_cb = function() {
+                            return _this.change(window.matches(options.media), options);
+                        };
+
+                        query.addListener(query_cb);
+
+                        window.addEventListener("orientationchange", window_cb, false);
+
+                        return this.change(query, options);
                     },
-                    window_cb = function(){
-                        var q = window.matches(options.media);
 
-                        return proto.media_change(q, options);
-                    };
+                    /**
+                     * Check media query parts dimentions and height / width 
+                     *
+                     * @param parts {object} the media query object to check 
+                     * @return {string} - matched query string 
+                    **/
+                    check: function(parts) {
+                        var constraint, dimension, matches, ratio, value, windowHeight, windowWidth;
 
-                query.addListener(query_cb);
+                        constraint = parts[1];
+                        dimension = parts[2];
 
-                window.addEventListener("orientationchange", window_cb, false);
+                        if (parts[4]) {
 
-                return proto.media_change(query, options);
-            },
+                            value = api.utils.getPxValue(parseInt(parts[3], 10), parts[4]); 
 
-            check_query:function(parts){
-                var constraint, dimension, matches, ratio, value, windowHeight, windowWidth;
+                        } else {
+                            value = parts[3];
+                        }
 
-                constraint = parts[1];
-                dimension = parts[2];
+                        windowWidth = window.innerWidth || document.documentElement.clientWidth;
+                        windowHeight = window.innerHeight || document.documentElement.clientHeight;
 
-                if(parts[4]){
-                    value = GUI.Util.getPxValue(parseInt(parts[3], 10), parts[4]); 
+                        if (dimension === 'width') {
 
-                }else{
-                    value = parts[3];
-                }
+                            matches = constraint === "max" && value > windowWidth || constraint === "min" && value < windowWidth;
 
-                windowWidth = window.innerWidth || document.documentElement.clientWidth;
-                windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                        } else if (dimension === 'height') {
 
-                if(dimension === 'width'){
-                    matches = constraint === "max" && value > windowWidth || constraint === "min" && value < windowWidth;
+                            matches = constraint === "max" && value > windowHeight || constraint === "min" && value < windowHeight;
+                        } else if (dimension === 'aspect-ratio') {
+                            ratio = windowWidth / windowHeight;
+                            // matches = constraint === "max" && JSON.parse(ratio) < JSON.parse(value) || constraint === "min" && JSON.parse(ratio) > JSON.parse(value);
+                            matches = constraint === "max" && JSON.parse(ratio) < JSON.parse(value) || constraint === "min" && JSON.parse(ratio) > JSON.parse(value);
+                        }
 
-                }else if(dimension === 'height'){
-                    matches = constraint === "max" && value > windowHeight || constraint === "min" && value < windowHeight;
+                        return matches;
+                    },
 
-                }else if(dimension === 'aspect-ratio'){
-                    ratio = windowWidth / windowHeight;
+                    /**
+                     * Attach event listener for changes in media / screen size 
+                     *
+                     * @return {object} - the added event object via change method 
+                    **/
+                    mediaListener: function() {
+                        var opts, matches, media, medias, parts, _i, _len;
 
-                    matches = constraint === "max" && eval(ratio) < eval(value) || constraint === "min" && eval(ratio) > eval(value);
-                }
+                        medias = (options.media) ? options.media.split(/\sand\s|,\s/) : null;
 
-                return matches;
-            },
+                        if (medias) {
+                            matches = true;
 
-            media_listener:function(){
-                var opts, matches, media, medias, parts, _i, _len;
+                            for (_i = 0, _len = medias.length; _i < _len; _i++) {
+                                media = medias[_i];
+                                parts = media.match(/\((.*?)-(.*?):\s([\d\/]*)(\w*)\)/);
 
-                medias = (options.media) ? options.media.split(/\sand\s|,\s/) : null;
+                                if (!this.check(parts)) {
+                                    matches = false;
+                                }
+                            }
 
-                if(medias){
-                    matches = true;
+                            opts = {media: options.media, matches: matches};
 
-                    for(_i = 0, _len = medias.length; _i < _len; _i++){
-                        media = medias[_i];
-                        parts = media.match(/\((.*?)-(.*?):\s([\d\/]*)(\w*)\)/);
-
-                        if (!proto.check_query(parts)) {
-                            matches = false;
+                            return this.change(opts, options);
                         }
                     }
+                };
 
-                    opts = {media:options.media, matches:matches};
+                /* Return all needed event listeners */
+                return function() {
+                    options = arguments[0] || {};
 
-                    return proto.media_change(opts, options);
-                }
-            }
-        };
+                    if (window.mediaMatches) {
 
-        return function(){
-            options = arguments[0] || {};
+                        return _this.listen();
+                    
+                    } else {
+                        if (window.addEventListener) {
+                            window.addEventListener("resize", _this.mediaListener);
 
-            if(window.media_matches){
-                return proto.add_listener();
-            
-            }else{
-                if(window.addEventListener){
-                    window.addEventListener("resize", proto.media_listener);
+                        } else {
 
-                }else{
+                            if (window.attachEvent) {
+                                window.attachEvent("onresize", _this.mediaListener);
+                            }
+                        }
 
-                    if(window.attachEvent){
-                        window.attachEvent("onresize", proto.media_listener);
+                        return _this.mediaListener();
                     }
-                }
-
-                return proto.media_listener();
-            }
-        };
-    };
-  
-    return {
-        load: function(api) {
-            api.Media = new Media();
-        },
-        unload: function() {
-            G.cleanup();
+                };
+            };
         }
     };
 });

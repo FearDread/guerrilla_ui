@@ -53,7 +53,7 @@ $.GUI().use(function(G) {
                         }
                         
                         return result;
-                    }
+                    };
                 },
 
                 /**
