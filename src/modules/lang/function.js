@@ -32,6 +32,29 @@ $.GUI().use(function(G) {
                         }, context || this), time);
                     };
                 },
+                
+                /**
+                 * Allow passed method to only be executed only once
+                 *
+                 * @param fn {function} - the function to execute once
+                 * @param context {object} - optional context that will be applied to passed method
+                 * @return {function}
+                **/
+                once: function(fn, context) {
+                    var result;
+                    
+                    return function() {
+                        
+                        if (fn) {
+                        
+                            result = fn.apply(context || this, arguments);
+                            
+                            fn = null;
+                        }
+                        
+                        return result;
+                    }
+                },
 
                 /**
                  * Delay a functions execution by passed amount of time 
@@ -43,6 +66,8 @@ $.GUI().use(function(G) {
                 **/
                 throttle: function(fn, time, context) {
                     var run;
+                    
+                    time = time || 1000;
 
                     return function() {
                         var args = arguments,
