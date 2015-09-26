@@ -15,17 +15,32 @@ $.GUI().create('App', function(G) {
     G.add('navclick', navHandler); 
 
     function _load(opts) {
+
         G.add('scrollPage', function() {
             console.log('fired scroll page channel');
         });
 
         initView();
 
-        G.Router.config({ mode: 'history'});
+        G.Router.config({ mode: 'hash'});
 
-        G.Router.add(/#about/, function() {
+        G.Router.add(/about/, function() {
             console.log('about');
         });
+
+        var media = new G.Media({
+            media:'(max-width: 1024)',
+            in: function() {
+                console.log('media in');
+            },
+            out: function() {
+                console.log('media out');
+            },
+            both: function() {
+                console.log('media both');
+            }
+        });
+
     }
 
     function bind() {
@@ -80,6 +95,5 @@ $.GUI().create('App', function(G) {
 
     return {
         load: _load,
-        unload: function() {}
     };
 }).start('App');

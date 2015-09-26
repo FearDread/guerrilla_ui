@@ -142,7 +142,7 @@
           G.log('G elem = ', el);
 
           function print() {
-            console.log('load called in mod A');
+            G.log('load called in mod A');
           }
 
           return {
@@ -166,7 +166,7 @@
 
           return {
               load: function() {
-                  console.log('load called in mod B');
+                  G.log('load called in mod B');
 
                   G.query('.canvas').stargaze();
                   // G.query('.canvas').misty();
@@ -184,9 +184,9 @@
 
           return {
               load: function(opts) {
-                  console.log('load called in mod C');
-
+                  G.log('load called in mod C');
                   G.log('loaded with options :: ', opts);
+
                   printHistory();
               },
               unload: function(){}
@@ -216,7 +216,7 @@
       // adding routes
       Router
       .add(/products\/(.*)\/edit\/(.*)/, function() {
-          console.log('products', arguments);
+          G.log('products', arguments);
       })
       .add(function() {
           console.log('default');

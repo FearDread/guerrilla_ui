@@ -10,10 +10,12 @@ $.GUI().use(function(G) {
             var Media;
 
             Media = function(options) {
-                var _this = this.prototype, breaks, change, listen, matches,
+                var _this = this.prototype, breaks, change, listen, matches, prototype,
                     hasMatch = window.mediaMatches !== undefined && !!window.mediaMatches('!').listen;
 
-                this.prototype = {
+                api.log('Media options = ', options);
+
+                prototype = {
 
                     /**
                      * Event handler that checks and fires callbacks based on passed media query 
@@ -136,27 +138,28 @@ $.GUI().use(function(G) {
 
                 /* Return all needed event listeners */
                 return function() {
-                    options = arguments[0] || {};
 
                     if (window.mediaMatches) {
 
-                        return _this.listen();
+                        return prototype.listen();
                     
                     } else {
                         if (window.addEventListener) {
-                            window.addEventListener("resize", _this.mediaListener);
+                            window.addEventListener("resize", prototype.mediaListener);
 
                         } else {
 
                             if (window.attachEvent) {
-                                window.attachEvent("onresize", _this.mediaListener);
+                                window.attachEvent("onresize", prototype.mediaListener);
                             }
                         }
 
-                        return _this.mediaListener();
+                        return prototype.mediaListener();
                     }
                 };
             };
+
+            api.Media = Media;
         }
     };
 });
