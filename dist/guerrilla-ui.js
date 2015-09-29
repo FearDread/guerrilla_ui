@@ -2736,6 +2736,29 @@ $.GUI().use(function(G) {
                         }, context || this), time);
                     };
                 },
+                
+                /**
+                 * Allow passed method to only be executed only once
+                 *
+                 * @param fn {function} - the function to execute once
+                 * @param context {object} - optional context that will be applied to passed method
+                 * @return {function}
+                **/
+                once: function(fn, context) {
+                    var result;
+                    
+                    return function() {
+                        
+                        if (fn) {
+                        
+                            result = fn.apply(context || this, arguments);
+                            
+                            fn = null;
+                        }
+                        
+                        return result;
+                    };
+                },
 
                 /**
                  * Delay a functions execution by passed amount of time 
@@ -2747,6 +2770,8 @@ $.GUI().use(function(G) {
                 **/
                 throttle: function(fn, time, context) {
                     var run;
+                    
+                    time = time || 1000;
 
                     return function() {
                         var args = arguments,
@@ -3438,40 +3463,203 @@ $.GUI().use(function(G) {
     };
 });
 ;/* --------------------------------------- *
+* Guerrilla JS                             *
+* @module: Dynamic media query callbacks   *
+* ---------------------------------------- */
+$.GUI().use(function(G) {
+
+    return {
+        
+        load: function(api) {
+            var Media;
+
+            Media = function(options) {
+                var _this = this.prototype, breaks, change, listen, matches, prototype,
+                    hasMatch = window.mediaMatches !== undefined && !!window.mediaMatches('!').listen;
+
+                prototype = {
+
+                    /**
+                     * Event handler that checks and fires callbacks based on passed media query 
+                     *
+                     * @param query {string} - the media query to execute on
+                     * @param options {object} - options object with media callbacks 
+                     * @return {function} - execute callbacks 
+                    **/
+                    change: function(query, options) {
+                        if (query.matches) {
+
+                            if (api.utils.isFunc(options.in)) {
+                                options.in(query);
+                            }
+                        } else {
+                    
+                            if (api.utils.isFunc(options.out)) {
+                                options.out(query);
+                            }
+                        }
+
+                        if (api.utils.isFunc(options.both)) {
+                            return options.both(query);
+                        }
+                    }, 
+
+                    /**
+                     * Add media listener to query and window orientation events 
+                     *
+                     * @param options {object} - options object with media queries 
+                     * @return {function} - execute change event 
+                    **/
+                    listen: function(options) {
+                        var _this = this, query, query_cb, window_cb;
+
+                        query = window.mediaMatches(options.media);
+
+                        query_cb = function() {
+                            return _this.change(query, options);
+                        };
+
+                        window_cb = function() {
+                            return _this.change(window.matches(options.media), options);
+                        };
+
+                        query.addListener(query_cb);
+
+                        window.addEventListener("orientationchange", window_cb, false);
+
+                        return this.change(query, options);
+                    },
+
+                    /**
+                     * Check media query parts dimentions and height / width 
+                     *
+                     * @param parts {object} the media query object to check 
+                     * @return {string} - matched query string 
+                    **/
+                    check: function(parts) {
+                        var constraint, dimension, matches, ratio, value, windowHeight, windowWidth;
+
+                        constraint = parts[1];
+                        dimension = parts[2];
+
+                        if (parts[4]) {
+
+                            value = api.utils.getPxValue(parseInt(parts[3], 10), parts[4]); 
+
+                        } else {
+                            value = parts[3];
+                        }
+
+                        windowWidth = window.innerWidth || document.documentElement.clientWidth;
+                        windowHeight = window.innerHeight || document.documentElement.clientHeight;
+
+                        if (dimension === 'width') {
+
+                            matches = constraint === "max" && value > windowWidth || constraint === "min" && value < windowWidth;
+
+                        } else if (dimension === 'height') {
+
+                            matches = constraint === "max" && value > windowHeight || constraint === "min" && value < windowHeight;
+                        } else if (dimension === 'aspect-ratio') {
+                            ratio = windowWidth / windowHeight;
+                            // matches = constraint === "max" && JSON.parse(ratio) < JSON.parse(value) || constraint === "min" && JSON.parse(ratio) > JSON.parse(value);
+                            matches = constraint === "max" && JSON.parse(ratio) < JSON.parse(value) || constraint === "min" && JSON.parse(ratio) > JSON.parse(value);
+                        }
+
+                        return matches;
+                    },
+
+                    /**
+                     * Attach event listener for changes in media / screen size 
+                     *
+                     * @return {object} - the added event object via change method 
+                    **/
+                    mediaListener: function() {
+                        var opts, matches, media, medias, parts, _i, _len;
+
+                        medias = (options.media) ? options.media.split(/\sand\s|,\s/) : null;
+
+                        if (medias) {
+                            matches = true;
+
+                            for (_i = 0, _len = medias.length; _i < _len; _i++) {
+                                media = medias[_i];
+                                parts = media.match(/\((.*?)-(.*?):\s([\d\/]*)(\w*)\)/);
+
+                                if (!prototype.check(parts)) {
+                                    matches = false;
+                                }
+                            }
+
+                            opts = {media: options.media, matches: matches};
+
+                            return prototype.change(opts, options);
+                        }
+                    }
+                };
+
+                /* Return all needed event listeners */
+                return function() {
+
+                    if (window.mediaMatches) {
+
+                        return prototype.listen();
+                    
+                    } else {
+                        if (window.addEventListener) {
+                            window.addEventListener("resize", prototype.mediaListener);
+
+                        } else {
+
+                            if (window.attachEvent) {
+                                window.attachEvent("onresize", prototype.mediaListener);
+                            }
+                        }
+
+                        return prototype.mediaListener();
+                    }
+                };
+            };
+
+            api.Media = Media;
+        }
+    };
+});
+;/* --------------------------------------- *
 * Guerrilla UI                             *
 * @module: GUI Layer Slider jQuery plugin  * 
 * ---------------------------------------- */
-$.GUI().create('Glisslider', function(G) {
+$.GUI().create('LayerSlider', function(G) {
 
-    var Glisslider = function($el, opts) {
+    var Layers = function($el, opts) {
         var _this = this, slider = $el;
         
         // default options
         this.defaults = {
-            debug:false,
-            text:null,
-            style:'random',
-            brand:null,
-            image:null,
-            showing:{
-                extra:null,
-                slider:true
+            debug: false,
+            text: null,
+            style: 'random',
+            brand: null,
+            image: null,
+            showing: {
+                extra: null,
+                slider: true
             },
-            focused:true,
-            collection:[],
-            animating:true,
-            capTime:1500,
-            brandTime:1500,
-            layerTime:1200,
-            slideTime:6500,
-            animationTime:1500,
-            slide:null,
-            start:function(){},
-            stop:function(){},
-            pause:function(){},
-            canvas:null,
-            container:$('#glisslider'),
-            selector:$('.slides > li'),
+            focused: true,
+            collection: [],
+            animating: true,
+            capTime: 1500,
+            brandTime: 1500,
+            layerTime: 1200,
+            slideTime: 6500,
+            animationTime: 1500,
+            slide: null,
+            start: function(){},
+            stop: function(){},
+            pause: function(){},
+            canvas: null,
+            container: $('#layerslider'),
+            selector: $('.slides > li'),
         };
 
         // Public Properties //
@@ -3491,7 +3679,7 @@ $.GUI().create('Glisslider', function(G) {
         };
 
         // Store Reference //
-        $.data($el, 'Glisslider', slider);
+        $.data($el, 'LayerSlider', slider);
 
         // Private Methods //
         this.methods = {
@@ -3545,15 +3733,12 @@ $.GUI().create('Glisslider', function(G) {
                         current.children('div').css('display','none');
 
                         next.addClass('active');
-
                         _this.animate(next, slider.animations.fade[rand]);
                         break;
                         
                     case 'fade':
                         current.fadeOut(500).removeClass('active');
-
                         next.fadeIn(500).addClass('active');
-
                         break;
 
                     case 'slide':
@@ -3561,6 +3746,7 @@ $.GUI().create('Glisslider', function(G) {
 
                         current.removeClass('active');
                         current.animate({
+
                             left: - slider.slideWidth
 
                         }, 200, function() {
@@ -3574,155 +3760,189 @@ $.GUI().create('Glisslider', function(G) {
                         break;
                 }
             },
-          slide_prev:function(){
-            var _this = this, current = $('.item.active', slider),
-                prev = current.previous().length ? current.previous() : current.siblings().last(),
-                rand = Math.floor(Math.random() * (9 - 0) + 0);
 
-            switch(slider.opts.style){
-              case 'random':
-                current.css('display','none').removeClass('active');
-                current.children('div').css('display','none');
-                prev.addClass('active');
-                _this.animate(prev, slider.animations.fade[rand]);
-                break;
-              case 'fade':
-                current.fadeOut(500).removeClass('active');
-                prev.fadeIn(500).addClass('active');
-                break;
-              case 'slide':
-                slider.opts.selector.animate({
-                  left: + slider.slideWidth
-                  },400,function(){
-                    $('.slides li:last-child').prependTo('.slides');
-                    $('.slides').css('left', '0');
-                });
-                break;
-              default:
-                break;
-            }
-          },
-          layer:function(item){
-            var _this = this;
-            var rand = Math.floor(Math.random() * (5 - 0) + 0);
-            var caption = item.find('.caption'), brand = item.find('.brand'); 
+            slide_prev: function() {
+                var _this = this, current = $('.item.active', slider),
+                    prev = current.previous().length ? current.previous() : current.siblings().last(),
+                    rand = Math.floor(Math.random() * (9 - 0) + 0);
 
-            _this.animate(item, 'fadeIn', 500);
-            $(slider).trigger('slide');
+                switch (slider.opts.style) {
+                    case 'random':
+                        current.css('display','none').removeClass('active');
+                        current.children('div').css('display','none');
 
-            setTimeout(function(){
-              brand.show();
-              _this.animate(brand,
-                slider.animations.rotate[rand], slider.opts.brandTime);
+                        prev.addClass('active');
+                        _this.animate(prev, slider.animations.fade[rand]);
+                        break;
 
-                setTimeout(function(){
-                  caption.show();
-                  _this.animate(caption,
-                    slider.animations.texts[rand], slider.opts.capTime);
+                    case 'fade':
+                        current.fadeOut(500).removeClass('active');
+                        prev.fadeIn(500).addClass('active');
+                        break;
 
-              }, slider.opts.layerTime);
-            }, slider.opts.layerTime);
-          },
-          cycle:function(){
-            var _this = this, item;
-            var len = slider.data.length;
-            item = $(slider.data[this.activeIndex]);
+                    case 'slide':
+                        slider.opts.selector.animate({
 
-            if(this.activeIndex < len && slider.opts.animating){
-              this.layer(item);
+                            left: + slider.slideWidth
 
-              setTimeout(function(){
-                _this.slide_next();
-                _this.cycle(); 
+                        }, 400, function(){
 
-              }, slider.opts.slideTime);
-            }else if(slider.opts.animating){
-              this.reset();
-              item = $(slider.data[this.activeIndex]);
+                            $('.slides li:last-child').prependTo('.slides');
+                            $('.slides').css('left', '0');
+                        });
+                        break;
 
-              this.layer(item);
-              setTimeout(function(){
-                _this.slide_next();
-                _this.cycle(); 
+                    default:
+                        break;
+                }
+            },
 
-              }, slider.opts.slideTime);
-            }
-          },
-          bind_events:function(){
-            var _this = this;
-            // Custom Events //
-            $(slider).bind('slide',function(_e){
-              _e.stopPropagation();
-              if(slider.opts.slide !== null){
-                if(typeof(slider.opts.slide) === 'function'){
+            layer: function(item) {
+                var _this = this, rand, caption, brand;
+
+                rand = Math.floor(Math.random() * (5 - 0) + 0);
+
+                brand = item.find('.brand');
+                caption = item.find('.caption');
+
+                this.animate(item, 'fadeIn', 500);
+
+                $(slider).trigger('slide');
+
+                setTimeout(function() {
+                    brand.show();
+
+                    _this.animate(
+                        brand,
+                        slider.animations.rotate[rand], 
+                        slider.opts.brandTime
+                    );
+
+                    setTimeout(function() {
+                        caption.show();
+
+                        _this.animate(
+                            caption,
+                            slider.animations.texts[rand], 
+                            slider.opts.capTime
+                        );
+
+                    }, slider.opts.layerTime);
+
+                }, slider.opts.layerTime);
+            },
+
+            cycle: function() {
+                var _this = this, length, item;
+            
+                length = slider.data.length;
+                item = $(slider.data[this.activeIndex]);
+
+                if (this.activeIndex < len && slider.opts.animating) {
+                    this.layer(item);
+
+                    setTimeout(function() {
+
+                        _this.slide_next();
+                        _this.cycle(); 
+
+                    }, slider.opts.slideTime);
+
+                } else if (slider.opts.animating) {
+
+                    this.reset();
+                    item = $(slider.data[this.activeIndex]);
+
+                    this.layer(item);
+
+                    setTimeout(function() {
+
+                        _this.slide_next();
+                        _this.cycle(); 
+
+                    }, slider.opts.slideTime);
+                }
+            },
+
+            bind_events: function() {
+                var _this = this;
+
+                // Custom Events //
+                $(slider).bind('slide', function(_e) {
+                    _e.stopPropagation();
+
+                    if (slider.opts.slide !== null) {
+                        if (typeof(slider.opts.slide) === 'function') {
                 
-                  slider.opts.slide();
-                }
-              }else{
-                if(slider.opts.showing.extra){
-                  $(slider.opts.showing.extra).show('slow');
-                }
-              }
-            });
-            $(slider).bind('start',function(_e){
-              _e.preventDefault();
-            
-            });
-            $(slider).bind('stop',function(_e){
-              _e.preventDefault();
-            
-            });
+                            slider.opts.slide();
+                        }
+                    } else {
 
-            // Slider Controls //
-            $('.slider-control.right',slider).bind('click',function(_e){
-              _e.preventDefault();
-              _this.slide_next();
-            });
-            $('.slider-control.left',slider).bind('click',function(_e){
-              _e.preventDefault();
-              _this.slide_prev();
-            });
-
-                $(slider.opts.container).hover(function(_e){
-                  _e.stopPropagation();
-                  return;
-                  slider.opts.animating = false;
-                  },function(){
-                    return;
-                    slider.opts.animating = true;
+                        if (slider.opts.showing.extra) {
+                            $(slider.opts.showing.extra).show('slow');
+                        }
+                    }
                 });
+
+                $(slider).bind('start',function(_e) {
+                    _e.preventDefault();
+            
+                });
+
+                $(slider).bind('stop',function(_e) {
+                    _e.preventDefault();
+            
+                });
+
+                // Slider Controls //
+                $('.slider-control.right',slider).bind('click',function(_e) {
+                    _e.preventDefault();
+                    _this.slide_next();
+                });
+
+                $('.slider-control.left',slider).bind('click',function(_e) {
+                    _e.preventDefault();
+                    _this.slide_prev();
+                });
+
+                $(slider.opts.container).hover(function(_e) {
+                    _e.stopPropagation();
+                    slider.opts.animating = false;
+
+                    }, function() {
+                        slider.opts.animating = true;
+                      }
+                  );
+              },
+
+            reset: function() {
+              this.activeIndex = 0;
             },
-            reset:function(){
-                this.activeIndex = 0;
-            },
-            init:function(){
-                console.log('MOSSlider: ', slider.opts);
+
+            init: function() {
+                console.log('Layers: ', slider.opts);
                 // Markup //
                 this.setup();
+
                 // Slideshow Loop //
                 this.cycle();
+
                 // Controls //
                 this.bind_events();
             }
         };
 
         // Default Callbacks //
-        slider.start = function(){
-        
-        };
+        slider.start = function() {};
 
-        slider.stop = function(){
-        
-        };
+        slider.stop = function() {};
 
-        slider.pause = function(){
-        
-        };
+        slider.pause = function() {};
 
-        slider.slide = function(){
-            if(slider.opts.showing.extra){
-                $(slider.opts.showing.extra).show('slow');
-            }
+        slider.slide = function() {
+          if (slider.opts.showing.extra) {
+            $(slider.opts.showing.extra).show('slow');
+          }
         };
 
         slider.slideCount = slider.opts.selector.length;
@@ -3735,7 +3955,7 @@ $.GUI().create('Glisslider', function(G) {
     };
   
     return {
-        fn:function(){
+        fn: function() {
 
         },
     };

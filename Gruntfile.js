@@ -29,6 +29,7 @@ module.exports = function(grunt){
                   'src/modules/lang/function.js',
                   'src/modules/util/cookie.js',
                   'src/modules/util/cellar.js',
+                  'src/modules/ui/media.js',
                   'src/plugins/layers.js',
                   'src/plugins/stargaze.js',
                   'src/plugins/misty.js',
