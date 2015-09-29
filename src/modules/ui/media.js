@@ -13,8 +13,6 @@ $.GUI().use(function(G) {
                 var _this = this.prototype, breaks, change, listen, matches, prototype,
                     hasMatch = window.mediaMatches !== undefined && !!window.mediaMatches('!').listen;
 
-                api.log('Media options = ', options);
-
                 prototype = {
 
                     /**
@@ -49,7 +47,7 @@ $.GUI().use(function(G) {
                      * @return {function} - execute change event 
                     **/
                     listen: function(options) {
-                        var query, query_cb, window_cb;
+                        var _this = this, query, query_cb, window_cb;
 
                         query = window.mediaMatches(options.media);
 
@@ -124,14 +122,14 @@ $.GUI().use(function(G) {
                                 media = medias[_i];
                                 parts = media.match(/\((.*?)-(.*?):\s([\d\/]*)(\w*)\)/);
 
-                                if (!this.check(parts)) {
+                                if (!prototype.check(parts)) {
                                     matches = false;
                                 }
                             }
 
                             opts = {media: options.media, matches: matches};
 
-                            return this.change(opts, options);
+                            return prototype.change(opts, options);
                         }
                     }
                 };

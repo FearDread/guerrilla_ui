@@ -28,7 +28,7 @@ $.GUI().create('App', function(G) {
             console.log('about');
         });
 
-        var media = new G.Media({
+        var m = new G.Media({
             media:'(max-width: 1024)',
             in: function() {
                 console.log('media in');
@@ -39,7 +39,9 @@ $.GUI().create('App', function(G) {
             both: function() {
                 console.log('media both');
             }
-        });
+        }).call();
+
+	//m();
 
     }
 
