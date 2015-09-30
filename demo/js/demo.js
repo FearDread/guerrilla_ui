@@ -15,6 +15,7 @@ $.GUI().create('App', function(G) {
     G.add('navclick', navHandler); 
 
     function _load(opts) {
+        var mediaListener;
 
         G.add('scrollPage', function() {
             console.log('fired scroll page channel');
@@ -28,7 +29,7 @@ $.GUI().create('App', function(G) {
             console.log('about');
         });
 
-        var m = new G.Media({
+        mediaListener = new G.Media({
             media:'(max-width: 1024)',
             in: function() {
                 console.log('media in');
@@ -40,9 +41,6 @@ $.GUI().create('App', function(G) {
                 console.log('media both');
             }
         }).call();
-
-	//m();
-
     }
 
     function bind() {
