@@ -1,23 +1,15 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
-* @module: Pop, timed animations based on  * 
-* scrolling and page location              *
+* @module: Charm, timed animations based   * 
+* on scrolling and page location           *
 * ---------------------------------------- */
-$.GUI().create('Pop', function(GUI){
-               
-    var WOW = (function(){
+$.GUI().use(function(core) {
+    
+    var Charm = (function() {
 
-        WOW.prototype.defaults = {
-            boxClass: 'wow',
-            animateClass: 'animated',
-            offset: 0,
-            mobile: true,
-            live: true,
-            callback: null
-        };
+        function Charm(options) {
 
-        function WOW(options){
-            if(options == null){
+            if (!options || options === null) {
                 options = {};
             }
 
@@ -31,20 +23,35 @@ $.GUI().create('Pop', function(GUI){
             this.wowEvent = this.util().createEvent(this.config.boxClass);
         }
 
-        WOW.prototype.init = function() {
+        Charm.prototype.defaults = {
+            boxClass: 'charm',
+            animateClass: 'animated',
+            offset: 0,
+            mobile: true,
+            live: true,
+            callback: null
+        };
+
+        Charm.prototype.init = function() {
             var ref;
+
             this.element = window.document.documentElement;
 
-            if((ref = document.readyState) === "interactive" || ref === "complete"){
+            if ((ref = document.readyState) === "interactive" || ref === "complete") {
+
                 this.start();
-            }else{
+
+            } else {
+
                 this.util().addEvent(document, 'DOMContentLoaded', this.start);
             }
 
-            return this.finished = [];
+            this.finished = [];
+
+            return this.finished;
         };
 
-        WOW.prototype.start = function() {
+        Charm.prototype.start = function() {
             var box, j, len, ref;
             this.stopped = false;
             this.boxes = (function(){
@@ -128,7 +135,7 @@ $.GUI().create('Pop', function(GUI){
             }
         };
 
-    WOW.prototype.stop = function() {
+    Charm.prototype.stop = function() {
       this.stopped = true;
       this.util().removeEvent(window, 'scroll', this.scrollHandler);
       this.util().removeEvent(window, 'resize', this.scrollHandler);
@@ -137,13 +144,13 @@ $.GUI().create('Pop', function(GUI){
       }
     };
 
-    WOW.prototype.sync = function(element) {
+    Charm.prototype.sync = function(element) {
       if (MutationObserver.notSupported) {
         return this.doSync(this.element);
       }
     };
 
-    WOW.prototype.doSync = function(element) {
+    Charm.prototype.doSync = function(element) {
       var box, j, len, ref, results;
       if (element == null) {
         element = this.element;
@@ -172,7 +179,7 @@ $.GUI().create('Pop', function(GUI){
       return results;
     };
 
-    WOW.prototype.show = function(box) {
+    Charm.prototype.show = function(box) {
       this.applyStyle(box);
       box.className = box.className + " " + this.config.animateClass;
       if (this.config.callback != null) {
@@ -186,7 +193,7 @@ $.GUI().create('Pop', function(GUI){
       return box;
     };
 
-    WOW.prototype.applyStyle = function(box, hidden) {
+    Charm.prototype.applyStyle = function(box, hidden) {
       var delay, duration, iteration;
       duration = box.getAttribute('data-wow-duration');
       delay = box.getAttribute('data-wow-delay');
@@ -198,7 +205,7 @@ $.GUI().create('Pop', function(GUI){
       })(this));
     };
 
-    WOW.prototype.animate = (function() {
+    Charm.prototype.animate = (function() {
       if ('requestAnimationFrame' in window) {
         return function(callback) {
           return window.requestAnimationFrame(callback);
@@ -210,7 +217,7 @@ $.GUI().create('Pop', function(GUI){
       }
     })();
 
-    WOW.prototype.resetStyle = function() {
+    Charm.prototype.resetStyle = function() {
       var box, j, len, ref, results;
       ref = this.boxes;
       results = [];
@@ -221,7 +228,7 @@ $.GUI().create('Pop', function(GUI){
       return results;
     };
 
-    WOW.prototype.resetAnimation = function(event) {
+    Charm.prototype.resetAnimation = function(event) {
       var target;
       if (event.type.toLowerCase().indexOf('animationend') >= 0) {
         target = event.target || event.srcElement;
@@ -229,7 +236,7 @@ $.GUI().create('Pop', function(GUI){
       }
     };
 
-    WOW.prototype.customStyle = function(box, hidden, duration, delay, iteration) {
+    Charm.prototype.customStyle = function(box, hidden, duration, delay, iteration) {
       if (hidden) {
         this.cacheAnimationName(box);
       }
@@ -255,9 +262,9 @@ $.GUI().create('Pop', function(GUI){
       return box;
     };
 
-    WOW.prototype.vendors = ["moz", "webkit"];
+    Charm.prototype.vendors = ["moz", "webkit"];
 
-    WOW.prototype.vendorSet = function(elem, properties) {
+    Charm.prototype.vendorSet = function(elem, properties) {
       var name, results, value, vendor;
       results = [];
       for (name in properties) {
@@ -277,7 +284,7 @@ $.GUI().create('Pop', function(GUI){
       return results;
     };
 
-    WOW.prototype.vendorCSS = function(elem, property) {
+    Charm.prototype.vendorCSS = function(elem, property) {
       var j, len, ref, result, style, vendor;
       style = getComputedStyle(elem);
       result = style.getPropertyCSSValue(property);
@@ -289,7 +296,7 @@ $.GUI().create('Pop', function(GUI){
       return result;
     };
 
-    WOW.prototype.animationName = function(box) {
+    Charm.prototype.animationName = function(box) {
       var animationName;
       try {
         animationName = this.vendorCSS(box, 'animation-name').cssText;
@@ -303,19 +310,21 @@ $.GUI().create('Pop', function(GUI){
       }
     };
 
-    WOW.prototype.cacheAnimationName = function(box) {
+    Charm.prototype.cacheAnimationName = function(box) {
       return this.animationNameCache.set(box, this.animationName(box));
     };
 
-    WOW.prototype.cachedAnimationName = function(box) {
+    Charm.prototype.cachedAnimationName = function(box) {
       return this.animationNameCache.get(box);
     };
 
-    WOW.prototype.scrollHandler = function() {
-      return this.scrolled = true;
+    Charm.prototype.scrollHandler = function() {
+      this.scrolled = true;
+
+      return this.scrolled;
     };
 
-    WOW.prototype.scrollCallback = function() {
+    Charm.prototype.scrollCallback = function() {
       var box;
       if (this.scrolled) {
         this.scrolled = false;
@@ -342,19 +351,20 @@ $.GUI().create('Pop', function(GUI){
       }
     };
 
-    WOW.prototype.offsetTop = function(element) {
+    Charm.prototype.offsetTop = function(element) {
       var top;
       while (element.offsetTop === void 0) {
         element = element.parentNode;
       }
       top = element.offsetTop;
+
       while (element = element.offsetParent) {
         top += element.offsetTop;
       }
       return top;
     };
 
-    WOW.prototype.isVisible = function(box) {
+    Charm.prototype.isVisible = function(box) {
       var bottom, offset, top, viewBottom, viewTop;
       offset = box.getAttribute('data-wow-offset') || this.config.offset;
       viewTop = window.pageYOffset;
@@ -364,22 +374,24 @@ $.GUI().create('Pop', function(GUI){
       return top <= viewBottom && bottom >= viewTop;
     };
 
-    WOW.prototype.util = function() {
-      return this._util != null ? this._util : this._util = new Util();
+    Charm.prototype.util = function() {
+      return this._util !== null ? this._util : this._util = new Util();
     };
 
-    WOW.prototype.disabled = function() {
+    Charm.prototype.disabled = function() {
       return !this.config.mobile && this.util().isMobile(navigator.userAgent);
     };
 
-    return WOW;
+    return Charm;
 
   })();
          
   return {
-      load:function(){
+      load: function(api) {
+
+          api.Charm = Charm;
       
       }
-  }
+  };
                
 });
