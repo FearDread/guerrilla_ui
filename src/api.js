@@ -14,37 +14,35 @@ API = function() {
         // create new API sandbox instance
         create: function(gui, instance, options, module) {
 
-            // set sandbox vars
+            /* Sandbox identefiers */ 
             this.id = instance;
             this.module = module;
             this.options = (options !== null) ? options : {}; 
 
-            // attach new sandbox instance
+            /* Attach Broker methods to sandbox api */ 
             gui._broker.install(this);
 
-            // add utils object
+            /* Add utils object to sandbox api */
             this.utils = utils;
              
             /* jQuery wrappers */
-            // Ajax shorthand reference
             this.xhr = $.ajax;
             this.data = $.data;
-            this.Deferred = $.Deferred;
-            this.Animation = $.Animation;
+            this.deferred = $.Deferred;
+            this.animation = $.Animation;
 
-            // each loop reference
-            this.each = utils.each;
+            /* Module Namespaces */ 
+            this.ui = {};
+            this.dom = {};
+            this.net = {};
 
-            // reference debug methods 
-            this.log = function() {
-                return gui.debug.log(arguments);
-            };
-
-            this.warn = function() {
-                return gui.debug.warn(arguments);
-            };
-
-            // find selector in dom with wrapped methods
+            /**
+             * Search DOM for selector and wrap with both native and jQuery helper methods 
+             *
+             * @param selector {string} - the element to scan DOM for
+             * @param context {object} - optional context object to be applied to returned object wrapper
+             * @return {object} - GUI and jQuery wrapped element DOM object 
+            **/
             this.query = function(selector, context) {
                 var $el, _ret = {}, _this = this;
                 
@@ -83,13 +81,38 @@ API = function() {
                 return _ret;
             };
 
-            // assign dollar $ to query method
+            /**
+             * Assign $ as shorthand query method 
+            **/
             this.$ = this.query;
+
+            /**
+             * Reference utils / jQuery each method 
+            **/
+            this.each = utils.each;
+
+            /**
+             * Reference GUI core log method 
+             *
+             * @return {function} 
+            **/
+            this.log = function() {
+                return gui.debug.log(arguments);
+            };
+
+            /**
+             * Reference GUI core warn method 
+             *
+             * @return {function}
+            **/
+            this.warn = function() {
+                return gui.debug.warn(arguments);
+            };
 
             /**
              * Get location with stored reference to window object 
              *
-             * @return {object} - window ref
+             * @return {object} - specific window reference location 
             **/
             this.getLocation = function() {
                 var win = gui.config.win;
