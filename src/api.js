@@ -12,7 +12,7 @@ API = function() {
 
     return {
         // create new API sandbox instance
-        create: function(core, instance, options, module) {
+        create: function(gui, instance, options, module) {
 
             // set sandbox vars
             this.id = instance;
@@ -20,9 +20,7 @@ API = function() {
             this.options = (options !== null) ? options : {}; 
 
             // attach new sandbox instance
-            core._broker.install(this);
-
-            // this.Broker = core._broker;
+            gui._broker.install(this);
 
             // add utils object
             this.utils = utils;
@@ -39,11 +37,11 @@ API = function() {
 
             // reference debug methods 
             this.log = function() {
-                return core.debug.log(arguments);
+                return gui.debug.log(arguments);
             };
 
             this.warn = function() {
-                return core.debug.warn(arguments);
+                return gui.debug.warn(arguments);
             };
 
             // find selector in dom with wrapped methods
@@ -85,13 +83,16 @@ API = function() {
                 return _ret;
             };
 
+            // assign dollar $ to query method
+            this.$ = this.query;
+
             /**
              * Get location with stored reference to window object 
              *
              * @return {object} - window ref
             **/
             this.getLocation = function() {
-                var win = core.config.win;
+                var win = gui.config.win;
 
                 return win && win.location;
             };

@@ -1,35 +1,34 @@
 /* --------------------------------------- *
-* Guerrilla UI                             *
-* @author: Garrett Haptonstall (FearDread) *
+* gui.errilla UI                             *
+* @author: gui.rrett Haptonstall (FearDread) *
 * @module: Demo Site Module                * 
 * ---------------------------------------- */
-$.GUI().create('App', function(G) {
-    console.log('Demo app :: ', G);
+$.GUI().create('App', function(gui) {
+    console.log('Demo app :: ', gui);
 
     var navHandler = function(data) {
-
-        G.log('nav handler event fired.');
-        G.log('data = ', data);
+        gui.log('nav handler event fired.');
+        gui.log('data = ', data);
     };
 
-    G.add('navclick', navHandler); 
+    gui.add('navclick', navHandler); 
 
     function _load(opts) {
         var mediaListener;
 
-        G.add('scrollPage', function() {
+        gui.add('scrollPage', function() {
             console.log('fired scroll page channel');
         });
 
         initView();
 
-        G.Router.config({ mode: 'hash'});
+        gui.Router.config({ mode: 'hash'});
 
-        G.Router.add(/about/, function() {
+        gui.Router.add(/about/, function() {
             console.log('about');
         });
 
-        mediaListener = new G.Media({
+        mediaListener = new gui.Media({
             media:'(max-width: 1024)',
             in: function() {
                 console.log('media in');
@@ -45,23 +44,23 @@ $.GUI().create('App', function(G) {
 
     function bind() {
 
-        G.query('.navbar-top').click(showPage);
-        G.query('.btn').click(function(e) {
+        gui.query('.navbar-top').click(showPage);
+        gui.query('.btn').click(function(e) {
             e.preventDefault();
-            G.fire('scrollPage');
+            gui.fire('scrollPage');
         });
     }
 
     function initView() {
         var user, view;
 
-        user = new G.Model({
+        user = new gui.Model({
             id: 1,
             firstName: 'Duke',
             lastName: 'Hazard'
         });
 
-        view = new G.View();
+        view = new gui.View();
         view.setModel(user);
 
         console.log('model = ', user);
@@ -72,24 +71,21 @@ $.GUI().create('App', function(G) {
         bind();
     }
 
-    function showPage(event) {
+    function showPage(e) {
         var page, href, target;
-
-        event.preventDefault();
+        e.preventDefault();
 
         target = event.target;
-
-        page = G.query(target);
+        page = gui.$(target);
 
         if (page && page.is('a')) {
 
             href = page.attr('href').split('#')[1];
         }
 
-        G.fire('navclick', {page:href}, function() {
-
-            // G.Router.navigate();
-            G.log('callback after fired navclick event.');
+        gui.fire('navclick', {page:href}, function() {
+            // gui.Router.navigate();
+            gui.log('callback after fired navclick event.');
         });
     }
 

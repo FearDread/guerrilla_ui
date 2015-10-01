@@ -28,7 +28,7 @@
                         <i class="fa fa-bars"></i>
                     </button>
                     <a class="navbar-brand page-scroll" href="#page-top">
-                      <span class="light">Guerrilla</span> UI
+                      <span class="light">gui.errilla</span> UI
                     </a>
                 </div>
                 
@@ -97,14 +97,14 @@
 
         <footer>
             <div class="container text-center pop fadeInDown">
-                <p>Copyright &copy; Guerrilla UI 2014 - 2015</p>
+                <p>Copyright &copy; gui.errilla UI 2014 - 2015</p>
             </div>
         </footer>
 
     <!-- jQuery Framework Library -->
     <script src='../libs/jquery/jquery.min.js'></script>
-    <script src='../libs/jquery/jquery-ui.min.js'></script>
-    <!-- GUI -->
+    <script src='../libs/jquery_ui/jquery-ui.min.js'></script>
+    <!-- gui.I -->
     <script src='../src/utils.js'></script>
     <script src='../src/broker.js'></script>
     <script src='../src/api.js'></script>
@@ -135,14 +135,14 @@
 
     <script type='text/javascript'>
       // basic module with start 
-      $.GUI().create('moduleA', function(G) {
-          G.log('module A sandbox :: ', G);
+      $.GUI().create('moduleA', function(gui) {
+          gui.log('module A sandbox :: ', gui);
 
-          var el = G.query('.btn');
-          G.log('G elem = ', el);
+          var el = gui.$('.btn');
+          gui.log('gui.$ elem = ', el);
 
           function print() {
-            G.log('load called in mod A');
+            gui.log('load called in mod A');
           }
 
           return {
@@ -160,32 +160,32 @@
           animated: true,
           instanceId: 'instance2'
 
-      }).create('moduleB', function(G) {
-          G.log('module B sandbox :: ', G);
-          G.log('config object available in sandbox :: ', G.config);
+      }).create('moduleB', function(gui) {
+          gui.log('module B sandbox :: ', gui);
+          gui.log('config object available in sandbox :: ', gui.config);
 
           return {
               load: function() {
-                  G.log('load called in mod B');
+                  gui.log('load called in mod B');
 
-                  G.query('.canvas').stargaze();
-                  // G.query('.canvas').misty();
+                  gui.query('.canvas').stargaze();
+                  // gui.query('.canvas').misty();
               },
               unload: function() {}
           }
       });
 
       // module with custom options object
-      $.GUI().create('moduleC', function(G) {
+      $.GUI().create('moduleC', function(gui) {
 
           function printHistory() {
-              G.log('Module C sandbox :: ', G);
+              gui.log('Module C sandbox :: ', gui);
           }
 
           return {
               load: function(opts) {
-                  G.log('load called in mod C');
-                  G.log('loaded with options :: ', opts);
+                  gui.log('load called in mod C');
+                  gui.log('loaded with options :: ', opts);
 
                   printHistory();
               },
@@ -216,7 +216,7 @@
       // adding routes
       Router
       .add(/products\/(.*)\/edit\/(.*)/, function() {
-          G.log('products', arguments);
+          gui.log('products', arguments);
       })
       .add(function() {
           console.log('default');
