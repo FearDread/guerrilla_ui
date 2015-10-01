@@ -22,13 +22,13 @@ $.GUI().create('App', function(gui) {
 
         initView();
 
-        gui.Router.config({ mode: 'hash'});
+        gui.net.router.config({ mode: 'hash'});
 
-        gui.Router.add(/about/, function() {
+        gui.net.router.add(/about/, function() {
             console.log('about');
         });
 
-        mediaListener = new gui.Media({
+        mediaListener = new gui.ui.media({
             media:'(max-width: 1024)',
             in: function() {
                 console.log('media in');
@@ -39,28 +39,32 @@ $.GUI().create('App', function(gui) {
             both: function() {
                 console.log('media both');
             }
-        }).call();
+        });
+
+        mediaListener();
     }
 
     function bind() {
-
-        gui.query('.navbar-top').click(showPage);
-        gui.query('.btn').click(function(e) {
+        var scroll = function(e) {
             e.preventDefault();
             gui.fire('scrollPage');
-        });
+        };
+
+        gui.$('.navbar-top').click(showPage);
+
+        gui.$('.btn').click(scroll);
     }
 
     function initView() {
         var user, view;
 
-        user = new gui.Model({
+        user = new gui.model({
             id: 1,
             firstName: 'Duke',
             lastName: 'Hazard'
         });
 
-        view = new gui.View();
+        view = new gui.view();
         view.setModel(user);
 
         console.log('model = ', user);
@@ -84,7 +88,7 @@ $.GUI().create('App', function(gui) {
         }
 
         gui.fire('navclick', {page:href}, function() {
-            // gui.Router.navigate();
+            // gui.net.router.navigate();
             gui.log('callback after fired navclick event.');
         });
     }

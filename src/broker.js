@@ -209,6 +209,7 @@ Broker = (function() {
             for (key in this) {
 
                 value = this[key];
+
                 if (forced) {
                     obj[key] = value;
                 } else {
