@@ -121,11 +121,22 @@ $.GUI().use(function(G) {
             }
         };
 
+        /** 
+         * Fire the Modal change event  
+         *
+         * @return {function} 
+        **/
         Model.prototype.notify = function() {
 
             return this.change();
         };
 
+        /** 
+         * Retreive property of current model object 
+         *
+         * @param key {string} - property to search model object for
+         * @return {various} - whateve value the found property holds 
+        **/
         Model.prototype.get = function(key) {
 
             return this[key];
@@ -148,6 +159,7 @@ $.GUI().use(function(G) {
             return json;
         };
 
+        /* The model change event identifier */
         Model.CHANGED = "changed";
 
         return Model;
@@ -156,8 +168,9 @@ $.GUI().use(function(G) {
 
     return {
         load: function(api) {
-            // extend api
-            api.Model = Model;
-        }
+
+           api.model = Model;
+        },
+        unload: function() {}
     };
 });

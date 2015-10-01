@@ -3,7 +3,7 @@
 * @author: Garrett Haptonstall (FearDread) *
 * @module: MVC Controller class module     * 
 * ---------------------------------------- */
-$.GUI().create('Controller', function(G) {
+$.GUI().create('Controller', function(gui) {
     var Controller;
 
     Controller = (function() {
@@ -19,15 +19,10 @@ $.GUI().create('Controller', function(G) {
 
     })();
 
-    GUI.Model = Model;
-
-    GUI.View = View;
-
-    GUI.Controller = Controller;
-
     return {
-        load: function() {
-            console.log('Controller class :: ', Controller);
+        load: function(api) {
+
+          api.controller = Controller;
         },
         unload: function() {}
     };

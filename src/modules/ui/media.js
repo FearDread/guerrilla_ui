@@ -157,7 +157,8 @@ $.GUI().use(function(G) {
                 };
             };
 
-            api.Media = Media;
+            // Add to sandbox ui namespace
+            api.ui.media = Media;
         }
     };
 });

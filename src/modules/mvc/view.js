@@ -2,7 +2,7 @@
 * Guerrilla UI                             *
 * @module: MVC View object class           * 
 * ---------------------------------------- */
-$.GUI().use(function(G) {
+$.GUI().use(function(gui) {
     var plugin, View;
 
     View = (function() {
@@ -33,9 +33,11 @@ $.GUI().use(function(G) {
     })();
 
     return {
-        load: function(sandbox) {
-            sandbox.View = View;
+
+        load: function(api) {
+
+            api.view = View;
         },
-        unload: function(){}
+        unload: function() {}
     };
 });

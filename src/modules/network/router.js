@@ -4,7 +4,7 @@
 * ---------------------------------------- */
 $.GUI().use(function(G) {
 
-    function Router(sb) {
+    function Router() {
 
         return {
             routes: [],
@@ -150,9 +150,8 @@ $.GUI().use(function(G) {
         };
     }
 
-
     function _load(api) {
-        api.Router = new Router(api);
+        api.net.router = new Router();
     }
 
     return {
