@@ -1,13 +1,13 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
 * @module: MVC Model object class          * 
-* ---------------------------------------- */
+* ----------------------------y------------ */
 $.GUI().use(function(gui) {
 
     Model = (function(superClass) {
 
-        // extend model object with superClass properties
-        utils.extend(Model, superClass);
+        // extend model prototype with superClass properties
+        utils.combine(Model, superClass);
 
         function Model(obj) {
 
@@ -25,7 +25,7 @@ $.GUI().use(function(gui) {
              * @param silent {boolean} - rather or not to fire model change event 
              * @return this {object} 
             **/
-            this.set = function(key, val, silent) {
+            this.extend = function(key, val, silent) {
                 var k;
 
                 if (!silent || silent === null) {
@@ -39,7 +39,8 @@ $.GUI().use(function(gui) {
                         for (k in key) {
 
                             v = key[k];
-                            this.set(k, v, true);
+
+                            this.extend(k, v, true);
                         }
 
                         if (!silent) {
@@ -168,7 +169,7 @@ $.GUI().use(function(gui) {
     return {
         load: function(api) {
 
-           api.model = Model;
+           api.model = new Model();
         },
         unload: function() {}
     };

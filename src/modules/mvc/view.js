@@ -36,7 +36,7 @@ $.GUI().use(function(gui) {
 
         load: function(api) {
 
-            api.view = View;
+            api.view = new View();
         },
         unload: function() {}
     };
