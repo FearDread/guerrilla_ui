@@ -2,8 +2,7 @@
 * Guerrilla UI                             *
 * @module: MVC Model object class          * 
 * ---------------------------------------- */
-
-$.GUI().use(function(G) {
+$.GUI().use(function(gui) {
 
     Model = (function(superClass) {
 

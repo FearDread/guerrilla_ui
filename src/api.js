@@ -21,6 +21,7 @@ API = function() {
 
             /* Attach Broker methods to sandbox api */ 
             gui._broker.install(this);
+            this.proxy = gui.Broker.prototype;
 
             /* Add utils object to sandbox api */
             this.utils = utils;
@@ -35,6 +36,7 @@ API = function() {
             this.ui = {};
             this.dom = {};
             this.net = {};
+            this.util = {};
 
             /**
              * Search DOM for selector and wrap with both native and jQuery helper methods 
