@@ -5,6 +5,7 @@
 * ---------------------------------------- */
 $.GUI().create('App', function(gui) {
     console.log('Demo app :: ', gui);
+    console.log('Demo context = ', this);
 
     var navHandler = function(data) {
         gui.log('nav handler event fired.');
@@ -41,10 +42,10 @@ $.GUI().create('App', function(gui) {
             }
         });
 
-        mediaListener();
+       mediaListener();
     }
 
-    function bind() {
+    function bindEvents() {
         var scroll = function(e) {
             e.preventDefault();
             gui.fire('scrollPage');
@@ -58,20 +59,18 @@ $.GUI().create('App', function(gui) {
     function initView() {
         var user, view;
 
-        user = gui.model.extend({
+        user = new gui.model({
             id: 1,
             firstName: 'Duke',
             lastName: 'Hazard'
         });
 
-        view = gui.view.setModel(user);
+        view = new gui.view(user);
 
         console.log('model = ', user);
         console.log('view = ', view);
 
-        // view.fire('change');
-
-        bind();
+        bindEvents();
     }
 
     function showPage(e) {
