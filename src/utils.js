@@ -21,7 +21,7 @@ utils = {
      * @param parent {object} - parent object prototype 
      * @return child {object} - combined child & parent prototypes 
     **/
-    extend: function(child, parent) {
+    combine: function(child, parent) {
         var key;
 
         for (key in parent) { 
@@ -126,6 +126,16 @@ utils = {
     **/
     isRetina: function() {
       return (window.retina || window.devicePixelRatio > 1);
+    },
+
+    /**
+    * Check if user agent is mobile device 
+    *
+    * @param agent {string} - user agent
+    * @return {boolean} 
+    **/
+    isMobile: function(agent) {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(agent);
     },
 
     /**

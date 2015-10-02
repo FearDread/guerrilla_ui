@@ -28,7 +28,7 @@ $.GUI().create('App', function(gui) {
             console.log('about');
         });
 
-        mediaListener = new gui.ui.media({
+        mediaListener = gui.ui.media({
             media:'(max-width: 1024)',
             in: function() {
                 console.log('media in');
@@ -58,14 +58,13 @@ $.GUI().create('App', function(gui) {
     function initView() {
         var user, view;
 
-        user = new gui.model({
+        user = gui.model.extend({
             id: 1,
             firstName: 'Duke',
             lastName: 'Hazard'
         });
 
-        view = new gui.view();
-        view.setModel(user);
+        view = gui.view.setModel(user);
 
         console.log('model = ', user);
         console.log('view = ', view);

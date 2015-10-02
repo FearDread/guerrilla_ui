@@ -21,7 +21,7 @@ API = function() {
 
             /* Attach Broker methods to sandbox api */ 
             gui._broker.install(this);
-            this.proxy = gui.Broker.prototype;
+            this.broker = gui._broker;
 
             /* Add utils object to sandbox api */
             this.utils = utils;
