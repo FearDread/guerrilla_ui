@@ -1,12 +1,14 @@
-
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Dom, stored document reference  * 
+* ---------------------------------------- */
 $.GUI().use(function(gui) {
-
 
     return {
         
         load: function(api) {
 
-            api.dom.event = Event;
+            api.dom.doc = (document) ? document : undefined;
         }
     };
 });
