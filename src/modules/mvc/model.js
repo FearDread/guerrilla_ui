@@ -7,7 +7,7 @@ $.GUI().use(function(gui) {
     Model = (function(superClass) {
 
         // extend model prototype with superClass properties
-        utils.combine(Model, superClass);
+        utils.extend(Model, superClass);
 
         function Model(obj) {
 
@@ -25,7 +25,7 @@ $.GUI().use(function(gui) {
              * @param silent {boolean} - rather or not to fire model change event 
              * @return this {object} 
             **/
-            this.extend = function(key, val, silent) {
+            this.set = function(key, val, silent) {
                 var k;
 
                 if (!silent || silent === null) {
@@ -40,7 +40,7 @@ $.GUI().use(function(gui) {
 
                             v = key[k];
 
-                            this.extend(k, v, true);
+                            this.set(k, v, true);
                         }
 
                         if (!silent) {
@@ -169,7 +169,7 @@ $.GUI().use(function(gui) {
     return {
         load: function(api) {
 
-           api.model = new Model();
+           api.model = Model;
         },
         unload: function() {}
     };

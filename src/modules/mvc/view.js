@@ -3,30 +3,30 @@
 * @module: MVC View object class           * 
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
-    var plugin, View;
+    var View;
 
     View = (function() {
 
         function View(model) {
 
             if (model) {
-                return this.setModel(model);
+                this.setModel(model);
             }
-      
-            this.setModel = function(obj) {
-                this.model = obj;
+        } 
 
-                return this.model.change((function() {
+        View.prototype.setModel = function(obj) {
+            this.model = obj;
 
-                    return this.render();
+            return this.model.change((function() {
 
-                }), this);
-            };
+                return this.render();
 
-            this.render = function() {
-                console.log('Render method called in View.');
-            };
-        }
+            }), this);
+        };
+
+        View.prototype.render = function() {
+            console.log('Render Template :: ', this);
+        };
 
         return View;
 
@@ -36,7 +36,7 @@ $.GUI().use(function(gui) {
 
         load: function(api) {
 
-            api.view = new View();
+            api.view = View;
         },
         unload: function() {}
     };
