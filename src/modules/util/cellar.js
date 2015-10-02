@@ -3,7 +3,7 @@
 * @module: Cellar, handle local & session  * 
 * storage api's                            *
 * ---------------------------------------- */
-$.GUI().use(function(G) {
+$.GUI().use(function(gui) {
 
     /* Private methods */
     /**
