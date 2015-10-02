@@ -163,7 +163,7 @@ $.GUI().use(function(gui) {
 
         return Model;
 
-    })(G.Broker);
+    })(gui.Broker);
 
     return {
         load: function(api) {
