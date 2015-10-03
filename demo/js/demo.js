@@ -43,6 +43,8 @@ $.GUI().create('App', function(gui) {
         });
 
        mediaListener();
+
+       new gui.ui.charm().init();
     }
 
     function bindEvents() {
