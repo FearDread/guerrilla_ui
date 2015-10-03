@@ -1215,9 +1215,7 @@ GUI = (function($) {
             /* GUI library version */
             version: '0.1.3',
             jquery: true,
-            animations: false,
-            /* Stored window reference */
-            win: (typeof window !== 'undefined') ? window : null
+            animations: false
         };
 
         // ability to pass optional config object
@@ -1894,7 +1892,7 @@ GUI = (function($) {
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
 
-    Map = gui.config.win.Map || gui.config.win.MozMap || (Map = (function() {
+    Map = window.Map || window.MozMap || (Map = (function() {
 
         function Map() {
             this.keys = [];
@@ -1917,22 +1915,21 @@ $.GUI().use(function(gui) {
         };
 
         Map.prototype.set = function(key, value) {
-          var i, item, j, ref;
+            var i, item, j, ref;
 
-          ref = this.keys;
+            ref = this.keys;
 
-          for (i = j = 0; j < ref.length; i = ++j) {
-              item = ref[i];
+            for (i = j = 0; j < ref.length; i = ++j) {
+                item = ref[i];
 
-              if (item === key) {
-                  this.values[i] = value;
-                  return;
-              }
-          }
+                if (item === key) {
+                    this.values[i] = value;
+                    return;
+                }
+            }
 
-          this.keys.push(key);
-
-          return this.values.push(value);
+            this.keys.push(key);
+            return this.values.push(value);
         };
 
         return Map;
@@ -1957,21 +1954,6 @@ $.GUI().use(function(gui) {
     Event = (function() {
 
         function Event() {}
-
-        Event.prototype.extend = function(custom, defaults) {
-            var key, value;
-
-            for (key in defaults) {
-                value = defaults[key];
-
-                if (custom[key] === null) {
-
-                    custom[key] = value;
-                }
-            }
-
-            return custom;
-        };
 
         Event.prototype.isMobile = function(agent) {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(agent);
@@ -2074,7 +2056,7 @@ $.GUI().use(function(gui) {
         
         load: function(api) {
 
-            api.dom.event = new Event();
+            api.dom.Event = new Event();
         },
         unload: function() {}
     };
@@ -2677,10 +2659,9 @@ $.GUI().use(function(gui) {
                     this.resetAnimation = api.broker.bind(this.resetAnimation, this);
 
                     this.config = api.utils.merge(options, this.defaults);
+                    this.charmEvent = this.Event.create(this.config.boxClass);
 
-                    this.wowEvent = this.event.create(this.config.boxClass);
-
-                    this.animationNameCache = new api.dom.map();
+                    this.animationNameCache = api.dom.map;
                     this.scrolled = true;
                 }
 
@@ -2695,9 +2676,13 @@ $.GUI().use(function(gui) {
 
                 Charm.prototype.vendors = ["moz", "webkit"];
 
-                Charm.prototype.event = function() {
+                Charm.prototype.Event = api.dom.Event;
+                
+                /*
+                function() {
                     return (this._event !== null) ? this._event : this._event = api.dom.event;
                 };
+                */
 
                 Charm.prototype.disabled = function() {
                     return !this.config.mobile && this.event.isMobile(navigator.userAgent);
@@ -2706,7 +2691,7 @@ $.GUI().use(function(gui) {
                 Charm.prototype.init = function() {
                     var ref;
 
-                    this.element = gui.config.win.document.documentElement;
+                    this.element = document.documentElement;
 
                     if ((ref = document.readyState) === "interactive" || ref === "complete") {
 
@@ -2714,7 +2699,7 @@ $.GUI().use(function(gui) {
 
                     } else {
 
-                        this.event.add(document, 'DOMContentLoaded', this.start);
+                        this.Event.add(document, 'DOMContentLoaded', this.start);
                     }
 
                     this.finished = [];
@@ -2723,7 +2708,7 @@ $.GUI().use(function(gui) {
                 };
 
                 Charm.prototype.start = function() {
-                    var box, j, length, _ref;
+                    var _this = this, box, j, length, _ref;
 
                     this.stopped = false;
 
@@ -2761,37 +2746,42 @@ $.GUI().use(function(gui) {
                         }
 
                         return results;
+
                     }).call(this);
 
                     if(this.boxes.length){
+
                         if(this.disabled()){
 
                             this.resetStyle();
+
                         }else{
                             ref = this.boxes;
 
-                            for(j = 0, len = ref.length; j < len; j++){
+                            for(j = 0, length = ref.length; j < length; j++){
                                 box = ref[j];
                                 this.applyStyle(box, true);
                             }
                         }
                     }
 
-                    if(!this.disabled()){
-                        this.util().addEvent(window, 'scroll', this.scrollHandler);
-                        this.util().addEvent(window, 'resize', this.scrollHandler);
-                        this.interval = setInterval(this.scrollCallback, 50);
+                    if (!this.disabled()) {
+                        this.Event.add(window, 'scroll', this.scrollHandler);
+                        this.Event.add(window, 'resize', this.scrollHandler);
+
+                        this.interval = window.setInterval(this.scrollCallback, 50);
                     }
 
-                    if(this.config.live){
-                        return new MutationObserver((function(_this){
-                            return function(records){
-                                var k, len1, node, record, results;
+                    if (this.config.live) {
 
-                                results = [];
-                                for(k = 0, len1 = records.length; k < len1; k++){
-                                    record = records[k];
-                                    results.push((function(){
+                        return new MutationObserver((function(_this) {
+                            return function(records) {
+                                var i = 0, length, node, record, results = [];
+
+                                for (length = records.length; i < length; i++) {
+                                    record = records[i];
+
+                                    results.push((function() {
                                         var l, len2, ref1, results1;
 
                                         ref1 = record.addedNodes || [];
@@ -2817,130 +2807,172 @@ $.GUI().use(function(gui) {
                 };
 
                 Charm.prototype.stop = function() {
-                  this.stopped = true;
-                  this.util().removeEvent(window, 'scroll', this.scrollHandler);
-                  this.util().removeEvent(window, 'resize', this.scrollHandler);
-                  if (this.interval != null) {
-                    return clearInterval(this.interval);
-                  }
+                    this.stopped = true;
+
+                    this.event.remove(window, 'scroll', this.scrollHandler);
+                    this.event.remove(window, 'resize', this.scrollHandler);
+
+                    if (this.interval != null) {
+                        return window.clearInterval(this.interval);
+                    }
                 };
 
+                /**
+                 * Check for MutationObserver support
+                 *
+                 * @param element {object} - dom element object
+                 * @return sync {function} - attempt to sync with dom element
+                **/
                 Charm.prototype.sync = function(element) {
-                  if (MutationObserver.notSupported) {
-                    return this.doSync(this.element);
-                  }
+                    if (MutationObserver.notSupported) {
+                        return this.doSync(this.element);
+                    }
                 };
 
                 Charm.prototype.doSync = function(element) {
-                  var box, j, len, ref, results;
-                  if (element == null) {
-                    element = this.element;
-                  }
-                  if (element.nodeType !== 1) {
-                    return;
-                  }
-                  element = element.parentNode || element;
-                  ref = element.querySelectorAll("." + this.config.boxClass);
-                  results = [];
-                  for (j = 0, len = ref.length; j < len; j++) {
-                    box = ref[j];
-                    if (indexOf.call(this.all, box) < 0) {
-                      this.boxes.push(box);
-                      this.all.push(box);
-                      if (this.stopped || this.disabled()) {
-                        this.resetStyle();
-                      } else {
-                        this.applyStyle(box, true);
-                      }
-                      results.push(this.scrolled = true);
-                    } else {
-                      results.push(void 0);
+                    var box, i = 0, length, ref, results = [];
+
+                    if (element == null) {
+                        element = this.element;
                     }
-                  }
-                  return results;
+
+                    if (element.nodeType !== 1) {
+                        return;
+                    }
+
+                    element = element.parentNode || element;
+                    ref = element.querySelectorAll("." + this.config.boxClass);
+
+                    for (length = ref.length; i < length; i++) {
+                        box = ref[i];
+
+                        if (indexOf.call(this.all, box) < 0) {
+                            this.boxes.push(box);
+                            this.all.push(box);
+
+                            if (this.stopped || this.disabled()) {
+                                this.resetStyle();
+                            } else {
+                                this.applyStyle(box, true);
+                            }
+
+                            results.push(this.scrolled = true);
+
+                        } else {
+
+                            results.push(void 0);
+                        }
+                    }
+
+                    return results;
                 };
 
+                /**
+                 * Add needed show events to reset animations 
+                 *
+                 * @param box {object} - the box element with animation props 
+                 * @return box {object} - updated box element with added events 
+                **/
                 Charm.prototype.show = function(box) {
-                  this.applyStyle(box);
-                  box.className = box.className + " " + this.config.animateClass;
-                  if (this.config.callback != null) {
-                    this.config.callback(box);
-                  }
-                  this.util().emitEvent(box, this.wowEvent);
-                  this.util().addEvent(box, 'animationend', this.resetAnimation);
-                  this.util().addEvent(box, 'oanimationend', this.resetAnimation);
-                  this.util().addEvent(box, 'webkitAnimationEnd', this.resetAnimation);
-                  this.util().addEvent(box, 'MSAnimationEnd', this.resetAnimation);
-                  return box;
+                    this.applyStyle(box);
+
+                    box.className = box.className + " " + this.config.animateClass;
+
+                    if (this.config.callback != null) {
+                        this.config.callback(box);
+                    }
+
+                    this.Event.fire(box, this.charmEvent);
+
+                    this.Event.add(box, 'animationend', this.resetAnimation);
+                    this.Event.add(box, 'oanimationend', this.resetAnimation);
+                    this.Event.add(box, 'webkitAnimationEnd', this.resetAnimation);
+                    this.Event.add(box, 'MSAnimationEnd', this.resetAnimation);
+
+                    return box;
                 };
 
                 Charm.prototype.applyStyle = function(box, hidden) {
-                  var delay, duration, iteration;
-                  duration = box.getAttribute('data-wow-duration');
-                  delay = box.getAttribute('data-wow-delay');
-                  iteration = box.getAttribute('data-wow-iteration');
-                  return this.animate((function(_this) {
-                    return function() {
-                      return _this.customStyle(box, hidden, duration, delay, iteration);
-                    };
-                  })(this));
+                    var delay, duration, iteration;
+
+                    duration = box.getAttribute('data-charm-duration');
+                    delay = box.getAttribute('data-charm-delay');
+                    iteration = box.getAttribute('data-charm-iteration');
+
+                    return this.animate((function(_this) {
+
+                        return function() {
+                            return _this.customStyle(box, hidden, duration, delay, iteration);
+                        };
+                    })(this));
                 };
 
                 Charm.prototype.animate = (function() {
-                  if ('requestAnimationFrame' in window) {
-                    return function(callback) {
-                      return window.requestAnimationFrame(callback);
-                    };
-                  } else {
-                    return function(callback) {
-                      return callback();
-                    };
-                  }
+                    if ('requestAnimationFrame' in window) {
+                        return function(callback) {
+                            return window.requestAnimationFrame(callback);
+                        };
+
+                    } else {
+                        return function(callback) {
+                            return callback();
+                        };
+                    }
                 })();
 
                 Charm.prototype.resetStyle = function() {
-                  var box, j, len, ref, results;
-                  ref = this.boxes;
-                  results = [];
-                  for (j = 0, len = ref.length; j < len; j++) {
-                    box = ref[j];
-                    results.push(box.style.visibility = 'visible');
-                  }
-                  return results;
+                    var box, i = 0, length, ref, results = [];
+
+                    ref = this.boxes;
+
+                    for (length = ref.length; i < length; i++) {
+                        box = ref[i];
+                        results.push(box.style.visibility = 'visible');
+                    }
+
+                    return results;
                 };
 
                 Charm.prototype.resetAnimation = function(event) {
-                  var target;
-                  if (event.type.toLowerCase().indexOf('animationend') >= 0) {
-                    target = event.target || event.srcElement;
-                    return target.className = target.className.replace(this.config.animateClass, '').trim();
-                  }
+                    var target;
+
+                    if (event.type.toLowerCase().indexOf('animationend') >= 0) {
+                        target = event.target || event.srcElement;
+
+                        return target.className = target.className.replace(this.config.animateClass, '').trim();
+                    }
                 };
 
                 Charm.prototype.customStyle = function(box, hidden, duration, delay, iteration) {
-                  if (hidden) {
-                    this.cacheAnimationName(box);
-                  }
-                  box.style.visibility = hidden ? 'hidden' : 'visible';
-                  if (duration) {
+                    if (hidden) {
+                        this.cacheAnimationName(box);
+                    }
+
+                    box.style.visibility = hidden ? 'hidden' : 'visible';
+
+                    if (duration) {
+                        this.vendorSet(box.style, {
+                            animationDuration: duration
+                        });
+                    }
+
+                    if (delay) {
+                        this.vendorSet(box.style, {
+                            animationDelay: delay
+                        });
+                    }
+
+                    if (iteration) {
+                        this.vendorSet(box.style, {
+                            animationIterationCount: iteration
+                        });
+                    }
+
                     this.vendorSet(box.style, {
-                      animationDuration: duration
+                        animationName: hidden ? 'none' : this.cachedAnimationName(box)
                     });
-                  }
-                  if (delay) {
-                    this.vendorSet(box.style, {
-                      animationDelay: delay
-                    });
-                  }
-                  if (iteration) {
-                    this.vendorSet(box.style, {
-                      animationIterationCount: iteration
-                    });
-                  }
-                  this.vendorSet(box.style, {
-                    animationName: hidden ? 'none' : this.cachedAnimationName(box)
-                  });
-                  return box;
+
+                    return box;
                 };
 
                 Charm.prototype.vendorSet = function(elem, properties) {
@@ -2958,7 +2990,7 @@ $.GUI().use(function(gui) {
 
                             for (i = 0; i < ref.length; i++) {
 
-                                vendor = ref[j];
+                                vendor = ref[i];
                                 results1.push(elem["" + vendor + (name.charAt(0).toUpperCase()) + (name.substr(1))] = value);
                             }
 
@@ -2973,7 +3005,7 @@ $.GUI().use(function(gui) {
                 Charm.prototype.vendorCSS = function(elem, property) {
                     var i = 0, length, ref, result, style, vendor;
 
-                    style = gui.config.win.getComputedStyle(elem);
+                    style = window.getComputedStyle(elem);
                     result = style.getPropertyCSSValue(property);
 
                     ref = this.vendors;
@@ -2995,7 +3027,7 @@ $.GUI().use(function(gui) {
 
                     } catch (_error) {
 
-                        animationName = gui.config.win.getComputedStyle(box).getPropertyValue('animation-name');
+                        animationName = window.getComputedStyle(box).getPropertyValue('animation-name');
                     }
 
                     if (animationName === 'none') {
@@ -3087,7 +3119,7 @@ $.GUI().use(function(gui) {
                     offset = box.getAttribute('data-wow-offset') || this.config.offset;
 
                     viewTop = window.pageYOffset;
-                    viewBottom = viewTop + Math.min(this.element.clientHeight, this.util().innerHeight()) - offset;
+                    viewBottom = viewTop + Math.min(this.element.clientHeight, this.Event.innerHeight()) - offset;
 
                     top = this.offsetTop(box);
                     bottom = top + box.clientHeight;
