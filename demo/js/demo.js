@@ -79,15 +79,13 @@ $.GUI().create('App', function(gui) {
         var page, href, target;
         e.preventDefault();
 
-        target = event.target;
-        page = gui.$(target);
+        target = gui.$(e.target);
 
-        if (page && page.is('a')) {
-
-            href = page.attr('href').split('#')[1];
+        if (target && target.is('a')) {
+            href = target.attr('href').split('#')[1];
         }
 
-        gui.fire('navclick', {page:href}, function() {
+        gui.fire('navclick', {page: href}, function() {
             // gui.net.router.navigate();
             gui.log('callback after fired navclick event.');
         });
