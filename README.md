@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js)
-# GUI [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) #
+[![Build Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) 
 Guerrilla JS jQuery Framework
 =============================
 The best front-end scalable framework and plugin library extending from jQuery.
