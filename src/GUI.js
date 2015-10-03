@@ -31,9 +31,7 @@ GUI = (function($) {
             /* GUI library version */
             version: '0.1.3',
             jquery: true,
-            animations: false,
-            /* Stored window reference */
-            win: (typeof window !== 'undefined') ? window : null
+            animations: false
         };
 
         // ability to pass optional config object

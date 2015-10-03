@@ -4,7 +4,7 @@
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
 
-    Map = gui.config.win.Map || gui.config.win.MozMap || (Map = (function() {
+    Map = window.Map || window.MozMap || (Map = (function() {
 
         function Map() {
             this.keys = [];
@@ -27,22 +27,21 @@ $.GUI().use(function(gui) {
         };
 
         Map.prototype.set = function(key, value) {
-          var i, item, j, ref;
+            var i, item, j, ref;
 
-          ref = this.keys;
+            ref = this.keys;
 
-          for (i = j = 0; j < ref.length; i = ++j) {
-              item = ref[i];
+            for (i = j = 0; j < ref.length; i = ++j) {
+                item = ref[i];
 
-              if (item === key) {
-                  this.values[i] = value;
-                  return;
-              }
-          }
+                if (item === key) {
+                    this.values[i] = value;
+                    return;
+                }
+            }
 
-          this.keys.push(key);
-
-          return this.values.push(value);
+            this.keys.push(key);
+            return this.values.push(value);
         };
 
         return Map;

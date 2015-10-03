@@ -8,21 +8,6 @@ $.GUI().use(function(gui) {
 
         function Event() {}
 
-        Event.prototype.extend = function(custom, defaults) {
-            var key, value;
-
-            for (key in defaults) {
-                value = defaults[key];
-
-                if (custom[key] === null) {
-
-                    custom[key] = value;
-                }
-            }
-
-            return custom;
-        };
-
         Event.prototype.isMobile = function(agent) {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(agent);
         };

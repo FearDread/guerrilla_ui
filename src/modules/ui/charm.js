@@ -25,7 +25,7 @@ $.GUI().use(function(gui) {
 
                     this.config = api.utils.merge(options, this.defaults);
 
-                    this.wowEvent = this.event.create(this.config.boxClass);
+                    this.charmEvent = this.event.create(this.config.boxClass);
 
                     this.animationNameCache = new api.dom.map();
                     this.scrolled = true;
@@ -53,7 +53,7 @@ $.GUI().use(function(gui) {
                 Charm.prototype.init = function() {
                     var ref;
 
-                    this.element = gui.config.win.document.documentElement;
+                    this.element = document.documentElement;
 
                     if ((ref = document.readyState) === "interactive" || ref === "complete") {
 
@@ -213,7 +213,7 @@ $.GUI().use(function(gui) {
                   if (this.config.callback != null) {
                     this.config.callback(box);
                   }
-                  this.util().emitEvent(box, this.wowEvent);
+                  this.util().emitEvent(box, this.charmEvent);
                   this.util().addEvent(box, 'animationend', this.resetAnimation);
                   this.util().addEvent(box, 'oanimationend', this.resetAnimation);
                   this.util().addEvent(box, 'webkitAnimationEnd', this.resetAnimation);
@@ -320,7 +320,7 @@ $.GUI().use(function(gui) {
                 Charm.prototype.vendorCSS = function(elem, property) {
                     var i = 0, length, ref, result, style, vendor;
 
-                    style = gui.config.win.getComputedStyle(elem);
+                    style = window.getComputedStyle(elem);
                     result = style.getPropertyCSSValue(property);
 
                     ref = this.vendors;
@@ -342,7 +342,7 @@ $.GUI().use(function(gui) {
 
                     } catch (_error) {
 
-                        animationName = gui.config.win.getComputedStyle(box).getPropertyValue('animation-name');
+                        animationName = window.getComputedStyle(box).getPropertyValue('animation-name');
                     }
 
                     if (animationName === 'none') {
