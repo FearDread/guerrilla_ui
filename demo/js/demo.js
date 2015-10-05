@@ -5,7 +5,6 @@
 * ---------------------------------------- */
 $.GUI().create('App', function(gui) {
     console.log('Demo app :: ', gui);
-    console.log('Demo context = ', this);
 
     var navHandler = function(data) {
         gui.log('nav handler event fired.');
