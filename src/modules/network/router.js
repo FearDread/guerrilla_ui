@@ -12,8 +12,12 @@ $.GUI().use(function(G) {
             root: '/',
 
             /**
-            *
-            **/
+             * Sets needed properties for the router
+
+             *
+             * @param options {object} - the options to apply via router constructor
+             * @return {this}
+             **/
             config: function(options) {
                 this.mode = options && options.mode && options.mode === 'history' && !!(history.pushState) ? 'history' : 'hash';
                 this.root = options && options.root ? '/' + this.clearSlashes(options.root) + '/' : '/';

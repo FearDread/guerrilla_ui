@@ -472,7 +472,7 @@ GUI = (function($) {
     /** 
       * Called when starting module fails 
       *
-      * @param ev {string / object} - message or error object 
+      * @param ev {object} - message or error object 
       * @param cb {function} - callback method to run with error string / object
       * @return this {object}
     **/
@@ -487,8 +487,8 @@ GUI = (function($) {
     /** 
       * Called when starting module fails 
       *
-      * @param ev {string / object} - message or error object 
-      * @param cb {function} - callback method to run with error string / object
+      * @param mods {function} - method with array of all modules to start 
+      * @param cb {function} - callback method to run once modules started 
       * @return this {object}
     **/
     GUI.prototype._startAll = function(mods, cb) {
@@ -554,11 +554,12 @@ GUI = (function($) {
     };
 
     /** 
-      * Called when starting module fails 
+      * Create new sandbox instance and attach to module 
       *
-      * @param ev {string / object} - message or error object 
-      * @param cb {function} - callback method to run with error string / object
-      * @return this {object}
+      * @param moduleId {string} - the module to create sandbox instance for 
+      * @param o {object} - options object 
+      * @param cb {function} - callback method to run once instance created
+      * @return {function} - run sandboxed instances
     **/
     GUI.prototype._createInstance = function(moduleId, o, cb) {
         var Sandbox, iOpts, id, j, key, len, module, obj, opt, ref, sb, val;
@@ -624,11 +625,12 @@ GUI = (function($) {
     };
     
     /** 
-      * Called when starting module fails 
+      * Sets up needed tasks for module initializations 
       *
-      * @param ev {string / object} - message or error object 
-      * @param cb {function} - callback method to run with error string / object
-      * @return this {object}
+      * @param ev {string} - check module for load / unload methods 
+      * @param sb {object} - the sandbox instance 
+      * @param cb {function} - callback method to run once instances initialized
+      * @return {function} - utils.run.seris
     **/
     GUI.prototype._runSandboxPlugins = function(ev, sb, cb) {
         var p, tasks;

@@ -41,14 +41,8 @@ $.GUI().use(function(gui) {
 
                 Charm.prototype.vendors = ["moz", "webkit"];
 
-                Charm.prototype.Event = api.dom.Event;
+                Charm.prototype.Event = api.dom.event;
                 
-                /*
-                function() {
-                    return (this._event !== null) ? this._event : this._event = api.dom.event;
-                };
-                */
-
                 Charm.prototype.disabled = function() {
                     return !this.config.mobile && this.event.isMobile(navigator.userAgent);
                 };

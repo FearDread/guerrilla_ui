@@ -4,14 +4,32 @@
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
 
+    /**
+     * A custom event handler for dom elements
+    **/
     Event = (function() {
 
         function Event() {}
 
+        /**
+         * Determine current mobile device for passed user agent 
+         *
+         * @param agent {string} - the user agent currently in use
+         * @return {boolean}
+        **/
         Event.prototype.isMobile = function(agent) {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(agent);
         };
 
+        /**
+         * Create new event handler
+         *
+         * @param event {string} - name of the event
+         * @param bubble {boolean} - whether or not to bubble the event in stack
+         * @param cancel {boolean} - boolean value to determine event cancellation
+         * @param detail {object} - optional data object
+         * @return event {object} - new event
+        **/
         Event.prototype.create = function(event, bubble, cancel, detail) {
             var customEvent;
 
@@ -45,6 +63,13 @@ $.GUI().use(function(gui) {
             return customEvent;
         };
 
+        /**
+         * Trigger specified event for given element
+         *
+         * @param elem {object} - the element with event handler
+         * @param event {string} - name of the event to fire
+         * @return {function} - calls event handler 
+        **/
         Event.prototype.fire = function(elem, event) {
             if (elem.dispatchEvent && elem.dispatchEvent !== null) {
 
@@ -109,7 +134,7 @@ $.GUI().use(function(gui) {
         
         load: function(api) {
 
-            api.dom.Event = new Event();
+            api.dom.event = new Event();
         },
         unload: function() {}
     };

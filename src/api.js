@@ -36,7 +36,6 @@ API = function() {
             this.ui = {};
             this.dom = {};
             this.net = {};
-            this.util = {};
 
             /**
              * Search DOM for selector and wrap with both native and jQuery helper methods 
