@@ -28,7 +28,7 @@
                         <i class="fa fa-bars"></i>
                     </button>
                     <a class="navbar-brand page-scroll" href="#page-top">
-                      <span class="light">gui.errilla</span> UI
+                      <span class="light">guerrilla</span> UI
                     </a>
                 </div>
                 
@@ -131,6 +131,7 @@
     <script src='../src/modules/util/cellar.js'></script>
     <script src='../src/modules/util/cookie.js'></script>
     <!-- Plugins -->
+    <script src='../src/plugins/background.js'></script>
     <script src='../src/plugins/layers.js'></script>
     <script src='../src/plugins/stargaze.js'></script>
     <script src='../src/plugins/misty.js'></script>
@@ -172,8 +173,16 @@
               load: function() {
                   gui.log('load called in mod B');
 
-                  gui.query('.canvas').stargaze();
-                  // gui.query('.canvas').misty();
+                  gui.$('.canvas').stargaze();
+                  // gui.$('.canvas').misty();
+
+                  gui.$('.intro').background({
+                      afterLoaded: function() {
+                          console.log('background plugin works.');
+
+                          gui.log('background plugin works!');
+                      }
+                  })
               },
               unload: function() {}
           }
