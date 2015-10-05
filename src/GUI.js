@@ -171,29 +171,6 @@ GUI = (function($) {
     };
 
     /** 
-     * Extend GUI core library and add to Sandbox API 
-     *
-     * @param plugin {string} - plugin identifier 
-     * @param creator {function} - function containing plugin class logic 
-     * @return this {object} 
-     *
-     * dont think we need this
-    **/
-    GUI.prototype.extend = function(plugin, creator, opts) {
-
-        if (!opts || opts === null) {
-            opts = {};
-        }
-
-        this._plugins.push({
-            creator: plugin,
-            options: opts
-        });
-
-        return this;
-    };
-
-    /** 
      * Starts module with new sandbox instance 
      *
      * @param moduleId {string} - module name or identifier
@@ -394,17 +371,19 @@ GUI = (function($) {
      *
      * @param plugin {object} - plugin object with all logic 
      * @param module {string} - identifier for jQuery plugin 
-     * @return void
+     * @return {function} - initialized jQuery plugin 
     **/
     GUI.prototype.plugin = function(plugin, module) {
         var _this = this;
 
-        if(plugin.fn && typeof plugin.fn === 'function'){
+        if (plugin.fn && utils.isFunc(plugin.fn)) { 
 
-            $.fn[module.toLowerCase()] = function(opts){
-                return new plugin.fn(this, opts);
+            $.fn[module.toLowerCase()] = function(options) {
+
+                return new plugin.fn(this, options);
             };
-        }else{
+        } else {
+
             GUI.log('Error :: Missing ' + plugin + ' fn() method.');
         }
     };

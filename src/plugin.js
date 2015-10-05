@@ -2,7 +2,7 @@
 * Guerrilla UI                             *
 * @module: $.GUI jQuery namespace          * 
 * ---------------------------------------- */
-;(function($){
+;(function($) {
     var $G;
 
     $G = new GUI();
@@ -19,12 +19,12 @@
         return app;
     };
 
-    $.fn.GUI = function(options){
-        return this.each(function(){
-            if(!$.data(this, 'guerrilla')){
+    $.fn.GUI = function(options) {
+        return this.each(function() {
+            if (!$.data(this, 'guerrilla')) {
 
                 $.data(this, 'guerrilla', new $.GUI().create(this, options));
-            }else{
+            } else {
                 return new $.GUI().create(this, options);
             }
         });

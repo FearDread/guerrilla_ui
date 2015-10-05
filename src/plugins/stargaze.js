@@ -2,11 +2,11 @@
 * Guerrilla UI                             *
 * @module: GUI Star jQuery plugin          * 
 * ---------------------------------------- */
-$.GUI().create('Stargaze', function(G) {
+$.GUI().create('Stargaze', function(gui) {
 
     var Stargaze = function(canvas, options) {
 
-        var $canvas = $(canvas) || null,
+        var $canvas = gui.$(canvas) || null,
             context = (canvas) ? canvas.getContext('2d') : null,
             defaults = {
                 star: {
@@ -167,12 +167,9 @@ $.GUI().create('Stargaze', function(G) {
     };
 
     return {
-        fn: function() {
-            var argc = arguments[0],
-                $elem = argc[0],
-                opts = argc[1];
+        fn: function($el, options) {
 
-            return new Stargaze($elem, opts).init();
+            return new Stargaze($el[0], options).init();
         },
     };
 }).start('Stargaze');
