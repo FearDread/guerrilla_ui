@@ -1,4 +1,4 @@
-[![Buil d Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) 
+[![Build Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) [!License](https://img.shields.io/packagist/l/doctrine/orm.svg)
 Guerrilla JS jQuery Framework
 =============================
 Guerrilla UI, <GUI>, a scalable, maintainable, extendable framework that lets you write even less and do even more! 
@@ -10,6 +10,9 @@ Guerrilla UI, <GUI>, a scalable, maintainable, extendable framework that lets yo
 Guerrilla UI was inspired by [Articles](http://www.ubelly.com/2011/11/scalablejs/) and talks given by Nicholas Zakas which can be seen here ["Scalable JavaScript Application Architecture"](https://www.youtube.com/watch?v=vXjVFPosQHw) or with this [Slideshow](http://www.slideshare.net/nzakas/scalable-javascript-application-architecture).
 
 The GUI architecture is designed to make DOM manipulation, event handling, animations, extensability and networking even simpler.  With [jQuery](https://jquery.com) being its base library <GUI> takes the write less and do more philosiphy another step forward.
+
+## Contributing
+Guerrilla UI is now open for contributions and looking for javascript programmers to help expand the default sandbox api!  Email author FearDread (ghaptonstall@gmail.com) or message via github to get in touch and become a part of this amazing project!  Once in contact, contribution guidlines will be given and explained.
  
 ## Getting started ##
 
@@ -92,7 +95,7 @@ start. The `unload` function is called when the module has to shut down.
 
 ## Asynchronous initialization
 
-You can also init or destroy you module in a asynchronous way:
+You can also load or unload your module in a asynchronous way:
 
 ```javascript
 var asyncModule = function(gui) {
@@ -245,7 +248,7 @@ gui.fire("anotherChannel", {prop:value}, function() {
 A handler for a subscription could look like this:
 
 ```javascript
-var channelA = function(data, channel) {
+var handler = function(data, channel) {
     switch(channel) {
         case "channelA":
             gui.fire("channelA", process(data));
@@ -261,23 +264,24 @@ var channelA = function(data, channel) {
 ... and it can listen to one or more channels:
 
 ```javascript
-sub1 = gui.add("channelA", messageHandler);
-sub2 = gui.add("channelB", messageHandler);
+sub1 = gui.add("channelA", handler);
+sub2 = gui.add("channelB", handler);
 ```
 Or just do it at all once:
 
 ```javascript
-gui.add({
-  topicA: cbA,
-  topicB: cbB,
-  topicC: cbC
+gui.add({channelA: cbA, channelB: cbB, channelC: function() {
+        // do something
+    }
 });
 ```
 
 You can also subscribe to several channels at once:
 
 ```javascript
-gui.add(["a", "b"], callback);
+gui.add(["ChannelA", "ChannelB"], function() {
+    // do something
+});
 ```
 
 #### listen and ignore
@@ -294,7 +298,7 @@ sub.listen(); // receive upcoming new messages
 You can unsubscribe a function from a channel
 
 ```javascript
-gui.remove("a-channel", callback);
+gui.remove("channelA", callback);
 ```
 
 And you can remove a callback function from all channels
@@ -377,7 +381,7 @@ Some of the current <gui> api features.
 - `dom` - DOM manipulation and `event` handling
 - `mvc` - MVC - `model`, `view`, `controller`
 - `ui` - Special features like `charm` and `media`
-- `network` - Supplies a `router` for your modules
+- `net` - Supplies a `router` for your modules
 - `lang` - Additional native type (`Array`, `Object`, etc) helper functions
 - `utils` - Helper methods like `mixin`, `throttle`, `slugify` etc.
 - `run` - Object with Flow Control methods such as `series`, `parallel` and more
@@ -391,8 +395,8 @@ Some of the current <gui> api features.
 ###  Uses Grunt CLI to concat, uglify and minify src/ libraries.
 
 ``` bash
-# To run the build process simply add any new src file paths to the Gruntfile.js task and run grunt.
-
+# To run the build process simply add any new src file paths.
+# Then run
 grunt -v
 
 ```
@@ -404,7 +408,7 @@ Licensed under the MIT [license](https://github.com/FearDread/guerrilla_js/blob/
 ...
 
 ## About Author ##
-Garrett Haptonstall (@FearDread)
+Garrett Haptonstall [(@FearDread)](https://github.com/FearDread)
 
 ### Social
   - [Facebook](https://www.facebook.com/ghaptonstall)
@@ -416,4 +420,10 @@ Garrett Haptonstall (@FearDread)
   - [jQuery UI](http://jqueryui.com)
   - [Animate.css](https://daneden.github.io/animate.css/)
   - [Bootstrap](http://getbootstrap.com)
+
+#### Cudos
+> The <GUI> framework is a based on various softwares modified to meet the guerrilla ui needs.
+  - [Canjs](https://github.com/bitovi/canjs)
+  - [YUI3](https://github.com/yui/yui3)
+  - [ScaleApp](https://github.com/flosse/scaleApp)
 
