@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) [!License](https://img.shields.io/packagist/l/doctrine/orm.svg)
+[![Build Status](https://travis-ci.org/FearDread/guerrilla_js.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_js) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) [!License](https://img.shields.io/packagist/l/doctrine/orm.svg)]
 Guerrilla JS jQuery Framework
 =============================
 Guerrilla UI, <GUI>, a scalable, maintainable, extendable framework that lets you write even less and do even more! 
