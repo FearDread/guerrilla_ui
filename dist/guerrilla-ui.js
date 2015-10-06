@@ -1048,7 +1048,6 @@ API = function() {
             this.ui = {};
             this.dom = {};
             this.net = {};
-            this.util = {};
 
             /**
              * Search DOM for selector and wrap with both native and jQuery helper methods 
@@ -1103,7 +1102,7 @@ API = function() {
             /**
              * Reference utils / jQuery each method 
             **/
-            this.each = utils.each;
+            this.each = $.each;
 
             /**
              * Reference GUI core log method 
@@ -1355,29 +1354,6 @@ GUI = (function($) {
     };
 
     /** 
-     * Extend GUI core library and add to Sandbox API 
-     *
-     * @param plugin {string} - plugin identifier 
-     * @param creator {function} - function containing plugin class logic 
-     * @return this {object} 
-     *
-     * dont think we need this
-    **/
-    GUI.prototype.extend = function(plugin, creator, opts) {
-
-        if (!opts || opts === null) {
-            opts = {};
-        }
-
-        this._plugins.push({
-            creator: plugin,
-            options: opts
-        });
-
-        return this;
-    };
-
-    /** 
      * Starts module with new sandbox instance 
      *
      * @param moduleId {string} - module name or identifier
@@ -1578,17 +1554,19 @@ GUI = (function($) {
      *
      * @param plugin {object} - plugin object with all logic 
      * @param module {string} - identifier for jQuery plugin 
-     * @return void
+     * @return {function} - initialized jQuery plugin 
     **/
     GUI.prototype.plugin = function(plugin, module) {
         var _this = this;
 
-        if(plugin.fn && typeof plugin.fn === 'function'){
+        if (plugin.fn && utils.isFunc(plugin.fn)) { 
 
-            $.fn[module.toLowerCase()] = function(opts){
-                return new plugin.fn(this, opts);
+            $.fn[module.toLowerCase()] = function(options) {
+
+                return new plugin.fn(this, options);
             };
-        }else{
+        } else {
+
             GUI.log('Error :: Missing ' + plugin + ' fn() method.');
         }
     };
@@ -1656,7 +1634,7 @@ GUI = (function($) {
     /** 
       * Called when starting module fails 
       *
-      * @param ev {string / object} - message or error object 
+      * @param ev {object} - message or error object 
       * @param cb {function} - callback method to run with error string / object
       * @return this {object}
     **/
@@ -1671,8 +1649,8 @@ GUI = (function($) {
     /** 
       * Called when starting module fails 
       *
-      * @param ev {string / object} - message or error object 
-      * @param cb {function} - callback method to run with error string / object
+      * @param mods {function} - method with array of all modules to start 
+      * @param cb {function} - callback method to run once modules started 
       * @return this {object}
     **/
     GUI.prototype._startAll = function(mods, cb) {
@@ -1738,11 +1716,12 @@ GUI = (function($) {
     };
 
     /** 
-      * Called when starting module fails 
+      * Create new sandbox instance and attach to module 
       *
-      * @param ev {string / object} - message or error object 
-      * @param cb {function} - callback method to run with error string / object
-      * @return this {object}
+      * @param moduleId {string} - the module to create sandbox instance for 
+      * @param o {object} - options object 
+      * @param cb {function} - callback method to run once instance created
+      * @return {function} - run sandboxed instances
     **/
     GUI.prototype._createInstance = function(moduleId, o, cb) {
         var Sandbox, iOpts, id, j, key, len, module, obj, opt, ref, sb, val;
@@ -1808,11 +1787,12 @@ GUI = (function($) {
     };
     
     /** 
-      * Called when starting module fails 
+      * Sets up needed tasks for module initializations 
       *
-      * @param ev {string / object} - message or error object 
-      * @param cb {function} - callback method to run with error string / object
-      * @return this {object}
+      * @param ev {string} - check module for load / unload methods 
+      * @param sb {object} - the sandbox instance 
+      * @param cb {function} - callback method to run once instances initialized
+      * @return {function} - utils.run.seris
     **/
     GUI.prototype._runSandboxPlugins = function(ev, sb, cb) {
         var p, tasks;
@@ -1857,7 +1837,7 @@ GUI = (function($) {
 * Guerrilla UI                             *
 * @module: $.GUI jQuery namespace          * 
 * ---------------------------------------- */
-;(function($){
+;(function($) {
     var $G;
 
     $G = new GUI();
@@ -1874,12 +1854,12 @@ GUI = (function($) {
         return app;
     };
 
-    $.fn.GUI = function(options){
-        return this.each(function(){
-            if(!$.data(this, 'guerrilla')){
+    $.fn.GUI = function(options) {
+        return this.each(function() {
+            if (!$.data(this, 'guerrilla')) {
 
                 $.data(this, 'guerrilla', new $.GUI().create(this, options));
-            }else{
+            } else {
                 return new $.GUI().create(this, options);
             }
         });
@@ -1951,14 +1931,32 @@ $.GUI().use(function(gui) {
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
 
+    /**
+     * A custom event handler for dom elements
+    **/
     Event = (function() {
 
         function Event() {}
 
+        /**
+         * Determine current mobile device for passed user agent 
+         *
+         * @param agent {string} - the user agent currently in use
+         * @return {boolean}
+        **/
         Event.prototype.isMobile = function(agent) {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(agent);
         };
 
+        /**
+         * Create new event handler
+         *
+         * @param event {string} - name of the event
+         * @param bubble {boolean} - whether or not to bubble the event in stack
+         * @param cancel {boolean} - boolean value to determine event cancellation
+         * @param detail {object} - optional data object
+         * @return event {object} - new event
+        **/
         Event.prototype.create = function(event, bubble, cancel, detail) {
             var customEvent;
 
@@ -1992,6 +1990,13 @@ $.GUI().use(function(gui) {
             return customEvent;
         };
 
+        /**
+         * Trigger specified event for given element
+         *
+         * @param elem {object} - the element with event handler
+         * @param event {string} - name of the event to fire
+         * @return {function} - calls event handler 
+        **/
         Event.prototype.fire = function(elem, event) {
             if (elem.dispatchEvent && elem.dispatchEvent !== null) {
 
@@ -2056,7 +2061,7 @@ $.GUI().use(function(gui) {
         
         load: function(api) {
 
-            api.dom.Event = new Event();
+            api.dom.event = new Event();
         },
         unload: function() {}
     };
@@ -2323,8 +2328,12 @@ $.GUI().use(function(G) {
             root: '/',
 
             /**
-            *
-            **/
+             * Sets needed properties for the router
+
+             *
+             * @param options {object} - the options to apply via router constructor
+             * @return {this}
+             **/
             config: function(options) {
                 this.mode = options && options.mode && options.mode === 'history' && !!(history.pushState) ? 'history' : 'hash';
                 this.root = options && options.root ? '/' + this.clearSlashes(options.root) + '/' : '/';
@@ -2676,14 +2685,8 @@ $.GUI().use(function(gui) {
 
                 Charm.prototype.vendors = ["moz", "webkit"];
 
-                Charm.prototype.Event = api.dom.Event;
+                Charm.prototype.Event = api.dom.event;
                 
-                /*
-                function() {
-                    return (this._event !== null) ? this._event : this._event = api.dom.event;
-                };
-                */
-
                 Charm.prototype.disabled = function() {
                     return !this.config.mobile && this.event.isMobile(navigator.userAgent);
                 };
@@ -4350,6 +4353,47 @@ $.GUI().use(function(G) {
 });
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
+* @module: Background Loaded jQuery plugin * 
+* ---------------------------------------- */
+$.GUI().create('background', function(gui) {
+
+    return {
+        fn: function($el, options) {
+            var _this = this, defaults, settings;
+
+            defaults = {
+                afterLoaded: function() {
+                    this.addClass('bg-loaded');
+                }
+            };
+            settings = gui.utils.merge({}, defaults, options);
+
+            gui.each(function() {
+                var $this = gui.$(this), bgImages;
+
+                bgImages = window.getComputedStyle($this.get(0), '::before').getPropertyValue('content').replace(/'/g, "").replace(/"/g, "").split(', ');
+
+                $this.data('loaded-count', 0);
+
+                gui.each(bgImages, function(key, value) {
+                    var img = value.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+
+                    gui.$('<img/>').attr('src', img).load(function() {
+                        $(this).remove(); // prevent memory leaks
+
+                        $this.data('loaded-count', $this.data('loaded-count') + 1);
+
+                        if ($this.data('loaded-count') >= bgImages.length) {
+                            settings.afterLoaded.call($this);
+                        }
+                    });
+                });
+            });
+        }
+    };
+}).start('background');
+;/* --------------------------------------- *
+* Guerrilla UI                             *
 * @module: GUI Layer Slider jQuery plugin  * 
 * ---------------------------------------- */
 $.GUI().create('LayerSlider', function(G) {
@@ -4687,11 +4731,11 @@ $.GUI().create('LayerSlider', function(G) {
 * Guerrilla UI                             *
 * @module: GUI Star jQuery plugin          * 
 * ---------------------------------------- */
-$.GUI().create('Stargaze', function(G) {
+$.GUI().create('Stargaze', function(gui) {
 
     var Stargaze = function(canvas, options) {
 
-        var $canvas = $(canvas) || null,
+        var $canvas = gui.$(canvas) || null,
             context = (canvas) ? canvas.getContext('2d') : null,
             defaults = {
                 star: {
@@ -4852,12 +4896,9 @@ $.GUI().create('Stargaze', function(G) {
     };
 
     return {
-        fn: function() {
-            var argc = arguments[0],
-                $elem = argc[0],
-                opts = argc[1];
+        fn: function($el, options) {
 
-            return new Stargaze($elem, opts).init();
+            return new Stargaze($el[0], options).init();
         },
     };
 }).start('Stargaze');

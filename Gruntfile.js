@@ -33,6 +33,7 @@ module.exports = function(grunt){
                   'src/modules/lang/function.js',
                   'src/modules/util/cellar.js',
                   'src/modules/util/cookie.js',
+                  'src/plugins/background.js',
                   'src/plugins/layers.js',
                   'src/plugins/stargaze.js',
                   'src/plugins/misty.js',
