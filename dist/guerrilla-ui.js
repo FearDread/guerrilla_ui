@@ -4368,7 +4368,7 @@ $.GUI().create('background', function(gui) {
             };
             settings = gui.utils.merge({}, defaults, options);
 
-            gui.each(function() {
+            $el.each(function() {
                 var $this = gui.$(this), bgImages;
 
                 bgImages = window.getComputedStyle($this.get(0), '::before').getPropertyValue('content').replace(/'/g, "").replace(/"/g, "").split(', ');
