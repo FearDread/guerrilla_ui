@@ -90,7 +90,7 @@ API = function() {
             /**
              * Reference utils / jQuery each method 
             **/
-            this.each = utils.each;
+            this.each = $.each;
 
             /**
              * Reference GUI core log method 

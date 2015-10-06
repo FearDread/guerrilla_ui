@@ -1,4 +1,7 @@
-
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Background Loaded jQuery plugin * 
+* ---------------------------------------- */
 $.GUI().create('background', function(gui) {
 
     return {

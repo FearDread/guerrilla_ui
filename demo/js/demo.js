@@ -28,7 +28,7 @@ $.GUI().create('App', function(gui) {
             console.log('about');
         });
 
-        mediaListener = gui.ui.media({
+        mediaListener = new gui.ui.media({
             media:'(max-width: 1024)',
             in: function() {
                 console.log('media in');
@@ -41,9 +41,9 @@ $.GUI().create('App', function(gui) {
             }
         });
 
-       mediaListener();
+        mediaListener();
 
-       new gui.ui.charm().init();
+        new gui.ui.charm().init();
     }
 
     function bindEvents() {

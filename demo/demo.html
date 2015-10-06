@@ -179,10 +179,11 @@
                   gui.$('.intro').background({
                       afterLoaded: function() {
                           console.log('background plugin works.');
+                          this.addClass('bg-loaded');
 
                           gui.log('background plugin works!');
                       }
-                  })
+                  });
               },
               unload: function() {}
           }
