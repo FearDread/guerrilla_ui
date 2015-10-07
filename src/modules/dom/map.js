@@ -4,7 +4,7 @@
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
 
-    Map = window.Map || window.MozMap || (Map = (function() {
+    var Map = window.Map || window.MozMap || (Map = (function() {
 
         function Map() {
             this.keys = [];

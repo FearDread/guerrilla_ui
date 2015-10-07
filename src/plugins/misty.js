@@ -54,7 +54,7 @@ $.GUI().create('Misty', function(G) {
         this.draw = function() {
             
             // If an image is set draw it
-            if(this.image){
+            if (this.image) {
                 this.context.drawImage(this.image, this.x-128, this.y-128);         
                 // If the image is being rendered do not draw the circle so break out of the draw function                
                 return;
@@ -109,13 +109,13 @@ $.GUI().create('Misty', function(G) {
             this.yVelocity = y;
         };
         
-        this.setImage = function(image){
+        this.setImage = function(image) {
             this.image = image;
-        }
+        };
     }
 
     // A function to generate a random number between 2 values
-    function generateRandom(min, max){
+    function generateRandom(min, max) {
         return Math.random() * (max - min) + min;
     }
 
@@ -124,15 +124,18 @@ $.GUI().create('Misty', function(G) {
 
     // Initialise the scene and set the context if possible
     function init() {
-        var canvas = document.getElementById('bg-canvas');
+        var i, particle, canvas;
+        
+        canvas = document.getElementById('bg-canvas');
+
         if (canvas.getContext) {
 
             // Set the context variable so it can be re-used
             context = canvas.getContext('2d');
 
             // Create the particles and set their initial positions and velocities
-            for(var i=0; i < particleCount; ++i){
-                var particle = new Particle(context);
+            for (i = 0; i < particleCount; i++) {
+                particle = new Particle(context);
                 
                 // Set the position to be inside the canvas bounds
                 particle.setPosition(generateRandom(0, canvasWidth), generateRandom(0, canvasHeight));
@@ -141,9 +144,8 @@ $.GUI().create('Misty', function(G) {
                 particle.setVelocity(generateRandom(-maxVelocity, maxVelocity), generateRandom(-maxVelocity, maxVelocity));
                 particles.push(particle);            
             }
-        }
-        else {
-            alert("Please use a modern browser");
+        } else {
+            gui.warn("Please use a modern browser");
         }
     }
 

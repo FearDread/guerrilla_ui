@@ -171,7 +171,7 @@ $.GUI().use(function(gui) {
                     this.event.remove(window, 'scroll', this.scrollHandler);
                     this.event.remove(window, 'resize', this.scrollHandler);
 
-                    if (this.interval != null) {
+                    if (this.interval !== null) {
                         return window.clearInterval(this.interval);
                     }
                 };
@@ -191,7 +191,7 @@ $.GUI().use(function(gui) {
                 Charm.prototype.doSync = function(element) {
                     var box, i = 0, length, ref, results = [];
 
-                    if (element == null) {
+                    if (element === null) {
                         element = this.element;
                     }
 
@@ -237,7 +237,7 @@ $.GUI().use(function(gui) {
 
                     box.className = box.className + " " + this.config.animateClass;
 
-                    if (this.config.callback != null) {
+                    if (this.config.callback !== null) {
                         this.config.callback(box);
                     }
 
@@ -298,7 +298,9 @@ $.GUI().use(function(gui) {
                     if (event.type.toLowerCase().indexOf('animationend') >= 0) {
                         target = event.target || event.srcElement;
 
-                        return target.className = target.className.replace(this.config.animateClass, '').trim();
+                        target.className = target.className.replace(this.config.animateClass, '').trim();
+
+                        return target.className;
                     }
                 };
 

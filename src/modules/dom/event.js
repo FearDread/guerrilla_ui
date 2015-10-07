@@ -50,7 +50,7 @@ $.GUI().use(function(gui) {
                 customEvent = document.createEvent('CustomEvent');
                 customEvent.initCustomEvent(event, bubble, cancel, detail);
 
-            } else if (document.createEventObject != null) {
+            } else if (document.createEventObject !== null) {
 
                 customEvent = document.createEventObject();
                 customEvent.eventType = event;
@@ -86,6 +86,8 @@ $.GUI().use(function(gui) {
         };
 
         Event.prototype.add = function(elem, event, fn) {
+            var newEvent;
+
             if (elem.addEventListener !== null) {
 
                 return elem.addEventListener(event, fn, false);
@@ -95,8 +97,9 @@ $.GUI().use(function(gui) {
                 return elem.attachEvent("on" + event, fn);
 
             } else {
+                newEvent = elem[event] = fn;
 
-                return elem[event] = fn;
+                return newEvent;
             }
         };
 
