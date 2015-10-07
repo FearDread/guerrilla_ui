@@ -15,10 +15,10 @@
   },
   "dependencies": {
     "jsdoc": "^3.3.3",
+    "time-grunt": "^1.2.1",
     "grunt-jsdoc": "^1.0.0",
     "ink-docstrap": "^0.5.2",
-    "load-grunt-tasks": "^3.3.0",
-    "time-grunt": "^1.2.1"
+    "load-grunt-tasks": "^3.3.0"
   },
   "author": {
     "name": "Garrett Haptonstall",
