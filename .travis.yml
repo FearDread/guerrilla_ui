@@ -8,10 +8,15 @@ node_js:
 
 before_install:
   - npm install grunt-cli -g 
+ 
+install:
   - npm install
+
+before_script:
+  - grunt build -v
 
 notifications:
   email:
     on_success: always
-    on_failure: never 
+    on_failure: always 
 
