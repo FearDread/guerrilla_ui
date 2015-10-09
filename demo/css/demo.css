@@ -54,84 +54,84 @@ a:focus {
     text-decoration: none;
     color: #1d9b6c;
 }
-
 .light {
     font-weight: 400;
 }
-
-.navbar-custom {
+.navbar {
+    min-height: 60px;
+    background: transparent;
+    box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.15);
+}
+.navbar {
     margin-bottom: 0;
-    border-bottom: 1px solid rgba(255,255,255,.3);
     text-transform: uppercase;
     font-family: 'Raleway',"Helvetica Neue",Helvetica,Arial,sans-serif;
-    background-color: #000;
 }
 
-.navbar-custom .navbar-brand {
+.navbar .navbar-brand {
     font-weight: 700;
 }
 
-.navbar-custom .navbar-brand:focus {
+.navbar .navbar-brand:focus {
     outline: 0;
 }
 
-.navbar-custom .navbar-brand .navbar-toggle {
+.navbar .navbar-brand .navbar-toggle {
     padding: 4px 6px;
     font-size: 16px;
     color: #fff;
 }
 
-.navbar-custom .navbar-brand .navbar-toggle:focus,
-.navbar-custom .navbar-brand .navbar-toggle:active {
+.navbar .navbar-brand .navbar-toggle:focus,
+.navbar .navbar-brand .navbar-toggle:active {
     outline: 0;
 }
 
-.navbar-custom a {
+.navbar a {
     color: #fff;
 }
 
-.navbar-custom .nav li a {
+.navbar .nav li a {
     -webkit-transition: background .3s ease-in-out;
     -moz-transition: background .3s ease-in-out;
     transition: background .3s ease-in-out;
 }
 
-.navbar-custom .nav li a:hover {
+.navbar .nav li a:hover {
     outline: 0;
     color: rgba(255,255,255,.8);
     background-color: transparent;
 }
 
-.navbar-custom .nav li a:focus,
-.navbar-custom .nav li a:active {
+.navbar .nav li a:focus,
+.navbar .nav li a:active {
     outline: 0;
     background-color: transparent;
 }
 
-.navbar-custom .nav li.active {
+.navbar .nav li.active {
     outline: 0;
 }
 
-.navbar-custom .nav li.active a {
+.navbar .nav li.active a {
     background-color: rgba(255,255,255,.3);
 }
 
-.navbar-custom .nav li.active a:hover {
+.navbar .nav li.active a:hover {
     color: #fff;
 }
 
 @media(min-width:768px) {
-    .navbar-custom {
-        padding: 20px 0;
+    .navbar {
+        padding: 10px 0;
         border-bottom: 0;
         letter-spacing: 1px;
-        background: 0 0;
         -webkit-transition: background .5s ease-in-out,padding .5s ease-in-out;
         -moz-transition: background .5s ease-in-out,padding .5s ease-in-out;
         transition: background .5s ease-in-out,padding .5s ease-in-out;
     }
     
-    .navbar-custom.top-nav-collapse {
+    .navbar .top-nav-collapse {
         padding: 0;
         border-bottom: 1px solid rgba(255,255,255,.3);
         background: #000;
@@ -261,6 +261,10 @@ a:focus {
         -moz-transform: scale(1);
         transform: scale(1);
     }
+}
+
+section {
+    min-height: 400px;
 }
 
 .content-section {
