@@ -2,7 +2,7 @@
 * Guerrilla UI                             *
 * @module: Basic Router implementation     * 
 * ---------------------------------------- */
-$.GUI().use(function(G) {
+$.GUI().use(function(gui) {
 
     function Router() {
 

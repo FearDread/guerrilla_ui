@@ -2,13 +2,23 @@
 * Guerrilla UI                             *
 * @module: Object extended helper methods  * 
 * ---------------------------------------- */
-$.GUI().use(function(G) {
+$.GUI().use(function(gui) {
 
     return {
 
         load: function(api) {
             
             api.Object = {};
+
+            /**
+             * Get size of object via number of keys 
+             *
+             * @param obj {object} - the object to size
+             * @return total {number} - total number of keys
+            **/
+            api.Object.size = function(obj) {
+                return api.utils.getObjectSize(obj);
+            },
 
             /**
              * Compare methods used to compare two objects
