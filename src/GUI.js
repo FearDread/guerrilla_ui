@@ -39,7 +39,7 @@ GUI = (function($) {
 
             if (options !== null && utils.isObj(options)) {
                 // set custom config options
-                this.config = utils.extend(this.config, options);
+                this.config = utils.merge(this.config, options);
 
                 // set logging verbosity
                 this.debug.level = this.config.logLevel || 0;

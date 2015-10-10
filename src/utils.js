@@ -64,7 +64,7 @@ utils = {
             idx = 1;
         }
 
-        return this.getArgumentNames(fn).length >= idx;
+        return this.args(fn).length >= idx;
     },
 
     /**
@@ -190,7 +190,7 @@ utils = {
     * @param max - int max number of range
     * @return int
     **/
-    getRandomNumber: function(min, max) {
+    rand: function(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     },
 
@@ -200,7 +200,7 @@ utils = {
     * @param fn {function} - the function to get arguments from 
     * @return {array}  
     **/
-    getArgumentNames: function(fn) {
+    args: function(fn) {
         var ref;
 
         return ((fn !== null ? (ref = fn.toString().match(utils.fnRgx)) !== null ? ref[1] : void 0 : void 0) || '').match(utils.argRgx) || [];
@@ -212,7 +212,7 @@ utils = {
     * @param $el {object} - jQuery wrapped element to resize 
     * @return void
     **/
-    resizeWindow: function($el) {
+    resize: function($el) {
         if (!$el.height) {
             $el = $($el);
         }
