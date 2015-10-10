@@ -18,7 +18,7 @@ $.GUI().use(function(gui) {
             **/
             api.Object.size = function(obj) {
                 return api.utils.getObjectSize(obj);
-            },
+            };
 
             /**
              * Compare methods used to compare two objects

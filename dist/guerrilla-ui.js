@@ -64,7 +64,7 @@ utils = {
             idx = 1;
         }
 
-        return this.getArgumentNames(fn).length >= idx;
+        return this.args(fn).length >= idx;
     },
 
     /**
@@ -190,7 +190,7 @@ utils = {
     * @param max - int max number of range
     * @return int
     **/
-    getRandomNumber: function(min, max) {
+    rand: function(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     },
 
@@ -200,7 +200,7 @@ utils = {
     * @param fn {function} - the function to get arguments from 
     * @return {array}  
     **/
-    getArgumentNames: function(fn) {
+    args: function(fn) {
         var ref;
 
         return ((fn !== null ? (ref = fn.toString().match(utils.fnRgx)) !== null ? ref[1] : void 0 : void 0) || '').match(utils.argRgx) || [];
@@ -212,7 +212,7 @@ utils = {
     * @param $el {object} - jQuery wrapped element to resize 
     * @return void
     **/
-    resizeWindow: function($el) {
+    resize: function($el) {
         if (!$el.height) {
             $el = $($el);
         }
@@ -1222,7 +1222,7 @@ GUI = (function($) {
 
             if (options !== null && utils.isObj(options)) {
                 // set custom config options
-                this.config = utils.extend(this.config, options);
+                this.config = utils.merge(this.config, options);
 
                 // set logging verbosity
                 this.debug.level = this.config.logLevel || 0;
@@ -2321,7 +2321,7 @@ $.GUI().create('Controller', function(gui) {
 * Guerrilla UI                             *
 * @module: Basic Router implementation     * 
 * ---------------------------------------- */
-$.GUI().use(function(G) {
+$.GUI().use(function(gui) {
 
     function Router() {
 
@@ -3390,13 +3390,23 @@ $.GUI().use(function(G) {
 * Guerrilla UI                             *
 * @module: Object extended helper methods  * 
 * ---------------------------------------- */
-$.GUI().use(function(G) {
+$.GUI().use(function(gui) {
 
     return {
 
         load: function(api) {
             
             api.Object = {};
+
+            /**
+             * Get size of object via number of keys 
+             *
+             * @param obj {object} - the object to size
+             * @return total {number} - total number of keys
+            **/
+            api.Object.size = function(obj) {
+                return api.utils.getObjectSize(obj);
+            };
 
             /**
              * Compare methods used to compare two objects
