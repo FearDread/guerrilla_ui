@@ -40,8 +40,11 @@ Link `guerrilla-ui.js` or `guerrilla-ui.min.js` in your HTML file (make sure to 
 # How It all Works #
 GUI implements many [javascript patterns](http://shichuan.github.io/javascript-patterns/) focusing on jQuery and jQuery plugin patterns. 
 
-
-## Create a module
+## Create a new module
+A module is a completely independent part of your application.
+It has absolutely no reference to another piece of the app.
+The only thing the module knows is your sandbox.
+The sandbox is used to communicate with other parts of the application.
 
 Now create a new module instance with its own sandbox:
 
@@ -93,7 +96,7 @@ $.GUI().create("App", App).start();
 The `load` function is called by the framework when the module is supposed to
 start. The `unload` function is called when the module has to shut down.
 
-## Asynchronous initialization
+## Load Asynchronously
 
 You can also load or unload your module in a asynchronous way:
 
@@ -118,14 +121,7 @@ $.GUI().create("asyncModule", asyncModule)
     }});
 ```
 
-### Modules
-
-A module is a completely independent part of your application.
-It has absolutely no reference to another piece of the app.
-The only thing the module knows is your sandbox.
-The sandbox is used to communicate with other parts of the application.
-
-### Sandbox
+### Guerrilla API 
 The <GUI> Sandbox API comes with alot of capabilities out of the box.  It uses the [faccade pattern](https://en.wikipedia.org/wiki/Facade_pattern).  That way you can hide the features provided by the core and only show a well defined custom static long term API to your modules.
 
 > This is actually one of the most important concepts for creating
@@ -133,7 +129,7 @@ mainainable applications.
 
 > For each module a separate sandbox instance will be created.
 
-### Core
+### Guerrilla Core
 
 The GUI core object is responsible for loading and unloading your modules.
 It also handles the messages by using the
@@ -227,12 +223,12 @@ $.GUI().stop(); // stops all running instances
 
 If a module needs to communicate with other modules, you can use the `fire` and `add` methods the Broker provides.
 
-### fire
+### Fire `fire` 
 
 The `fire` function takes three parameters, the last one is optional:
 - `channel` : the channel name you want to emit to
 - `data`  : the data itself
-- `cb`    : callback method
+- `callback`    : callback method
 
 The fire function is accessible through the gui sandbox:
 
@@ -244,7 +240,7 @@ gui.fire("anotherChannel", {prop:value}, function() {
 });
 ```
 
-### add
+### Add new channel `add`
 A handler for a subscription could look like this:
 
 ```javascript
@@ -284,7 +280,7 @@ gui.add(["ChannelA", "ChannelB"], function() {
 });
 ```
 
-#### listen and ignore
+#### `listen` and `ignore`
 
 A subscription can be detached and attached again:
 
@@ -293,7 +289,7 @@ sub.ignore(); // don't listen any more
 sub.listen(); // receive upcoming new messages
 ```
 
-#### remove
+#### Remove a channel `remove`
 
 You can unsubscribe a function from a channel
 
@@ -375,6 +371,7 @@ $.GUI().create("jQueryPlugin", function(gui) {
 + flow control
 + [AMD](https://en.wikipedia.org/wiki/Asynchronous_module_definition) & [CommonJS](http://www.commonjs.org/) support
 + framework-agnostic
++ jquery easing included
 
 Some of the current <gui> api features.
 
