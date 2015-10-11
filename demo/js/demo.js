@@ -18,7 +18,6 @@ $.GUI().create('App', function(gui) {
         },
         showPage: function(e) {
             e.preventDefault();
-
             var page, href, target;
 
             target = gui.$(e.target);
@@ -29,13 +28,12 @@ $.GUI().create('App', function(gui) {
 
             gui.fire('navclick', {page: href}, function() {
                 gui.log('callback after fired navclick event.');
-                gui.net.router.navigate();
             });
         }
     };
 
     function _load(opts) {
-        var mediaListener;
+        var mediaListener, charm;
 
         gui.add('scrollPage', function() {
             console.log('fired scroll page channel');
@@ -65,23 +63,15 @@ $.GUI().create('App', function(gui) {
 
         mediaListener();
 
-        new gui.ui.charm().init();
+        charm = new gui.ui.charm({
+            offset: 60,
+            callback: function() {
+                console.log('charm loaded.');
+            }
+        });
 
-        var scrollAnimationTime = 1200,
-            scrollAnimation = 'easeInOutExpo';
-
-            $('.btn').bind('click.smoothscroll', function (event) {
-                event.preventDefault();
-                var target = this.hash;
-
-                $('html, body').stop().animate({
-
-                    'scrollTop': $(target).offset().top + 60
-
-                }, scrollAnimationTime, scrollAnimation, function () {
-                    window.location.hash = target;
-                });
-            });
+        charm.init();
+        // new WOW().init();
     }
 
     function bindEvents() {

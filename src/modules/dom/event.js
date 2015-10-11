@@ -137,7 +137,7 @@ $.GUI().use(function(gui) {
         
         load: function(api) {
 
-            api.dom.event = new Event();
+            api.dom.Event = new Event();
         },
         unload: function() {}
     };

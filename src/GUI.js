@@ -8,6 +8,7 @@ var GUI;
 /** 
  * @todo - add default config that will change behavior of GUI core 
  * @todo - add custom config logic to apply customization options 
+ * @todo - allow async dependency loading to keep framework light - loads modules / plugins only when called via dependency array
  **/
 
 // GUI Core

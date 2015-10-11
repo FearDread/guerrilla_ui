@@ -1,10 +1,10 @@
-/* ----------------------api----------------- *
+/* --------------------------------------- *
 * Guerrilla UI                             *
 * @module: Charm, timed animations based   * 
 * on scrolling and page location           *
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
- 
+
     return {
 
         load: function(api) {
@@ -23,11 +23,11 @@ $.GUI().use(function(gui) {
                     this.scrollCallback = api.broker.bind(this.scrollCallback, this);
                     this.resetAnimation = api.broker.bind(this.resetAnimation, this);
 
-                    this.config = api.utils.merge(options, this.defaults);
+                    this.config = this.extend(options, this.defaults);
                     this.charmEvent = this.Event.create(this.config.boxClass);
 
-                    this.animationNameCache = api.dom.map;
                     this.scrolled = true;
+                    this.animationNameCache = api.dom.map;
                 }
 
                 Charm.prototype.defaults = {
@@ -36,15 +36,31 @@ $.GUI().use(function(gui) {
                     offset: 0,
                     mobile: true,
                     live: true,
-                    callback: null
+                    callback: null,
+                    scrollContainer: null
+                };
+
+                Charm.prototype.extend = function(custom, defaults) {
+                    var key, value;
+
+                    for (key in defaults) {
+
+                        value = defaults[key];
+
+                        if (custom[key] == null) {
+                            custom[key] = value;
+                        }
+                    }
+
+                    return custom;
                 };
 
                 Charm.prototype.vendors = ["moz", "webkit"];
 
-                Charm.prototype.Event = api.dom.event;
+                Charm.prototype.Event = api.dom.Event;
                 
                 Charm.prototype.disabled = function() {
-                    return !this.config.mobile && this.event.isMobile(navigator.userAgent);
+                    return !this.config.mobile && this.Event.isMobile(navigator.userAgent);
                 };
 
                 Charm.prototype.init = function() {
@@ -168,8 +184,8 @@ $.GUI().use(function(gui) {
                 Charm.prototype.stop = function() {
                     this.stopped = true;
 
-                    this.event.remove(window, 'scroll', this.scrollHandler);
-                    this.event.remove(window, 'resize', this.scrollHandler);
+                    this.Event.remove(window, 'scroll', this.scrollHandler);
+                    this.Event.remove(window, 'resize', this.scrollHandler);
 
                     if (this.interval !== null) {
                         return window.clearInterval(this.interval);
@@ -292,11 +308,11 @@ $.GUI().use(function(gui) {
                     return results;
                 };
 
-                Charm.prototype.resetAnimation = function(event) {
+                Charm.prototype.resetAnimation = function(e) {
                     var target;
 
-                    if (event.type.toLowerCase().indexOf('animationend') >= 0) {
-                        target = event.target || event.srcElement;
+                    if (e.type.toLowerCase().indexOf('animationend') >= 0) {
+                        target = e.target || e.srcElement;
 
                         target.className = target.className.replace(this.config.animateClass, '').trim();
 
@@ -421,28 +437,24 @@ $.GUI().use(function(gui) {
                     if (this.scrolled) {
                         this.scrolled = false;
                         this.boxes = (function() {
-                            var i = 0, lenth, ref, results = [];
+                            var j, len, ref, results;
 
                             ref = this.boxes;
-                            length = ref.length;
-                            
-                            if (length > 0) {
+                            results = [];
 
-                                do {
-                                    box = ref[i];
+                            for (j = 0, len = ref.length; j < len; j++) {
+                                box = ref[j];
 
-                                    if (!(box)) {
-                                        continue;
-                                    }
-                                    if (this.isVisible(box)) {
-                                        this.show(box);
-                                        continue;
-                                    }
+                                if (!(box)) {
+                                    continue;
+                                }
 
-                                    results.push(box);
-                                    i++;
+                                if (this.isVisible(box)) {
+                                    this.show(box);
+                                    continue;
+                                }
 
-                                } while (--length);
+                                results.push(box);
                             }
 
                             return results;
@@ -450,7 +462,6 @@ $.GUI().use(function(gui) {
                         }).call(this);
 
                         if (!(this.boxes.length || this.config.live)) {
-
                             return this.stop();
                         }
                     }
@@ -477,7 +488,7 @@ $.GUI().use(function(gui) {
                 Charm.prototype.isVisible = function(box) {
                     var bottom, offset, top, viewBottom, viewTop;
 
-                    offset = box.getAttribute('data-wow-offset') || this.config.offset;
+                    offset = box.getAttribute('data-charm-offset') || this.config.offset;
 
                     viewTop = window.pageYOffset;
                     viewBottom = viewTop + Math.min(this.element.clientHeight, this.Event.innerHeight()) - offset;
