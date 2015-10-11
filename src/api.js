@@ -97,7 +97,9 @@ API = function() {
              *
              * @return {function} 
             **/
-            this.timeout = window.setTimeout;
+            this.timeout = function(fn, ms) {
+                return window.setTimeout(fn, ms);
+            };
 
             /**
              * Shorthand timeout method 

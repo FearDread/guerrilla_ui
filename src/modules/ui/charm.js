@@ -47,7 +47,7 @@ $.GUI().use(function(gui) {
 
                         value = defaults[key];
 
-                        if (custom[key] === null) {
+                        if (custom[key] !== null) {
                             custom[key] = value;
                         }
                     }

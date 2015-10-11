@@ -28,6 +28,7 @@ module.exports = function(grunt){
                     'src/modules/mvc/controller.js',
                     'src/modules/network/router.js',
                     'src/modules/ui/media.js',
+                    'src/modules/ui/easing.js',
                     'src/modules/ui/charm.js',
                     'src/modules/lang/lang.js',
                     'src/modules/lang/array.js',
@@ -62,5 +63,5 @@ module.exports = function(grunt){
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
-    grunt.registerTask('build', ['test', 'docs', 'concat','uglify']);
+    grunt.registerTask('build', ['test', 'concat','uglify']);
 };
