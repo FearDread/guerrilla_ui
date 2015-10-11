@@ -1105,6 +1105,20 @@ API = function() {
             this.each = $.each;
 
             /**
+             * Shorthand timeout method 
+             *
+             * @return {function} 
+            **/
+            this.timeout = window.setTimeout;
+
+            /**
+             * Shorthand timeout method 
+             *
+             * @return {function} 
+            **/
+            this.interval = window.setInterval;
+
+            /**
              * Reference GUI core log method 
              *
              * @return {function} 
@@ -1191,6 +1205,7 @@ var GUI;
 /** 
  * @todo - add default config that will change behavior of GUI core 
  * @todo - add custom config logic to apply customization options 
+ * @todo - allow async dependency loading to keep framework light - loads modules / plugins only when called via dependency array
  **/
 
 // GUI Core
@@ -1868,18 +1883,18 @@ GUI = (function($) {
 })(jQuery);
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
-* @module: Map, basic key value map store  * 
+* @module: WeakMap, basic key value map store  * 
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
 
-    var Map = window.Map || window.MozMap || (Map = (function() {
+    var WeakMap = this.WeakMap || this.MozWeakMap || (WeakMap = (function() {
 
-        function Map() {
+        function WeakMap() {
             this.keys = [];
             this.values = [];
         }
 
-        Map.prototype.get = function(key) {
+        WeakMap.prototype.get = function(key) {
             var i, item, j, ref;
 
             ref = this.keys;
@@ -1894,7 +1909,7 @@ $.GUI().use(function(gui) {
             }
         };
 
-        Map.prototype.set = function(key, value) {
+        WeakMap.prototype.set = function(key, value) {
             var i, item, j, ref;
 
             ref = this.keys;
@@ -1912,7 +1927,7 @@ $.GUI().use(function(gui) {
             return this.values.push(value);
         };
 
-        return Map;
+        return WeakMap;
 
     })());
 
@@ -1920,7 +1935,7 @@ $.GUI().use(function(gui) {
 
         load: function(api) {
 
-          api.dom.map = new Map();
+          api.dom.map = new WeakMap();
         },
         unload: function() {}
     };
@@ -2064,7 +2079,7 @@ $.GUI().use(function(gui) {
         
         load: function(api) {
 
-            api.dom.event = new Event();
+            api.dom.Event = new Event();
         },
         unload: function() {}
     };
@@ -2645,13 +2660,13 @@ $.GUI().use(function(G) {
         }
     };
 });
-;/* ----------------------api----------------- *
+;/* --------------------------------------- *
 * Guerrilla UI                             *
 * @module: Charm, timed animations based   * 
 * on scrolling and page location           *
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
- 
+
     return {
 
         load: function(api) {
@@ -2670,11 +2685,11 @@ $.GUI().use(function(gui) {
                     this.scrollCallback = api.broker.bind(this.scrollCallback, this);
                     this.resetAnimation = api.broker.bind(this.resetAnimation, this);
 
-                    this.config = api.utils.merge(options, this.defaults);
+                    this.config = this.extend(options, this.defaults);
                     this.charmEvent = this.Event.create(this.config.boxClass);
 
-                    this.animationNameCache = api.dom.map;
                     this.scrolled = true;
+                    this.animationNameCache = api.dom.map;
                 }
 
                 Charm.prototype.defaults = {
@@ -2683,15 +2698,31 @@ $.GUI().use(function(gui) {
                     offset: 0,
                     mobile: true,
                     live: true,
-                    callback: null
+                    callback: null,
+                    scrollContainer: null
+                };
+
+                Charm.prototype.extend = function(custom, defaults) {
+                    var key, value;
+
+                    for (key in defaults) {
+
+                        value = defaults[key];
+
+                        if (custom[key] === null) {
+                            custom[key] = value;
+                        }
+                    }
+
+                    return custom;
                 };
 
                 Charm.prototype.vendors = ["moz", "webkit"];
 
-                Charm.prototype.Event = api.dom.event;
+                Charm.prototype.Event = api.dom.Event;
                 
                 Charm.prototype.disabled = function() {
-                    return !this.config.mobile && this.event.isMobile(navigator.userAgent);
+                    return !this.config.mobile && this.Event.isMobile(navigator.userAgent);
                 };
 
                 Charm.prototype.init = function() {
@@ -2815,8 +2846,8 @@ $.GUI().use(function(gui) {
                 Charm.prototype.stop = function() {
                     this.stopped = true;
 
-                    this.event.remove(window, 'scroll', this.scrollHandler);
-                    this.event.remove(window, 'resize', this.scrollHandler);
+                    this.Event.remove(window, 'scroll', this.scrollHandler);
+                    this.Event.remove(window, 'resize', this.scrollHandler);
 
                     if (this.interval !== null) {
                         return window.clearInterval(this.interval);
@@ -2939,11 +2970,11 @@ $.GUI().use(function(gui) {
                     return results;
                 };
 
-                Charm.prototype.resetAnimation = function(event) {
+                Charm.prototype.resetAnimation = function(e) {
                     var target;
 
-                    if (event.type.toLowerCase().indexOf('animationend') >= 0) {
-                        target = event.target || event.srcElement;
+                    if (e.type.toLowerCase().indexOf('animationend') >= 0) {
+                        target = e.target || e.srcElement;
 
                         target.className = target.className.replace(this.config.animateClass, '').trim();
 
@@ -3068,28 +3099,24 @@ $.GUI().use(function(gui) {
                     if (this.scrolled) {
                         this.scrolled = false;
                         this.boxes = (function() {
-                            var i = 0, lenth, ref, results = [];
+                            var j, len, ref, results;
 
                             ref = this.boxes;
-                            length = ref.length;
-                            
-                            if (length > 0) {
+                            results = [];
 
-                                do {
-                                    box = ref[i];
+                            for (j = 0, len = ref.length; j < len; j++) {
+                                box = ref[j];
 
-                                    if (!(box)) {
-                                        continue;
-                                    }
-                                    if (this.isVisible(box)) {
-                                        this.show(box);
-                                        continue;
-                                    }
+                                if (!(box)) {
+                                    continue;
+                                }
 
-                                    results.push(box);
-                                    i++;
+                                if (this.isVisible(box)) {
+                                    this.show(box);
+                                    continue;
+                                }
 
-                                } while (--length);
+                                results.push(box);
                             }
 
                             return results;
@@ -3097,7 +3124,6 @@ $.GUI().use(function(gui) {
                         }).call(this);
 
                         if (!(this.boxes.length || this.config.live)) {
-
                             return this.stop();
                         }
                     }
@@ -3124,7 +3150,7 @@ $.GUI().use(function(gui) {
                 Charm.prototype.isVisible = function(box) {
                     var bottom, offset, top, viewBottom, viewTop;
 
-                    offset = box.getAttribute('data-wow-offset') || this.config.offset;
+                    offset = box.getAttribute('data-charm-offset') || this.config.offset;
 
                     viewTop = window.pageYOffset;
                     viewBottom = viewTop + Math.min(this.element.clientHeight, this.Event.innerHeight()) - offset;
@@ -3635,11 +3661,29 @@ $.GUI().use(function(G) {
 
                         clearTimeout(timeout);
 
-                        timeout = setTimeout(utils.proxy(function () {
+                        timeout = api.timeout(utils.proxy(function () {
                             fn.apply(this, args);
                         }, context || this), time);
                     };
                 },
+
+                /**
+                * Delays a method call for given milliseconds 
+                *
+                * @param time {number} - the amount of time to wait 
+                * @param callback {function} - the function to execute when time done 
+                * @return {function}
+                **/
+                delay: (function(callback,  ms) {
+                    var timer = 0;
+
+                    return function(callback, ms) {
+
+                        clearTimeout(timer);
+
+                        timer = api.timeout(callback, ms);
+                    };
+                })(),
                 
                 /**
                  * Allow passed method to only be executed only once
@@ -3684,7 +3728,7 @@ $.GUI().use(function(G) {
                         if (!run) {
                             run = true;
 
-                            setTimeout(function() {
+                            api.timeout(function() {
                                 fn.apply(ctx, args);
                                 run = false;
                             }, time);
@@ -3703,7 +3747,7 @@ $.GUI().use(function(G) {
                     var args = arguments,
                         ctx = context || this;
 
-                    setTimeout(function() {
+                    api.timeout(function() {
                         fn.apply(ctx, args);
                     }, 0);
                 }

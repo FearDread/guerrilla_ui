@@ -27,11 +27,29 @@ $.GUI().use(function(G) {
 
                         clearTimeout(timeout);
 
-                        timeout = setTimeout(utils.proxy(function () {
+                        timeout = api.timeout(utils.proxy(function () {
                             fn.apply(this, args);
                         }, context || this), time);
                     };
                 },
+
+                /**
+                * Delays a method call for given milliseconds 
+                *
+                * @param time {number} - the amount of time to wait 
+                * @param callback {function} - the function to execute when time done 
+                * @return {function}
+                **/
+                delay: (function(callback,  ms) {
+                    var timer = 0;
+
+                    return function(callback, ms) {
+
+                        clearTimeout(timer);
+
+                        timer = api.timeout(callback, ms);
+                    };
+                })(),
                 
                 /**
                  * Allow passed method to only be executed only once
@@ -76,7 +94,7 @@ $.GUI().use(function(G) {
                         if (!run) {
                             run = true;
 
-                            setTimeout(function() {
+                            api.timeout(function() {
                                 fn.apply(ctx, args);
                                 run = false;
                             }, time);
@@ -95,7 +113,7 @@ $.GUI().use(function(G) {
                     var args = arguments,
                         ctx = context || this;
 
-                    setTimeout(function() {
+                    api.timeout(function() {
                         fn.apply(ctx, args);
                     }, 0);
                 }

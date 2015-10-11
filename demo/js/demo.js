@@ -64,14 +64,13 @@ $.GUI().create('App', function(gui) {
         mediaListener();
 
         charm = new gui.ui.charm({
-            offset: 60,
+            offset: 80,
             callback: function() {
                 console.log('charm loaded.');
             }
         });
 
         charm.init();
-        // new WOW().init();
     }
 
     function bindEvents() {
@@ -98,8 +97,34 @@ $.GUI().create('App', function(gui) {
 
     return {
         load: function() {
+            //jQuery to collapse the navbar on scroll
+            $(window).scroll(function() {
+                if ($(".navbar").offset().top > 50) {
 
-            _load();
+                    $(".navbar-fixed-top").addClass("top-nav-collapse");
+                } else {
+                    $(".navbar-fixed-top").removeClass("top-nav-collapse");
+                }
+            });
+
+            //jQuery for page scrolling feature - requires jQuery Easing plugin
+            $(function() {
+                $('a.page-scroll').bind('click', function(e) {
+                    var $anchor = $(this);
+
+                    $('html, body').stop().animate({
+                        scrollTop: $($anchor.attr('href')).offset().top
+                    }, 1500, 'easeInOutExpo');
+                    
+                    e.preventDefault();
+                });
+            });
+
+            setTimeout(function() {
+                $('.preloader').fadeOut();
+
+                _load();
+            }, 1500);
         },
         unload: function() {}
     };

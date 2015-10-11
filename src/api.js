@@ -93,6 +93,20 @@ API = function() {
             this.each = $.each;
 
             /**
+             * Shorthand timeout method 
+             *
+             * @return {function} 
+            **/
+            this.timeout = window.setTimeout;
+
+            /**
+             * Shorthand timeout method 
+             *
+             * @return {function} 
+            **/
+            this.interval = window.setInterval;
+
+            /**
              * Reference GUI core log method 
              *
              * @return {function} 
