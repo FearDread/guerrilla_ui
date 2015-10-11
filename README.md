@@ -126,3 +126,294 @@ The <GUI> Sandbox API comes with alot of capabilities out of the box.  It uses t
 
 > This is actually one of the most important concepts for creating
 mainainable applications.
+
+> For each module a separate sandbox instance will be created.
+
+### Guerrilla Core
+
+The GUI core object is responsible for loading and unloading your modules.
+It also handles the messages by using the
+[Publish/Subscribe (Mediator) pattern](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) with the Broker.
+
+## Starting Modules
+
+After your modules are created, start your modules:
+
+```javascript
+$.GUI()
+    .start("moduleA")
+    .start("moduleB", function(err) {
+        // 'anOtherModule' is running now
+    });
+```
+
+### Various Start Options
+
+With <GUI> you can start multiple instances of the same module using `instanceId`:
+
+```javascript
+$.GUI().start("moduleA", {instanceId: "moduleInstanceA"});
+$.GUI().start("moduleA", {instanceId: "moduleInstanceB"});
+```
+
+You can also attach custom data to the `options` property and it will be accessible within your modules:
+
+```javascript
+$.GUI().create("module", function(gui) {
+  
+    return {
+        load: function(opts) {
+            (opts.myProp === "someValue")  // true
+
+            gui.each(opts.anotherProp, function(k, v) {
+                gui.log("key :" + k);
+                gui.log("value :", v);
+            });
+        },
+        unload: function() {}
+    };
+}).start("moduleA", {
+    instanceId: "testing",
+    options: {
+        myProp: "someValue",
+        anotherProp: ["data1", "data2"],
+        someObj: {}
+    }
+});
+```
+
+If you want to just start all modules with no custom instances simply call start with no options.
+
+```javascript
+$.GUI().start();
+```
+
+To start specific modules at once you can pass an array of the module names to start.
+
+```javascript
+$.GUI().start(["moduleA","moduleB"]);
+```
+
+You can also pass a callback function:
+
+```javascript
+$.GUI().start(function() {
+  // do something when all modules initialized
+});
+```
+
+If you need to you can create your own sandbox to use for a module:
+
+```javascript
+var newSandbox = function() {};
+
+$.GUI().start("moduleA", {sandbox: newSandbox});
+```
+
+## Stopping
+
+Simply call
+
+```javascript
+$.GUI().stop("moduleB");
+$.GUI().stop(); // stops all running instances
+```
+
+## Broker Publish / Subscribe
+
+If a module needs to communicate with other modules, you can use the `fire` and `add` methods the Broker provides.
+
+### Fire `fire` 
+
+The `fire` function takes three parameters, the last one is optional:
+- `channel` : the channel name you want to emit to
+- `data`  : the data itself
+- `callback`    : callback method
+
+The fire function is accessible through the gui sandbox:
+
+```javascript
+gui.fire("myChannle", myDataObj);
+
+gui.fire("anotherChannel", {prop:value}, function() {
+  gui.log("Called after event fired.");
+});
+```
+
+### Add new channel `add`
+A handler for a subscription could look like this:
+
+```javascript
+var handler = function(data, channel) {
+    switch(channel) {
+        case "channelA":
+            gui.fire("channelA", process(data));
+            break;
+        
+        case "channelB":
+            // do something else;
+            break;
+    }
+};
+```
+
+... and it can listen to one or more channels:
+
+```javascript
+sub1 = gui.add("channelA", handler);
+sub2 = gui.add("channelB", handler);
+```
+Or just do it at all once:
+
+```javascript
+gui.add({channelA: cbA, channelB: cbB, channelC: function() {
+        // do something
+    }
+});
+```
+
+You can also subscribe to several channels at once:
+
+```javascript
+gui.add(["ChannelA", "ChannelB"], function() {
+    // do something
+});
+```
+
+#### `listen` and `ignore`
+
+A subscription can be detached and attached again:
+
+```javascript
+sub.ignore(); // don't listen any more
+sub.listen(); // receive upcoming new messages
+```
+
+#### Remove a channel `remove`
+
+You can unsubscribe a function from a channel
+
+```javascript
+gui.remove("channelA", callback);
+```
+
+And you can remove a callback function from all channels
+
+```javascript
+gui.remove(callback);
+```
+
+Or remove all subscriptions from a channel:
+
+```javascript
+gui.remove("channelName");
+```
+
+## Extendable
+
+### Plugin & jQuery Plugins
+
+Plugins can extend the <GUI> core or the sandbox with additional features.
+For example you could extend the core with basic functionalities
+(like DOM manipulation) or just aliases the features of the base jQuery library.
+
+To create a plugin and start extending both the core and or sandbox <GUI> has the `use` method which accepts a function and returns an object with the `load` function and the optional `unload` function similar to the `create` method.
+
+```javascript
+$.GUI().use(function(core) {
+    // extend the core
+    core.myNewMethod = function() {
+        // do something new
+    }
+
+    return {
+        load: function(sandbox) {
+            // extend sandbox api
+            sandbox.myNewPlugin = function() {
+
+            }
+
+            sandbox.anotherObject = {};
+        },
+        unload: function() {}
+    }
+});
+```
+
+<GUI> lets you easily write your own jQuery plugins and attach them to the jQuery namespace easily with the `fn` method.
+
+```javascript
+$.GUI().create("jQueryPlugin", function(gui) {
+
+    function scrollPlugin() {}
+
+    scrollPlugin.prototype.init = function($el, opts) {
+        window.scrollTo($el);
+    };
+
+    return {
+        // attach to jQuery namespace
+        fn: function($el, options) {
+            // init plugin here
+            return new scrollPlugin($el, options);
+        }
+    };
+}).start("jQueryPlugin");
+
+```
+
+## Features
+
++ multiple browser support
++ full access to jQuery
++ extendable with plugins
++ easy to add jQuery plugins
++ flow control
++ [AMD](https://en.wikipedia.org/wiki/Asynchronous_module_definition) & [CommonJS](http://www.commonjs.org/) support
++ framework-agnostic
++ jquery easing included
+
+Some of the current <gui> api features.
+
+- `dom` - DOM manipulation and `event` handling
+- `mvc` - MVC - `model`, `view`, `controller`
+- `ui` - Special features like `charm` and `media`
+- `net` - Supplies a `router` for your modules
+- `lang` - Additional native type (`Array`, `Object`, etc) helper functions
+- `utils` - Helper methods like `mixin`, `throttle`, `slugify` etc.
+- `run` - Object with Flow Control methods such as `series`, `parallel` and more
+- `cellar` - Easy to use storage api for `localStorage` and `sessionStorage`
+
+# Download
+
+- [guerrilla_js.zip](https://github.com/FearDread/guerrilla_js/archive/master.zip)
+
+## Build process ##
+###  Uses Grunt CLI to concat, uglify and minify src/ libraries.
+
+``` bash
+# To run the build process simply add any new src file paths.
+# Then run
+grunt build -v
+
+```
+
+## License ##
+Copyright © 2014 Garrett Haptonstall (@FearDread)  
+Licensed under the MIT [license](https://github.com/FearDread/guerrilla_js/blob/master/LICENSE).
+
+...
+
+## About Author ##
+Garrett Haptonstall [(@FearDread)](https://github.com/FearDread)
+
+### Social
+  - [Facebook](https://www.facebook.com/ghaptonstall)
+  - [Twitter](https://twitter.com/G_HAP)
+  - [Instagram](https://instagram.com#/ghap205)
+
+### Technolegy Used
+  - [jQuery](http://jquery.org)
+  - [jQuery UI](http://jqueryui.com)
+  - [Animate.css](https://daneden.github.io/animate.css/)
+  - [Bootstrap](http://getbootstrap.com)
