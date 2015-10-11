@@ -120,6 +120,7 @@
     <!-- Network -->
     <script src='../src/modules/network/router.js'></script>
     <!-- UI -->
+    <script src='../src/modules/ui/easing.js'></script>
     <script src='../src/modules/ui/media.js'></script>
     <script src='../src/modules/ui/charm.js'></script>
     <!-- Lang -->
@@ -153,6 +154,7 @@
           return {
               load: function(options) {
                   print();
+                  console.log('easing? ', $.easing);
               },
               unload: function(){}
           }
