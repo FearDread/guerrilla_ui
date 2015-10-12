@@ -97,28 +97,29 @@ $.GUI().create('App', function(gui) {
 
     return {
         load: function() {
-            //jQuery to collapse the navbar on scroll
-            $(window).scroll(function() {
-                if ($(".navbar").offset().top > 50) {
-
-                    $(".navbar-fixed-top").addClass("top-nav-collapse");
-                } else {
-                    $(".navbar-fixed-top").removeClass("top-nav-collapse");
-                }
-            });
-
-            $('a.page-scroll').bind('click', function(e) {
-                var $anchor = $(this);
-
-                $('html, body').stop().animate({
-                    scrollTop: $($anchor.attr('href')).offset().top
-                }, 1500, 'easeInOutExpo');
-                
-                e.preventDefault();
-            });
 
             gui.timeout(function() {
                 $('.preloader').fadeOut(300);
+
+                $(window).scroll(function() {
+                    var $nav = $('.navbar-fixed-top');
+
+                    if ($(".navbar").offset().top > 500) {
+                        $nav.slideDown();
+                    } else {
+                        $nav.slideUp();
+                    }
+                });
+
+                $('a.page-scroll').bind('click', function(e) {
+                    var $anchor = $(this);
+
+                    $('html, body').stop().animate({
+                        scrollTop: $($anchor.attr('href')).offset().top
+                    }, 1500, 'easeInOutExpo');
+                    
+                    e.preventDefault();
+                });
 
                 _load();
             }, 1500);

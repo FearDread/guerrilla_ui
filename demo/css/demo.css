@@ -48,7 +48,8 @@ canvas {
 }
 
 .topnav {
-    opacity: 0.55;
+    display: none;
+    opacity: 0.95;
     font-size: 14px; 
     color: #1f1e25;
     background: #000;
