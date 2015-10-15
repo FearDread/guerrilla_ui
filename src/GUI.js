@@ -62,7 +62,7 @@ GUI = (function($) {
         this.attach = function(imports) {
             console.log('dynamic asyn module loading.');
             console.log('imports = ', imports);
-        }
+        };
     }
 
     // console log wrapper
