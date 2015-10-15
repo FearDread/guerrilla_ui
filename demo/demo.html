@@ -254,7 +254,11 @@
 
     <script type='text/javascript'>
       // basic module with start 
-      $.GUI().create('moduleA', function(gui) {
+      $.GUI([
+          'dependency1',
+          'dependency2'
+      ])
+      .create('moduleA', function(gui) {
           gui.log('module A sandbox :: ', gui);
 
           var el = gui.$('.btn');
@@ -279,8 +283,8 @@
           mode: 'single',
           animated: true,
           instanceId: 'instance2'
-
-      }).create('moduleB', function(gui) {
+      })
+      .create('moduleB', function(gui) {
           gui.log('module B sandbox :: ', gui);
           gui.log('config object available in sandbox :: ', gui.config);
 
@@ -320,7 +324,8 @@
               },
               unload: function(){}
           };
-      }).start('moduleC', {
+      })
+      .start('moduleC', {
           instanceId: 'Instance 2',
           options: {
               myProp: 'some property',

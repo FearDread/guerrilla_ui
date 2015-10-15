@@ -9,11 +9,18 @@
 
     $.GUI = function() {
         var argc = [].slice.call(arguments),
-            options = (argc[0] instanceof Object) ? argc[0] : null,
+            options = argc[0] || null;
             app = $G;
 
         if (options && options !== null) {
-            app.configure(options);
+
+            if (utils.isArr(options)) {
+                
+                app.attach(options);
+            } else if (utils.isObj(options)) {
+                
+                app.configure(options);
+            }
         }
 
         return app;

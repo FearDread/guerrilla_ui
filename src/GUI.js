@@ -28,9 +28,9 @@ GUI = (function($) {
             /* Logging verbosity */
             logLevel: 0,
             /* Single page app or Multiple page site */
-            mode: 'single',
+            mode: 'multi',
             /* GUI library version */
-            version: '0.1.3',
+            version: '0.4.7',
             jquery: true,
             animations: false
         };
@@ -53,10 +53,16 @@ GUI = (function($) {
         this._instances = {};
         this._sandboxes = {};
         this._running = {};
+        this._imports = [];
 
         // add broker to core object
         this._broker = new Broker(this);
         this.Broker = Broker;
+
+        this.attach = function(imports) {
+            console.log('dynamic asyn module loading.');
+            console.log('imports = ', imports);
+        }
     }
 
     // console log wrapper

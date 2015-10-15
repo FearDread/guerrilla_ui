@@ -1,17 +1,17 @@
 /* --------------------------------------- *
 * Guerrilla UI                             *
-* @module: WeakMap, basic key value map store  * 
+* @module: Map, basic key value map store  * 
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
 
-    var WeakMap = this.WeakMap || this.MozWeakMap || (WeakMap = (function() {
+    var Map = this.Map || this.MozMap || (Map = (function() {
 
-        function WeakMap() {
+        function Map() {
             this.keys = [];
             this.values = [];
         }
 
-        WeakMap.prototype.get = function(key) {
+        Map.prototype.get = function(key) {
             var i, item, j, ref;
 
             ref = this.keys;
@@ -26,7 +26,7 @@ $.GUI().use(function(gui) {
             }
         };
 
-        WeakMap.prototype.set = function(key, value) {
+        Map.prototype.set = function(key, value) {
             var i, item, j, ref;
 
             ref = this.keys;
@@ -44,7 +44,7 @@ $.GUI().use(function(gui) {
             return this.values.push(value);
         };
 
-        return WeakMap;
+        return Map;
 
     })());
 
@@ -52,7 +52,7 @@ $.GUI().use(function(gui) {
 
         load: function(api) {
 
-          api.dom.map = new WeakMap();
+          api.dom.map = new Map();
         },
         unload: function() {}
     };
