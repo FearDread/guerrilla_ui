@@ -1,4 +1,7 @@
-
+/* --------------------------------------- *
+* Gurilla JS                               *
+* @module: Grunt jsDocs3 task              * 
+* ---------------------------------------- */
 module.exports = function(grunt) {
 
     grunt.config(['jsdoc'], {
