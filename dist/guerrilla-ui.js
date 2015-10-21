@@ -1227,9 +1227,9 @@ GUI = (function($) {
             /* Logging verbosity */
             logLevel: 0,
             /* Single page app or Multiple page site */
-            mode: 'single',
+            mode: 'multi',
             /* GUI library version */
-            version: '0.1.3',
+            version: '0.4.7',
             jquery: true,
             animations: false
         };
@@ -1252,10 +1252,16 @@ GUI = (function($) {
         this._instances = {};
         this._sandboxes = {};
         this._running = {};
+        this._imports = [];
 
         // add broker to core object
         this._broker = new Broker(this);
         this.Broker = Broker;
+
+        this.attach = function(imports) {
+            console.log('dynamic asyn module loading.');
+            console.log('imports = ', imports);
+        };
     }
 
     // console log wrapper
@@ -1861,11 +1867,18 @@ GUI = (function($) {
 
     $.GUI = function() {
         var argc = [].slice.call(arguments),
-            options = (argc[0] instanceof Object) ? argc[0] : null,
+            options = argc[0] || null;
             app = $G;
 
         if (options && options !== null) {
-            app.configure(options);
+
+            if (utils.isArr(options)) {
+                
+                app.attach(options);
+            } else if (utils.isObj(options)) {
+                
+                app.configure(options);
+            }
         }
 
         return app;
@@ -1885,18 +1898,18 @@ GUI = (function($) {
 })(jQuery);
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
-* @module: WeakMap, basic key value map store  * 
+* @module: Map, basic key value map store  * 
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
 
-    var WeakMap = this.WeakMap || this.MozWeakMap || (WeakMap = (function() {
+    var Map = this.Map || this.MozMap || (Map = (function() {
 
-        function WeakMap() {
+        function Map() {
             this.keys = [];
             this.values = [];
         }
 
-        WeakMap.prototype.get = function(key) {
+        Map.prototype.get = function(key) {
             var i, item, j, ref;
 
             ref = this.keys;
@@ -1911,7 +1924,7 @@ $.GUI().use(function(gui) {
             }
         };
 
-        WeakMap.prototype.set = function(key, value) {
+        Map.prototype.set = function(key, value) {
             var i, item, j, ref;
 
             ref = this.keys;
@@ -1929,7 +1942,7 @@ $.GUI().use(function(gui) {
             return this.values.push(value);
         };
 
-        return WeakMap;
+        return Map;
 
     })());
 
@@ -1937,7 +1950,7 @@ $.GUI().use(function(gui) {
 
         load: function(api) {
 
-          api.dom.map = new WeakMap();
+          api.dom.map = new Map();
         },
         unload: function() {}
     };
@@ -3093,7 +3106,7 @@ $.GUI().use(function(gui) {
                     for (length = ref.length; i < length; i++) {
                         box = ref[i];
 
-                        if (indexOf.call(this.all, box) < 0) {
+                        if (api.Array.index.call(this.all, box) < 0) {
                             this.boxes.push(box);
                             this.all.push(box);
 
