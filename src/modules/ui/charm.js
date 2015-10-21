@@ -221,7 +221,7 @@ $.GUI().use(function(gui) {
                     for (length = ref.length; i < length; i++) {
                         box = ref[i];
 
-                        if (indexOf.call(this.all, box) < 0) {
+                        if (api.Array.index.call(this.all, box) < 0) {
                             this.boxes.push(box);
                             this.all.push(box);
 
