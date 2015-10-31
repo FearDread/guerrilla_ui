@@ -277,7 +277,7 @@ GUI = (function($) {
     GUI.prototype.use = function(plugin, opt) {
         var i, len, p;
 
-        if (plugin instanceof Array) {
+        if (utils.isArr(plugin)) {
 
             for (i = 0, len = plugin.length; i < len; i++) {
                 p = plugin[i];
