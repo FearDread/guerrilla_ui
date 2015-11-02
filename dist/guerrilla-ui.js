@@ -8,8 +8,57 @@ utils = {
     /* jQuery $.extend pointer */
     merge: $.extend,
 
-    /* jQuery $.each pointer */
-    each: $.each,
+    each: function (obj, iterator, context) {
+        var key, length, isPrimitive;
+
+        if (obj) {
+            if (isFunction(obj)) {
+
+                for (key in obj) {
+                    if (key != 'prototype' && key != 'length' && key != 'name' && (!obj.hasOwnProperty || obj.hasOwnProperty(key))) {
+                        iterator.call(context, obj[key], key, obj);
+                    }
+                }
+            } else if (isArray(obj) || isArrayLike(obj)) {
+                isPrimitive = typeof obj !== 'object';
+
+                for (key = 0, length = obj.length; key < length; key++) {
+                    if (isPrimitive || key in obj) {
+
+                        iterator.call(context, obj[key], key, obj);
+                    }
+                }
+
+            } else if (obj.forEach && obj.forEach !== forEach) {
+
+                obj.forEach(iterator, context, obj);
+
+            } else if (isBlankObject(obj)) {
+                for (key in obj) {
+
+                    iterator.call(context, obj[key], key, obj);
+                }
+
+            } else if (typeof obj.hasOwnProperty === 'function') {
+
+                for (key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+
+                        iterator.call(context, obj[key], key, obj);
+                    }
+                }
+            } else {
+                for (key in obj) {
+                    if (hasOwnProperty.call(obj, key)) {
+
+                        iterator.call(context, obj[key], key, obj);
+                    }
+                }
+            }
+        }
+
+        return obj;
+    },
 
     /* Array.prototype.slice */
     slice: [].slice,
@@ -1476,7 +1525,7 @@ GUI = (function($) {
     GUI.prototype.use = function(plugin, opt) {
         var i, len, p;
 
-        if (plugin instanceof Array) {
+        if (utils.isArr(plugin)) {
 
             for (i = 0, len = plugin.length; i < len; i++) {
                 p = plugin[i];
