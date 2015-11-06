@@ -417,3 +417,4 @@ Garrett Haptonstall [(@FearDread)](https://github.com/FearDread)
   - [jQuery UI](http://jqueryui.com)
   - [Animate.css](https://daneden.github.io/animate.css/)
   - [Bootstrap](http://getbootstrap.com)
+
