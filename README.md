@@ -9,7 +9,7 @@ Guerrilla UI, <GUI>, a scalable, maintainable, extendable framework that lets yo
 
 Guerrilla UI was inspired by [Articles](http://www.ubelly.com/2011/11/scalablejs/) and talks given by Nicholas Zakas which can be seen here ["Scalable JavaScript Application Architecture"](https://www.youtube.com/watch?v=vXjVFPosQHw) or with this [Slideshow](http://www.slideshare.net/nzakas/scalable-javascript-application-architecture).
 
-The GUI architecture is designed to make DOM manipulation, event handling, animations, extensability and networking even simpler.  With [jQuery](https://jquery.com) being its base library <GUI> takes the write less and do more philosiphy another step forward.
+The GUI architecture is designed to make DOM manipulation, event handling, animations, extensability and networking even simpler.  With [jQuery](https://jquery.com) being its base library Guerrilla UI takes the write less and do more philosiphy another step forward.
 
 ## Contributing
 Guerrilla UI is now open for contributions and looking for javascript programmers to help expand the default sandbox api!  Email author FearDread (ghaptonstall@gmail.com) or message via github to get in touch and become a part of this amazing project!  Once in contact, contribution guidlines will be given and explained.
@@ -27,7 +27,7 @@ git clone --depth 1 https://github.com/FearDread/guerrilla_js.git
 mv guerrilla_js my-branch 
 
 ```
-Link `guerrilla-ui.js` or `guerrilla-ui.min.js` in your HTML file (make sure to include latest version of jQuery as its required by GUI):
+Link `guerrilla-ui.js` or `guerrilla-ui.min.js` in your HTML file (make sure to include latest version of jQuery as its required by Guerrilla UI):
 
 ```html
 <script src="/js/jquery.min.js"></script>
@@ -38,7 +38,7 @@ Link `guerrilla-ui.js` or `guerrilla-ui.min.js` in your HTML file (make sure to 
 ```
 
 # How It all Works #
-GUI implements many [javascript patterns](http://shichuan.github.io/javascript-patterns/) focusing on jQuery and jQuery plugin patterns. 
+Guerrilla UI implements many [javascript patterns](http://shichuan.github.io/javascript-patterns/) focusing on jQuery and jQuery plugin patterns. 
 
 ## Create a new module
 A module is a completely independent part of your application.
@@ -149,7 +149,7 @@ $.GUI()
 
 ### Various Start Options
 
-With <GUI> you can start multiple instances of the same module using `instanceId`:
+With Guerrilla UI you can start multiple instances of the same module using `instanceId`:
 
 ```javascript
 $.GUI().start("moduleA", {instanceId: "moduleInstanceA"});
@@ -313,11 +313,11 @@ gui.remove("channelName");
 
 ### Plugin & jQuery Plugins
 
-Plugins can extend the <GUI> core or the sandbox with additional features.
+Plugins can extend the Guerrilla UI core or the sandbox with additional features.
 For example you could extend the core with basic functionalities
 (like DOM manipulation) or just aliases the features of the base jQuery library.
 
-To create a plugin and start extending both the core and or sandbox <GUI> has the `use` method which accepts a function and returns an object with the `load` function and the optional `unload` function similar to the `create` method.
+To create a plugin and start extending both the core and or sandbox, Guerrilla UI has the `use` method which accepts a function and returns an object with the `load` function and the optional `unload` function similar to the `create` method.
 
 ```javascript
 $.GUI().use(function(core) {
@@ -340,7 +340,7 @@ $.GUI().use(function(core) {
 });
 ```
 
-<GUI> lets you easily write your own jQuery plugins and attach them to the jQuery namespace easily with the `fn` method.
+Guerrilla UI lets you easily write your own jQuery plugins and attach them to the jQuery namespace easily with the `fn` method.
 
 ```javascript
 $.GUI().create("jQueryPlugin", function(gui) {
