@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/FearDread/guerrilla_ui.svg?branch=master)](https://travis-ci.org/FearDread/guerrilla_ui) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/) [![MIT License](https://img.shields.io/packagist/l/doctrine/orm.svg)](LICENSE)
 Guerrilla JS jQuery Framework
 =============================
-Guerrilla UI, <GUI>, a scalable, maintainable, extendable framework that lets you write even less and do even more! 
+Guerrilla UI, GUI, a scalable, maintainable, extendable framework that lets you write even less and do even more! 
 
 > It's The perfect framework for Multiple page Websites and [Single Page Applications.](http://en.wikipedia.org/wiki/Single-page_application)  Missing something you need?  GUI lets you extend the core and sandbox objects which can then be used in any of your modules or plugins.  Dynamically start, stop, load and unload modules that act as small parts of your whole application. 
 
@@ -122,7 +122,7 @@ $.GUI().create("asyncModule", asyncModule)
 ```
 
 ### Guerrilla API 
-The <GUI> Sandbox API comes with alot of capabilities out of the box.  It uses the [faccade pattern](https://en.wikipedia.org/wiki/Facade_pattern).  That way you can hide the features provided by the core and only show a well defined custom static long term API to your modules.
+The Guerrilla UI Sandbox API comes with alot of capabilities out of the box.  It uses the [faccade pattern](https://en.wikipedia.org/wiki/Facade_pattern).  That way you can hide the features provided by the core and only show a well defined custom static long term API to your modules.
 
 > This is actually one of the most important concepts for creating
 mainainable applications.
@@ -373,7 +373,7 @@ $.GUI().create("jQueryPlugin", function(gui) {
 + framework-agnostic
 + jquery easing included
 
-Some of the current <gui> api features.
+Some of the current Guerrilla UI api features.
 
 - `dom` - DOM manipulation and `event` handling
 - `mvc` - MVC - `model`, `view`, `controller`
