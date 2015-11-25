@@ -100,6 +100,7 @@ $.GUI().create('App', function(gui) {
 
             gui.timeout(function() {
                 $('.preloader').fadeOut(300);
+                $('html').niceScroll({styler:'fb', cursorcolor:"#FFF"});
 
                 $(window).scroll(function() {
                     var $nav = $('.navbar-fixed-top');
