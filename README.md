@@ -5,6 +5,11 @@ Guerrilla UI, GUI, a scalable, maintainable, extendable framework that lets you 
 
 > It's The perfect framework for Multiple page Websites and [Single Page Applications.](http://en.wikipedia.org/wiki/Single-page_application)  Missing something you need?  GUI lets you extend the core and sandbox objects which can then be used in any of your modules or plugins.  Dynamically start, stop, load and unload modules that act as small parts of your whole application. 
 
+## Comming Soon
+-- Safer module name spacing
+-- Dynamic dependency loading via Ajax, this way only core is loaded unless dependencies called
+-- Better Model / View functionality with basic two way data binding
+
 ## Overview
 
 Guerrilla UI was inspired by [Articles](http://www.ubelly.com/2011/11/scalablejs/) and talks given by Nicholas Zakas which can be seen here ["Scalable JavaScript Application Architecture"](https://www.youtube.com/watch?v=vXjVFPosQHw) or with this [Slideshow](http://www.slideshare.net/nzakas/scalable-javascript-application-architecture).
