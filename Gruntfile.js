@@ -16,11 +16,12 @@ module.exports = function(grunt){
             },
             dist: {
                 src: [
-                    'src/utils.js',
-                    'src/broker.js',
-                    'src/api.js',
-                    'src/GUI.js',
-                    'src/plugin.js',
+                    'src/core/utils.js',
+                    'src/core/broker.js',
+                    'src/core/api.js',
+                    'src/core/core.js',
+                    'src/core/plugin.js',
+                    /*
                     'src/modules/dom/map.js',
                     'src/modules/dom/event.js',
                     'src/modules/mvc/model.js',
@@ -40,6 +41,7 @@ module.exports = function(grunt){
                     'src/plugins/layers.js',
                     'src/plugins/stargaze.js',
                     'src/plugins/misty.js',
+                    */
                 ],
                 dest: 'dist/<%= pkg.name %>.js'
              }
