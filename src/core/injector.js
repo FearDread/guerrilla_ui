@@ -36,10 +36,10 @@ Injector = {
 
             for(i = 0; i < deps.length; i++) {
                 dep = deps[i];
-                args.push(($this.dependencies[dep] && dep != '') ? $this.dependencies[dep] : argc.shift());
+                args.push(($this.dependencies[dep] && dep !== '') ? $this.dependencies[dep] : argc.shift());
             }
 
             func.apply(scope || {}, args);
-        } 
+        };
     }
 };
