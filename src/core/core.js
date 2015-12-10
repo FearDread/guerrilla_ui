@@ -13,7 +13,7 @@ var GUI;
  **/
 
 // GUI Core
-GUI = (function($) {
+GUI = (function ($) {
 
     // Make sure we have jQuery
     if (typeof $ === 'undefined' || $ === null) {
@@ -36,8 +36,11 @@ GUI = (function($) {
             animations: false
         };
 
+        this.injector = Injector;
+        this.binder = new Binder();
+
         // ability to pass optional config object
-        this.configure = function(options) {
+        this.configure = function (options) {
 
             if (options !== null && utils.isObj(options)) {
                 // set custom config options
@@ -54,7 +57,7 @@ GUI = (function($) {
         this._instances = {};
         this._sandboxes = {};
         this._running = {};
-        this._imports = [];
+        this._dependencies = {};
 
         // add broker to core object
         this._broker = new Broker(this);
@@ -225,10 +228,10 @@ GUI = (function($) {
             return this._fail(new Error("module was already started"), cb);
         }
 
-        initInst = (function(_this) {
+        initInst = (function($this) {
             return function(err, instance, opt) {
                 if (err) {
-                    return _this._fail(err, cb);
+                    return $this._fail(err, cb);
                 }
 
                 try {
@@ -236,7 +239,7 @@ GUI = (function($) {
                         return instance.load(opt, function(err) {
 
                             if (!err) {
-                                _this._running[id] = true;
+                                $this._running[id] = true;
                             }
 
                             return cb(err);
@@ -244,26 +247,27 @@ GUI = (function($) {
                     } else {
 
                         instance.load(opt);
-                        _this._running[id] = true;
+                        $this._running[id] = true;
 
                         return cb();
                     }
                 } catch (_error) {
                     e = _error;
-                    return _this._fail(e, cb);
+
+                    return $this._fail(e, cb);
                 }
             };
         })(this);
 
-        return this.boot((function(_this) {
+        return this.boot((function ($this) {
 
-            return function(err) {
+            return function (err) {
 
                 if (err) {
-                    return _this._fail(err, cb);
+                    return $this._fail(err, cb);
                 }
 
-                return _this._createInstance(moduleId, opt, initInst);
+                return $this._createInstance(moduleId, opt, initInst);
             };
         })(this));
     };
@@ -333,9 +337,9 @@ GUI = (function($) {
 
                 return results;
 
-            }).call(this), ((function(_this) {
+            }).call(this), ((function($this) {
                 return function() {
-                    return _this.stop.apply(_this, arguments);
+                    return $this.stop.apply($this, arguments);
                 };
             })(this)), id, true);
 
@@ -348,12 +352,12 @@ GUI = (function($) {
             this._broker.off(instance);
 
             // run unload method in stopped modules
-            this._runSandboxPlugins('unload', this._sandboxes[id], (function(_this) {
+            this._runSandboxPlugins('unload', this._sandboxes[id], (function($this) {
                 return function(err) {
                     if (utils.hasArgs(instance.unload)) {
 
                         return instance.unload(function(err2) {
-                            delete _this._running[id];
+                            delete $this._running[id];
 
                             return cb(err || err2);
                         });
@@ -363,7 +367,7 @@ GUI = (function($) {
                             instance.unload();
                         }
 
-                        delete _this._running[id];
+                        delete $this._running[id];
 
                         return cb(err);
                     }
@@ -382,7 +386,7 @@ GUI = (function($) {
      * @return {function} - initialized jQuery plugin 
     **/
     GUI.prototype.plugin = function(plugin, module) {
-        var _this = this;
+        var $this = this;
 
         if (plugin.fn && utils.isFunc(plugin.fn)) { 
 
@@ -495,9 +499,9 @@ GUI = (function($) {
         }
 
         // self executing action
-        startAction = (function(_this) {
+        startAction = (function($this) {
             return function(m, next) {
-                return _this.start(m, _this._modules[m].options, next);
+                return $this.start(m, $this._modules[m].options, next);
             };
         })(this);
 
@@ -586,7 +590,7 @@ GUI = (function($) {
         }
 
         // run sandboxed instance load method
-        return this._runSandboxPlugins('load', sb, (function(_this) {
+        return this._runSandboxPlugins('load', sb, (function($this) {
             return function(err) {
                 var instance;
 
@@ -596,15 +600,15 @@ GUI = (function($) {
 
                     // determine if module is jQuery plugin
                     if (instance.fn && typeof instance.fn === 'function') {
-                        return _this.plugin(instance, id); 
+                        return $this.plugin(instance, id); 
                     }
 
                     return cb(new Error("module has no 'load' or 'fn' method"));
                 }
 
                 // store instance and sandbox
-                _this._instances[id] = instance;
-                _this._sandboxes[id] = sb;
+                $this._instances[id] = instance;
+                $this._sandboxes[id] = sb;
 
                 return cb(null, instance, iOpts);
             };
