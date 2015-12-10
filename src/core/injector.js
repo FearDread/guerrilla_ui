@@ -1,7 +1,9 @@
-
-
-/* jshint ignore:start*/
-var Injector, funcRegx = /^function\s*[^\(]*\(\s*([^\)]*)\)/; 
+/* --------------------------------------- *
+* Guerrilla UI                             *
+* @module: Injector dependency injection   * 
+* via AMD and function based telemetry     * 
+* ---------------------------------------- */
+var Injector;
 
 Injector = {
     /* Injector dependencies */
@@ -23,18 +25,18 @@ Injector = {
 
         } else {
             func = arguments[0];
-            deps = func.toString().match(funcRegx)[1].replace(/ /g, '').split(',');
+            deps = func.toString().match(utils.fnRgx)[1].replace(/ /g, '').split(',');
             scope = arguments[1] || {};
         }
 
         return function() {
-            var argc, dep;
+            var i, argc, dep;
 
-            argc = Array.prototype.slice.call(arguments, 0);
+            argc = utils.slice.call(arguments, 0);
 
-            for(var i=0; i<deps.length; i++) {
+            for(i = 0; i < deps.length; i++) {
                 dep = deps[i];
-                args.push($this.dependencies[dep] && dep != '' ? $this.dependencies[dep] : argc.shift());
+                args.push(($this.dependencies[dep] && dep != '') ? $this.dependencies[dep] : argc.shift());
             }
 
             func.apply(scope || {}, args);

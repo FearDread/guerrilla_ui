@@ -12,7 +12,7 @@ utils = {
         var key, length, isPrimitive;
 
         if (obj) {
-            if (isFunction(obj)) {
+            if (this.isFunc(obj)) {
 
                 for (key in obj) {
                     if (key != 'prototype' && key != 'length' && key != 'name' && (!obj.hasOwnProperty || obj.hasOwnProperty(key))) {
@@ -61,7 +61,7 @@ utils = {
     },
 
     /* Array.prototype.slice */
-    slice: [].slice,
+    slice: Array.prototype.slice,
 
     /**
      * Attach child object prototype to parent object prototype 
@@ -99,7 +99,7 @@ utils = {
     argRgx: /([^\s,]+)/g,
 
     /* Shorthand reference to Object.prototype.hasOwnProperty */
-    hasProp: {}.hasOwnProperty,
+    hasProp: Object.prototype.hasOwnProperty,
 
     /**
      * Check number of arguments passed to function / method
@@ -198,7 +198,7 @@ utils = {
 
         for (key in obj) {
 
-            if (obj.hasOwnProperty(key)) {
+            if (this.hasProp.call(key)) {
                 total += 1;
             }
         }
