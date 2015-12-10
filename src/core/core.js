@@ -6,8 +6,9 @@
 var GUI;
 
 /** 
+ * @todo - add two way / single data binding logic feature
  * @todo - add default config that will change behavior of GUI core 
- * @todo - add custom config logic to apply customization options 
+ * @tood - load modules via dependency injection, built framework should only contain core objects
  * @todo - allow async dependency loading to keep framework light - loads modules / plugins only when called via dependency array
  **/
 
