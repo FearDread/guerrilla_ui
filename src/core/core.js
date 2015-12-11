@@ -279,7 +279,7 @@ GUI = (function ($) {
      * @param opt {object} - optional options object to be accessed in plugin 
      * @return this {object}
     **/
-    GUI.prototype.use = function(plugin, opt) {
+    GUI.prototype.use = function (plugin, opt) {
         var i, len, p;
 
         if (utils.isArr(plugin)) {
