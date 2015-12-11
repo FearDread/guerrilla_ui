@@ -3,6 +3,9 @@
 * @module: Object extended helper methods  * 
 * ---------------------------------------- */
 $.GUI().use(function(gui) {
+    var Native;
+
+    Native = Object.prototype;
 
     return {
 
@@ -41,11 +44,16 @@ $.GUI().use(function(gui) {
                 }
             };
 
+            api.Object.keys = Native.keys || function (obj) {
+                var len = obj.length;
+
+            };
+
             /* Shorthand call to jQuery isPlainObject */
-            api.Object.isPlain = $.isPlainObject;
+            api.Object.isPlain = api.utils.isPlain;
 
             /* Shorthand call to jQuery isEmptyObject */
-            api.Object.isEmpty = $.isEmptyObject;
+            api.Object.isEmpty = api.utils.isEmpty;
 
             /**
              * Shorthand method to the native hasOwnProperty call 
@@ -67,11 +75,15 @@ $.GUI().use(function(gui) {
              * @returns {boolean} Whether or not subset is a subset of set
             **/
             api.Object.subset = function(subset, set, compare) {
+                var prop;
+
                 compare = compare || {};
 
-                for (var prop in set) {
-                    if (!same(subset[prop], set[prop], compare[prop], subset, set)) {
-                        return false;
+                for (prop in set) {
+                    if (api.Object.has(set, prop)) {
+                        if (!same(subset[prop], set[prop], compare[prop], subset, set)) {
+                            return false;
+                        }
                     }
                 }
 
@@ -86,18 +98,21 @@ $.GUI().use(function(gui) {
              * @param {object} compare
              * @return {object}
             **/
-            api.Object.subsets = function(check, sets, compare) {
-                var len = sets.length,
-                        subsets = [];
-                for (var i = 0; i < len; i++) {
-                        //check this subset
-                        var set = sets[i];
-                        if (can.Object.subset(checkSet, set, compares)) {
-                                subsets.push(set);
-                        }
-                }
-                return subsets;
+            api.Object.subsets = function (check, sets, compare) {
+                var i, set,
+                    len = sets.length,
+                    subsets = [];
 
+                for (i = 0; i < len; i++) {
+                    //check this subset
+                    set = sets[i];
+
+                    if (api.Object.subset(check, set, compares)) {
+                        subsets.push(set);
+                    }
+                }
+
+                return subsets;
             };
 
             /**
@@ -110,7 +125,7 @@ $.GUI().use(function(gui) {
             api.Object.limit = function(obj, limit) {
                 var _ret, keys, count;
 
-                keys = Object.keys(obj);
+                keys = Native.keys(obj);
 
                 if (keys.length < 1) return [];
 
