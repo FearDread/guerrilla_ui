@@ -27,7 +27,7 @@ Broker = (function() {
     };
 
     Broker.prototype.add = function(channel, fn, context) {
-        var subscription, _this = this;
+        var subscription, $this = this;
 
         if (!context || context === null) {
             context = this;
@@ -45,11 +45,11 @@ Broker = (function() {
       
         return {
             listen: function() {
-                _this.channels[channel].push(subscription);
+                $this.channels[channel].push(subscription);
                 return this;
             },
             ignore: function() {
-                _this.remove(channel);
+                $this.remove(channel);
                 return this;
             }
         }.listen();
