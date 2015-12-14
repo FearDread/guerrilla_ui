@@ -2,7 +2,7 @@
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
 * @module: GUI Core                        * 
-* ---------------------------------------- */
+* ---------------------------------------- *
 var GUI;
 
 /** 
