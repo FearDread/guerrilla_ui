@@ -10,56 +10,13 @@ utils = {
      *
      *
     **/
-    each: function (obj, iterator, context) {
-        var key, length, isPrimitive;
+    each: function (subject, fn) {
+        var length, i;
 
-        if (obj) {
-            if (this.isFunc(obj)) {
+        for (i = 0; i < length; i++) {
 
-                for (key in obj) {
-                    if (key != 'prototype' && key != 'length' && key != 'name' && (!obj.hasOwnProperty || obj.hasOwnProperty(key))) {
-                        iterator.call(context, obj[key], key, obj);
-                    }
-                }
-            } else if (this.isArr(obj)) {
-                isPrimitive = typeof obj !== 'object';
-
-                for (key = 0, length = obj.length; key < length; key++) {
-                    if (isPrimitive || key in obj) {
-
-                        iterator.call(context, obj[key], key, obj);
-                    }
-                }
-
-            } else if (obj.forEach && obj.forEach !== forEach) {
-
-                obj.forEach(iterator, context, obj);
-
-            } else if (this.isEmpty(obj)) {
-                for (key in obj) {
-
-                    iterator.call(context, obj[key], key, obj);
-                }
-
-            } else if (typeof obj.hasOwnProperty === 'function') {
-
-                for (key in obj) {
-                    if (obj.hasOwnProperty(key)) {
-
-                        iterator.call(context, obj[key], key, obj);
-                    }
-                }
-            } else {
-                for (key in obj) {
-                    if (this.hasProp.call(obj, key)) {
-
-                        iterator.call(context, obj[key], key, obj);
-                    }
-                }
-            }
+            fn(subject[i], i, subject);
         }
-
-        return obj;
     },
 
     /** 
