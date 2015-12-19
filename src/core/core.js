@@ -228,15 +228,15 @@ GUI = (function ($) {
             return this._fail(new Error("module was already started"), cb);
         }
 
-        initInst = (function($this) {
-            return function(err, instance, opt) {
+        initInst = (function ($this) {
+            return function (err, instance, opt) {
                 if (err) {
                     return $this._fail(err, cb);
                 }
 
                 try {
                     if (utils.hasArgs(instance.load, 2)) {
-                        return instance.load(opt, function(err) {
+                        return instance.load(opt, function (err) {
 
                             if (!err) {
                                 $this._running[id] = true;
@@ -320,15 +320,15 @@ GUI = (function ($) {
      * @param callback {function} - optional callback to run when module stopped
      * @return this {object}
     **/
-    GUI.prototype.stop = function(id, callback) {
+    GUI.prototype.stop = function (id, callback) {
         var instance;
 
         if (cb === null) {
-            cb = function() {};
+            cb = function () {};
         }
 
         if (arguments.length === 0 || typeof id === "function") {
-            utils.run.all((function() {
+            utils.run.all((function () {
                 var results = [], x;
 
                 for (x in this._instances) {
@@ -337,8 +337,8 @@ GUI = (function ($) {
 
                 return results;
 
-            }).call(this), ((function($this) {
-                return function() {
+            }).call(this), ((function ($this) {
+                return function () {
                     return $this.stop.apply($this, arguments);
                 };
             })(this)), id, true);
@@ -352,11 +352,11 @@ GUI = (function ($) {
             this._broker.off(instance);
 
             // run unload method in stopped modules
-            this._runSandboxPlugins('unload', this._sandboxes[id], (function($this) {
-                return function(err) {
+            this._runSandboxPlugins('unload', this._sandboxes[id], (function ($this) {
+                return function (err) {
                     if (utils.hasArgs(instance.unload)) {
 
-                        return instance.unload(function(err2) {
+                        return instance.unload(function (err2) {
                             delete $this._running[id];
 
                             return cb(err || err2);
@@ -385,12 +385,12 @@ GUI = (function ($) {
      * @param module {string} - identifier for jQuery plugin 
      * @return {function} - initialized jQuery plugin 
     **/
-    GUI.prototype.plugin = function(plugin, module) {
+    GUI.prototype.plugin = function (plugin, module) {
         var $this = this;
 
         if (plugin.fn && utils.isFunc(plugin.fn)) { 
 
-            $.fn[module.toLowerCase()] = function(options) {
+            $.fn[module.toLowerCase()] = function (options) {
 
                 return new plugin.fn(this, options);
             };
