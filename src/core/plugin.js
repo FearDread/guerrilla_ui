@@ -15,8 +15,9 @@
         if (options && options !== null) {
 
             if (utils.isArr(options)) {
-                
-                app.attach(options);
+
+                app.injector.register(arguments);
+
             } else if (utils.isObj(options)) {
                 
                 app.configure(options);

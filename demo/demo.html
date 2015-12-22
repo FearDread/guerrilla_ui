@@ -220,11 +220,14 @@
     <!-- nice scroll -->
     <script src='../libs/nice-scroll/jquery.nicescroll.js'></script>
     <!-- GUI -->
-    <script src='../src/utils.js'></script>
-    <script src='../src/broker.js'></script>
-    <script src='../src/api.js'></script>
-    <script src='../src/GUI.js'></script>
-    <script src='../src/plugin.js'></script>
+    <script src='../src/core/modules/utils/utils.js'></script>
+    <script src='../src/core/modules/utils/runner.js'></script>
+    <script src='../src/core/broker.js'></script>
+    <script src='../src/core/modules/injector/injector.js'></script>
+    <script src='../src/core/modules/binder/binder.js'></script>
+    <script src='../src/core/modules/sandbox/api.js'></script>
+    <script src='../src/core/core.js'></script>
+    <script src='../src/core/plugin.js'></script>
     <!-- DOM -->
     <script src='../src/modules/dom/map.js'></script>
     <script src='../src/modules/dom/event.js'></script>
@@ -239,23 +242,22 @@
     <script src='../src/modules/ui/media.js'></script>
     <script src='../src/modules/ui/charm.js'></script>
     <!-- Lang -->
-    <script src='../src/modules/lang/lang.js'></script>
-    <script src='../src/modules/lang/array.js'></script>
-    <script src='../src/modules/lang/object.js'></script>
-    <script src='../src/modules/lang/function.js'></script>
+    <script src='../src/core/modules/lang/lang.js'></script>
+    <script src='../src/core/modules/lang/array.js'></script>
+    <script src='../src/core/modules/lang/object.js'></script>
+    <script src='../src/core/modules/lang/function.js'></script>
     <!-- Utils -->
     <script src='../src/modules/util/cellar.js'></script>
     <script src='../src/modules/util/cookie.js'></script>
     <!-- Plugins -->
-    <script src='../src/plugins/background.js'></script>
-    <script src='../src/plugins/layers.js'></script>
-    <script src='../src/plugins/stargaze.js'></script>
-    <script src='../src/plugins/misty.js'></script>
+    <script src='../src/plugins/jquery/background.js'></script>
+    <script src='../src/plugins/jquery/layers.js'></script>
+    <script src='../src/plugins/jquery/stargaze.js'></script>
+    <script src='../src/plugins/jquery/misty.js'></script>
     <!-- Demo App -->
     <script src='js/demo.js'></script>
 
     <script type='text/javascript'>
-      /*
       // basic module with start 
       $.GUI([
           'dependency1',
@@ -342,7 +344,6 @@
 
       // start instance of all modules
       $.GUI().start(['moduleA','moduleB']);
-      */
 
       // starting new dependency injectoin and loading of library files.
       // so only core is actually compiled into distro and any extra library is loaded dynamically and only when asked for
