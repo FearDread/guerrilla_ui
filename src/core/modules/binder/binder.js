@@ -36,7 +36,7 @@ Binder = (function (global, utils) {
 
         var length = this.length;
 
-        {}.defineProperty(this, 'length', {
+        Object.defineProperty(this, 'length', {
             configurable: false, // don't allow it to be deleted
             enumerable: true,
             set: function (v) {
@@ -69,34 +69,40 @@ Binder = (function (global, utils) {
         return this;
     }
 
-  function __export(target, object) {
-    if (!(object instanceof Object)) {
-      return object; // this is a primative
-    }
+    function __export(target, object) {
+        if (!(object instanceof Object)) {
+            return object; // this is a primative
+        }
 
-    forEach(Object.getOwnPropertyNames(object), function (key) {
-      var value = object[key];
+        utils.each(Object.getOwnPropertyNames(object), function (key) {
+            var value = object[key];
 
-      // ignore properties on the prototype (pretty sure there's a better way)
-      if (Bind.prototype[key] || key === '__callback') {
-        return;
-      }
+            // ignore properties on the prototype (pretty sure there's a better way)
+            if (Binder.prototype[key] || key === '__callback') {
+                return;
+            }
 
-      if (typeof value === o && value !== null && value instanceof Array) {
-        target[key] = [].map.call(value, function (value) {
-          return value instanceof Object ?
-            __export(target[key] || {}, value) :
-            value;
+            if (typeof value === o && value !== null && value instanceof Array) {
+
+                target[key] = [].map.call(value, function (value) {
+
+                    return value instanceof Object ?
+                        __export(target[key] || {}, value) :
+                        value;
+                });
+
+            } else if (typeof value === o && value !== null && !isArray(value)) {
+
+                target[key] = __export(target[key] || {}, value);
+
+            } else {
+
+                target[key] = value;
+            }
         });
-      } else if (typeof value === o && value !== null && !isArray(value)) {
-        target[key] = __export(target[key] || {}, value);
-      } else {
-        target[key] = value;
-      }
-    });
 
-    return target;
-  }
+        return target;
+    }
 
     function Binder (obj, mapping) {
         if (!this || this === global) {
@@ -135,5 +141,3 @@ Binder = (function (global, utils) {
     return Binder;
 
 })(this, utils);
-
-
