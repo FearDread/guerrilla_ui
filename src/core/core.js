@@ -22,6 +22,7 @@ GUI = (function ($) {
 
     // GUI Constructor
     function GUI() {
+	var $this = this;
 
         // default config
         this.config = {
@@ -43,6 +44,7 @@ GUI = (function ($) {
         this.configure = function (options) {
 
             if (options !== null && utils.isObj(options)) {
+		
                 // set custom config options
                 this.config = utils.merge(this.config, options);
 
@@ -63,7 +65,7 @@ GUI = (function ($) {
         this._broker = new Broker(this);
         this.Broker = Broker;
 
-        this.attach = function(imports) {
+        this.attach = function (imports) {
             console.log('dynamic asyn module loading.');
             console.log('imports = ', imports);
         };
