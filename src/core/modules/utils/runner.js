@@ -6,7 +6,7 @@
 
 var GRun, utils = utils || {};
 
-GRun = utils.run = {};
+utils.run = {};
 
 /**
 * Run all modules one after another 
@@ -14,7 +14,7 @@ GRun = utils.run = {};
 * @param args {array} - arguments list 
 * @return void
 **/
-GRun.all = function (args, fn, cb, force) {
+utils.run.all = function (args, fn, cb, force) {
     var a, tasks;
 
     if (!args || args === null) {
@@ -49,7 +49,7 @@ GRun.all = function (args, fn, cb, force) {
 * @param args {array} - arguments list 
 * @return void
 **/
-Grun.parallel = function (tasks, cb, force) {
+utils.run.parallel = function (tasks, cb, force) {
     var count, errors, hasErr, i, j, len, results, paralleled, task;
 
     if (!tasks || tasks === null) {
@@ -125,7 +125,7 @@ Grun.parallel = function (tasks, cb, force) {
 * @param args {array} - arguments list 
 * @return void
 **/
-GRun.series = function (tasks, cb, force) {
+utils.run.series = function (tasks, cb, force) {
     var count, errors, hasErr, i, next, results;
 
     if (!tasks || tasks === null) {
@@ -195,7 +195,7 @@ GRun.series = function (tasks, cb, force) {
 * @param force {boolean} - optional force errors
 * @return {function} execute 
 **/
-GRun.first = function (tasks, cb, force) {
+utils.run.first = function (tasks, cb, force) {
     var count, errors, i, next, result;
 
     if (!tasks || tasks === null) {
@@ -264,7 +264,7 @@ GRun.first = function (tasks, cb, force) {
 * @param args {array} - arguments list 
 * @return void
 **/
-GRun.waterfall = function (tasks, cb) {
+utils.run.waterfall = function (tasks, cb) {
     var i, next;
 
     i = -1;

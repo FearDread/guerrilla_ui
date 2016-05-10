@@ -117,7 +117,7 @@ Binder = (function (global, utils) {
             instance: this,
         };
 
-        utils.extend(this, obj, settings);
+        utils.merge(this, obj, settings);
 
         // allow object updates to happen now, otherwise we end up iterating the
         // setter & getter methods, which causes multiple callbacks to run
