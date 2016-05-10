@@ -2,9 +2,9 @@
 * Guerrilla UI                             *
 * @module: GUI Star jQuery plugin          * 
 * ---------------------------------------- */
-$.GUI().create('Stargaze', function(gui) {
+$.GUI().create('Stargaze', function (gui) {
 
-    var Stargaze = function(canvas, options) {
+    var Stargaze = function (canvas, options) {
 
         var $canvas = gui.$(canvas) || null,
             context = (canvas) ? canvas.getContext('2d') : null,
@@ -31,7 +31,7 @@ $.GUI().create('Stargaze', function(gui) {
             },
             config = $.extend(true, {}, defaults, options);
 
-        function Star (){
+        function Star () {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
 
@@ -43,23 +43,23 @@ $.GUI().create('Stargaze', function(gui) {
 
         Star.prototype = {
 
-            create: function(){
+            create: function () {
                 context.beginPath();
                 context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
                 context.fill();
             },
 
-            animate: function(){
+            animate: function () {
                 var i;
 
-                for(i = 0; i < config.length; i++){
+                for (i = 0; i < config.length; i++) {
                     var star = config.stars[i];
 
-                    if(star.y < 0 || star.y > canvas.height){
+                    if (star.y < 0 || star.y > canvas.height) {
                         star.vx = star.vx;
                         star.vy = - star.vy;
 
-                    }else if (star.x < 0 || star.x > canvas.width){
+                    } else if (star.x < 0 || star.x > canvas.width) {
                         star.vx = - star.vx;
                         star.vy = star.vy;
                     }
@@ -67,17 +67,19 @@ $.GUI().create('Stargaze', function(gui) {
                     star.x += star.vx;
                     star.y += star.vy;
                 }
+
             },
 
-            line:function(){
+            line: function () {
                 var length = config.length,
                     iStar,
                     jStar,
                     i,
                     j;
 
-                for(i = 0; i < length; i++){
-                    for(j = 0; j < length; j++){
+                for (i = 0; i < length; i++) {
+
+                    for (j = 0; j < length; j++) {
                         iStar = config.stars[i];
                         jStar = config.stars[j];
 
@@ -99,13 +101,18 @@ $.GUI().create('Stargaze', function(gui) {
                                 context.stroke();
                                 context.closePath();
                             }
+
                         }
+
                     }
+
                 }
+
             }
+
         };
 
-        this.createStars = function(){
+        this.createStars = function() {
             var length = config.length,
                 star, i;
 
@@ -122,18 +129,18 @@ $.GUI().create('Stargaze', function(gui) {
             star.animate();
         };
 
-        this.setCanvas = function(){
+        this.setCanvas = function() {
             canvas.width = config.width;
             canvas.height = config.height;
         };
 
-        this.setContext = function(){
+        this.setContext = function() {
             context.fillStyle = config.star.color;
             context.strokeStyle = config.line.color;
             context.lineWidth = config.line.width;
         };
 
-        this.setInitialPosition = function(){
+        this.setInitialPosition = function() {
             if(!options || !options.hasOwnProperty('position')){
                 config.position = {
                     x: canvas.width * 0.5,
@@ -142,7 +149,7 @@ $.GUI().create('Stargaze', function(gui) {
             }
         };
 
-        this.loop = function(callback){
+        this.loop = function (callback) {
             callback();
 
             window.requestAnimationFrame(function(){
@@ -150,26 +157,30 @@ $.GUI().create('Stargaze', function(gui) {
             }.bind(this));
         };
 
-        this.bind = function(){
+        this.bind = function () {
             $(document).on('mousemove', function(e){
                 config.position.x = e.pageX - $canvas.offset().left;
                 config.position.y = e.pageY - $canvas.offset().top;
             });
         };
 
-        this.init = function(){
+        this.init = function () {
             this.setCanvas();
             this.setContext();
             this.setInitialPosition();
             this.loop(this.createStars);
             this.bind();
         };
+
     };
 
     return {
+
         fn: function($el, options) {
 
             return new Stargaze($el[0], options).init();
         },
+
     };
+
 }).start('Stargaze');
