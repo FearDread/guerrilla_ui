@@ -11,9 +11,11 @@ module.exports = function(grunt){
     grunt.initConfig({
         pkg:grunt.file.readJSON('package.json'),
         concat: {
+
             options: {
                 separator: ';'
             },
+
             dist: {
                 src: [
                     'src/core/modules/utils/utils.js',
@@ -45,6 +47,7 @@ module.exports = function(grunt){
                 dest: 'dist/<%= pkg.name %>.js'
              }
         },
+
         uglify: {
             options: {
                 preserveComments: false,
@@ -54,8 +57,11 @@ module.exports = function(grunt){
                 files: {
                     'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
                 }
+
             }
+
         }
+
     });
 
     // load external tasks
@@ -65,4 +71,5 @@ module.exports = function(grunt){
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
     grunt.registerTask('build', ['test', 'concat','uglify']);
+
 };
