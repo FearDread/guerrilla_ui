@@ -5,63 +5,43 @@
 var utils;
 
 utils = {
-    /* jQuery $.extend pointer */
-    merge: $.extend,
 
-    each: function (obj, iterator, context) {
-        var key, length, isPrimitive;
+    /** 
+     *
+     *
+    **/
+    each: function (subject, fn) {
+        var length, i;
 
-        if (obj) {
-            if (isFunction(obj)) {
+        for (i = 0; i < length; i++) {
 
-                for (key in obj) {
-                    if (key != 'prototype' && key != 'length' && key != 'name' && (!obj.hasOwnProperty || obj.hasOwnProperty(key))) {
-                        iterator.call(context, obj[key], key, obj);
-                    }
-                }
-            } else if (isArray(obj) || isArrayLike(obj)) {
-                isPrimitive = typeof obj !== 'object';
-
-                for (key = 0, length = obj.length; key < length; key++) {
-                    if (isPrimitive || key in obj) {
-
-                        iterator.call(context, obj[key], key, obj);
-                    }
-                }
-
-            } else if (obj.forEach && obj.forEach !== forEach) {
-
-                obj.forEach(iterator, context, obj);
-
-            } else if (isBlankObject(obj)) {
-                for (key in obj) {
-
-                    iterator.call(context, obj[key], key, obj);
-                }
-
-            } else if (typeof obj.hasOwnProperty === 'function') {
-
-                for (key in obj) {
-                    if (obj.hasOwnProperty(key)) {
-
-                        iterator.call(context, obj[key], key, obj);
-                    }
-                }
-            } else {
-                for (key in obj) {
-                    if (hasOwnProperty.call(obj, key)) {
-
-                        iterator.call(context, obj[key], key, obj);
-                    }
-                }
-            }
+            fn(subject[i], i, subject);
         }
 
-        return obj;
     },
 
-    /* Array.prototype.slice */
-    slice: [].slice,
+    /** 
+     *
+     *
+    **/
+    merge: function () {
+        var i, key;
+
+        for (i = 1; i < arguments.length; i++) {
+            
+            for (key in arguments[i]) {
+
+                if (arguments[i].hasOwnProperty(key)) {
+
+                    arguments[0][key] = arguments[i][key];
+                }
+
+            }
+
+        }
+
+        return arguments[0];
+    },
 
     /**
      * Attach child object prototype to parent object prototype 
@@ -92,14 +72,54 @@ utils = {
         return child;
     },
 
+    /**
+    * Copy an Array or Object and return new instance 
+    *
+    * @param data {various} - the array / object to clone (copy) 
+    * @return copy {various} - the new array / object 
+    **/
+    clone: function(data) {
+        var copy, k, v;
+
+        if (data instanceof Array) {
+
+            copy = (function() {
+                var i, len, results;
+
+                results = [];
+                for (i = 0, len = data.length; i < len; i++) {
+  
+                    v = data[i];
+                    results.push(v);
+                }
+
+                return results;
+
+            })();
+
+        } else {
+            copy = {};
+
+            for (k in data) {
+                v = data[k];
+                copy[k] = v;
+            }
+        }
+
+        return copy;
+    },
+
     /* Function Regex */
     fnRgx: /function[^(]*\(([^)]*)\)/,
 
     /* Argument Regex */
     argRgx: /([^\s,]+)/g,
+    
+    /* Array.prototype.slice */
+    slice: Array.prototype.slice,
 
     /* Shorthand reference to Object.prototype.hasOwnProperty */
-    hasProp: {}.hasOwnProperty,
+    hasProp: Object.prototype.hasOwnProperty,
 
     /**
      * Check number of arguments passed to function / method
@@ -115,6 +135,22 @@ utils = {
 
         return this.args(fn).length >= idx;
     },
+
+    /**
+    * Check if passed object is empty 
+    *
+    * @param obj {object} - object to check
+    * @return boolean
+    **/
+    isEmpty: $.isEmptyObject,
+
+    /**
+    * Check if passed object is empty 
+    *
+    * @param obj {object} - object to check
+    * @return boolean
+    **/
+    isPlain: $.isPlainObject,
 
     /**
     * Check if passed object is instance of Object
@@ -198,7 +234,7 @@ utils = {
 
         for (key in obj) {
 
-            if (obj.hasOwnProperty(key)) {
+            if (this.hasProp.call(key)) {
                 total += 1;
             }
         }
@@ -293,333 +329,6 @@ utils = {
     },
 
     /* Run methods for async loading of modules and plugins */
-    run: {
-
-        /**
-        * Run all modules one after another 
-        *
-        * @param args {array} - arguments list 
-        * @return void
-        **/
-        all: function(args, fn, cb, force) {
-            var a, tasks;
-
-            if (!args || args === null) {
-                args = [];
-            }
-
-            tasks = (function() {
-                var j, len, results1;
-
-                results1 = [];
-
-                for (j = 0, len = args.length; j < len; j++) {
-                    a = args[j];
-
-                    results1.push((function(a) {
-                        return function(next) {
-                            return fn(a, next);
-                        };
-                    })(a));
-                }
-
-                return results1;
-
-            })();
-
-            return this.parallel(tasks, cb, force);
-        },
-
-        /**
-        * Run asynchronous tasks in parallel 
-        *
-        * @param args {array} - arguments list 
-        * @return void
-        **/
-        parallel: function(tasks, cb, force) {
-            var count, errors, hasErr, i, j, len, results, paralleled, task;
-
-            if (!tasks || tasks === null) {
-
-                tasks = [];
-
-            }else if (!cb || cb === null) {
-
-                cb = (function() {});
-            }
-
-            count = tasks.length;
-            results = [];
-
-            if (count === 0) {
-                return cb(null, results);
-            }
-
-            errors = [];
-
-            hasErr = false;
-            paralleled = [];
-
-            for (i = j = 0, len = tasks.length; j < len; i = ++j) {
-                task = tasks[i];
-
-                paralleled.push((function(t, idx) {
-                    var e, next;
-
-                    next = function() {
-                        var err, res;
-
-                        err = arguments[0];
-                        res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
-
-                        if (err) {
-                            errors[idx] = err;
-                            hasErr = true;
-
-                            if (!force) {
-                                return cb(errors, results);
-                            }
-                        } else {
-                            results[idx] = res.length < 2 ? res[0] : res;
-                        }
-
-                        if (--count <= 0) {
-                            if (hasErr) {
-                                return cb(errors, results);
-                            } else {
-                                return cb(null, results);
-                            }
-                        }
-                    };
-
-                    try {
-
-                        return t(next);
-
-                    } catch (_error) {
-                        e = _error;
-                        return next(e);
-                    }
-                })(task, i));
-            }
-
-            return paralleled;
-        },
-
-        /**
-        * Run asynchronous tasks one after another 
-        *
-        * @param args {array} - arguments list 
-        * @return void
-        **/
-        series: function(tasks, cb, force) {
-            var count, errors, hasErr, i, next, results;
-
-            if (!tasks || tasks === null) {
-                tasks = [];
-            }
-            if (!cb || cb === null) {
-                cb = (function() {});
-            }
-
-            i = -1;
-
-            count = tasks.length;
-            results = [];
-
-            if (count === 0) {
-                return cb(null, results);
-            }
-
-            errors = [];
-            hasErr = false;
-
-            next = function() {
-                var e, err, res;
-
-                err = arguments[0];
-                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
-
-                if (err) {
-                    errors[i] = err;
-                    hasErr = true;
-
-                    if (!force) {
-                        return cb(errors, results);
-                    }
-                } else {
-                    if (i > -1) {
-                        results[i] = res.length < 2 ? res[0] : res;
-                    }
-                }
-
-                if (++i >= count) {
-
-                    if (hasErr) {
-                        return cb(errors, results);
-                    } else {
-                        return cb(null, results);
-                    }
-                } else {
-
-                    try {
-                        return tasks[i](next);
-                    } catch (_error) {
-                        e = _error;
-                        return next(e);
-                    }
-                }
-            };
-
-            return next();
-        },
-
-        /**
-        * Run first task, which does not return an error 
-        *
-        * @param tasks {array} - tasks list 
-        * @param cb {function} - callback method
-        * @param force {boolean} - optional force errors
-        * @return {function} execute 
-        **/
-        first: function(tasks, cb, force) {
-            var count, errors, i, next, result;
-
-            if (!tasks || tasks === null) {
-                tasks = [];
-            }
-            if (!cb || cb === null) {
-                cb = (function() {});
-            }
-
-            i = -1;
-
-            count = tasks.length;
-            result = null;
-
-            if (!count || count === 0) {
-                return cb(null);
-            }
-
-            errors = [];
-
-            next = function() {
-                var e, err, res;
-
-                err = arguments[0];
-                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
-
-                if (err) {
-                    errors[i] = err;
-
-                    if (!force) {
-                        return cb(errors);
-                    }
-                } else {
-
-                    if (i > -1) {
-
-                        return cb(null, res.length < 2 ? res[0] : res);
-                    }
-                }
-
-                if (++i >= count) {
-
-                    return cb(errors);
-
-                } else {
-
-                    try {
-
-                        return tasks[i](next);
-
-                    } catch (_error) {
-
-                        e = _error;
-                        return next(e);
-                    }
-                }
-            };
-
-            return next();
-        },
-
-        /**
-        * Run asynchronous tasks one after another
-        * and pass the argument
-        *
-        * @param args {array} - arguments list 
-        * @return void
-        **/
-        waterfall: function(tasks, cb) {
-            var i, next;
-
-            i = -1;
-
-            if (tasks.length === 0) {
-                return cb();
-            }
-
-            next = function() {
-                var err, res;
-
-                err = arguments[0];
-                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
-
-                if (err !== null) {
-                    return cb(err);
-                }
-
-                if (++i >= tasks.length) {
-
-                    return cb.apply(null, [null].concat(utils.slice.call(res)));
-
-                } else {
-
-                    return tasks[i].apply(tasks, utils.slice.call(res).concat([next]));
-                }
-            };
-
-            return next();
-        }
-    },
-
-    /**
-    * Copy an Array or Object and return new instance 
-    *
-    * @param data {various} - the array / object to clone (copy) 
-    * @return copy {various} - the new array / object 
-    **/
-    clone: function(data) {
-        var copy, k, v;
-
-        if (data instanceof Array) {
-
-            copy = (function() {
-                var i, len, results;
-
-                results = [];
-                for (i = 0, len = data.length; i < len; i++) {
-  
-                    v = data[i];
-                    results.push(v);
-                }
-
-                return results;
-
-            })();
-
-        } else {
-            copy = {};
-
-            for (k in data) {
-                v = data[k];
-                copy[k] = v;
-            }
-        }
-
-        return copy;
-    },
 
     /**
     * Compute passed value to em 
@@ -744,6 +453,303 @@ utils = {
 };
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
+* @module: Task Runner Utility methods for *
+* all modules                              * 
+* ---------------------------------------- */
+
+var GRun, utils = utils || {};
+
+utils.run = {};
+
+/**
+* Run all modules one after another 
+*
+* @param args {array} - arguments list 
+* @return void
+**/
+utils.run.all = function (args, fn, cb, force) {
+    var a, tasks;
+
+    if (!args || args === null) {
+        args = [];
+    }
+
+    tasks = (function() {
+        var j, len, results1;
+
+        results1 = [];
+
+        for (j = 0, len = args.length; j < len; j++) {
+            a = args[j];
+
+            results1.push((function(a) {
+                return function(next) {
+                    return fn(a, next);
+                };
+            })(a));
+        }
+
+        return results1;
+
+    })();
+
+    return this.parallel(tasks, cb, force);
+};
+
+/**
+* Run asynchronous tasks in parallel 
+*
+* @param args {array} - arguments list 
+* @return void
+**/
+utils.run.parallel = function (tasks, cb, force) {
+    var count, errors, hasErr, i, j, len, results, paralleled, task;
+
+    if (!tasks || tasks === null) {
+
+        tasks = [];
+
+    }else if (!cb || cb === null) {
+
+        cb = (function() {});
+    }
+
+    count = tasks.length;
+    results = [];
+
+    if (count === 0) {
+        return cb(null, results);
+    }
+
+    errors = [];
+
+    hasErr = false;
+    paralleled = [];
+
+    for (i = j = 0, len = tasks.length; j < len; i = ++j) {
+        task = tasks[i];
+
+        paralleled.push((function(t, idx) {
+            var e, next;
+
+            next = function() {
+                var err, res;
+
+                err = arguments[0];
+                res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+
+                if (err) {
+                    errors[idx] = err;
+                    hasErr = true;
+
+                    if (!force) {
+                        return cb(errors, results);
+                    }
+                } else {
+                    results[idx] = res.length < 2 ? res[0] : res;
+                }
+
+                if (--count <= 0) {
+                    if (hasErr) {
+                        return cb(errors, results);
+                    } else {
+                        return cb(null, results);
+                    }
+                }
+            };
+
+            try {
+
+                return t(next);
+
+            } catch (_error) {
+                e = _error;
+                return next(e);
+            }
+        })(task, i));
+    }
+
+    return paralleled;
+};
+
+/**
+* Run asynchronous tasks one after another 
+*
+* @param args {array} - arguments list 
+* @return void
+**/
+utils.run.series = function (tasks, cb, force) {
+    var count, errors, hasErr, i, next, results;
+
+    if (!tasks || tasks === null) {
+        tasks = [];
+    }
+    if (!cb || cb === null) {
+        cb = (function() {});
+    }
+
+    i = -1;
+
+    count = tasks.length;
+    results = [];
+
+    if (count === 0) {
+        return cb(null, results);
+    }
+
+    errors = [];
+    hasErr = false;
+
+    next = function() {
+        var e, err, res;
+
+        err = arguments[0];
+        res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+
+        if (err) {
+            errors[i] = err;
+            hasErr = true;
+
+            if (!force) {
+                return cb(errors, results);
+            }
+        } else {
+            if (i > -1) {
+                results[i] = res.length < 2 ? res[0] : res;
+            }
+        }
+
+        if (++i >= count) {
+
+            if (hasErr) {
+                return cb(errors, results);
+            } else {
+                return cb(null, results);
+            }
+        } else {
+
+            try {
+                return tasks[i](next);
+            } catch (_error) {
+                e = _error;
+                return next(e);
+            }
+        }
+    };
+
+    return next();
+};
+
+/**
+* Run first task, which does not return an error 
+*
+* @param tasks {array} - tasks list 
+* @param cb {function} - callback method
+* @param force {boolean} - optional force errors
+* @return {function} execute 
+**/
+utils.run.first = function (tasks, cb, force) {
+    var count, errors, i, next, result;
+
+    if (!tasks || tasks === null) {
+        tasks = [];
+    }
+    if (!cb || cb === null) {
+        cb = (function() {});
+    }
+
+    i = -1;
+
+    count = tasks.length;
+    result = null;
+
+    if (!count || count === 0) {
+        return cb(null);
+    }
+
+    errors = [];
+
+    next = function() {
+        var e, err, res;
+
+        err = arguments[0];
+        res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+
+        if (err) {
+            errors[i] = err;
+
+            if (!force) {
+                return cb(errors);
+            }
+        } else {
+
+            if (i > -1) {
+
+                return cb(null, res.length < 2 ? res[0] : res);
+            }
+        }
+
+        if (++i >= count) {
+
+            return cb(errors);
+
+        } else {
+
+            try {
+
+                return tasks[i](next);
+
+            } catch (_error) {
+
+                e = _error;
+                return next(e);
+            }
+        }
+    };
+
+    return next();
+};
+
+/**
+* Run asynchronous tasks one after another
+* and pass the argument
+*
+* @param args {array} - arguments list 
+* @return void
+**/
+utils.run.waterfall = function (tasks, cb) {
+    var i, next;
+
+    i = -1;
+
+    if (tasks.length === 0) {
+        return cb();
+    }
+
+    next = function() {
+        var err, res;
+
+        err = arguments[0];
+        res = (2 <= arguments.length) ? utils.slice.call(arguments, 1) : [];
+
+        if (err !== null) {
+            return cb(err);
+        }
+
+        if (++i >= tasks.length) {
+
+            return cb.apply(null, [null].concat(utils.slice.call(res)));
+
+        } else {
+
+            return tasks[i].apply(tasks, utils.slice.call(res).concat([next]));
+        }
+    };
+
+    return next();
+};
+;/* --------------------------------------- *
+* Guerrilla UI                             *
 * @module: Broker pub / sub implemntation  * 
 * ---------------------------------------- */
 var Broker;
@@ -771,7 +777,7 @@ Broker = (function() {
     };
 
     Broker.prototype.add = function(channel, fn, context) {
-        var subscription, _this = this;
+        var subscription, $this = this;
 
         if (!context || context === null) {
             context = this;
@@ -789,11 +795,11 @@ Broker = (function() {
       
         return {
             listen: function() {
-                _this.channels[channel].push(subscription);
+                $this.channels[channel].push(subscription);
                 return this;
             },
             ignore: function() {
-                _this.remove(channel);
+                $this.remove(channel);
                 return this;
             }
         }.listen();
@@ -1250,17 +1256,18 @@ API = function() {
 * Guerrilla UI                             *
 * @author: Garrett Haptonstall (FearDread) *
 * @module: GUI Core                        * 
-* ---------------------------------------- */
+* ---------------------------------------- *
 var GUI;
 
 /** 
+ * @todo - add two way / single data binding logic feature
  * @todo - add default config that will change behavior of GUI core 
- * @todo - add custom config logic to apply customization options 
+ * @tood - load modules via dependency injection, built framework should only contain core objects
  * @todo - allow async dependency loading to keep framework light - loads modules / plugins only when called via dependency array
  **/
 
 // GUI Core
-GUI = (function($) {
+GUI = (function ($) {
 
     // Make sure we have jQuery
     if (typeof $ === 'undefined' || $ === null) {
@@ -1269,6 +1276,7 @@ GUI = (function($) {
 
     // GUI Constructor
     function GUI() {
+	var $this = this;
 
         // default config
         this.config = {
@@ -1283,10 +1291,14 @@ GUI = (function($) {
             animations: false
         };
 
+        this.injector = Injector;
+        this.binder = new Binder();
+
         // ability to pass optional config object
-        this.configure = function(options) {
+        this.configure = function (options) {
 
             if (options !== null && utils.isObj(options)) {
+		
                 // set custom config options
                 this.config = utils.merge(this.config, options);
 
@@ -1301,13 +1313,13 @@ GUI = (function($) {
         this._instances = {};
         this._sandboxes = {};
         this._running = {};
-        this._imports = [];
+        this._dependencies = {};
 
         // add broker to core object
         this._broker = new Broker(this);
         this.Broker = Broker;
 
-        this.attach = function(imports) {
+        this.attach = function (imports) {
             console.log('dynamic asyn module loading.');
             console.log('imports = ', imports);
         };
@@ -1472,18 +1484,18 @@ GUI = (function($) {
             return this._fail(new Error("module was already started"), cb);
         }
 
-        initInst = (function(_this) {
-            return function(err, instance, opt) {
+        initInst = (function ($this) {
+            return function (err, instance, opt) {
                 if (err) {
-                    return _this._fail(err, cb);
+                    return $this._fail(err, cb);
                 }
 
                 try {
                     if (utils.hasArgs(instance.load, 2)) {
-                        return instance.load(opt, function(err) {
+                        return instance.load(opt, function (err) {
 
                             if (!err) {
-                                _this._running[id] = true;
+                                $this._running[id] = true;
                             }
 
                             return cb(err);
@@ -1491,26 +1503,27 @@ GUI = (function($) {
                     } else {
 
                         instance.load(opt);
-                        _this._running[id] = true;
+                        $this._running[id] = true;
 
                         return cb();
                     }
                 } catch (_error) {
                     e = _error;
-                    return _this._fail(e, cb);
+
+                    return $this._fail(e, cb);
                 }
             };
         })(this);
 
-        return this.boot((function(_this) {
+        return this.boot((function ($this) {
 
-            return function(err) {
+            return function (err) {
 
                 if (err) {
-                    return _this._fail(err, cb);
+                    return $this._fail(err, cb);
                 }
 
-                return _this._createInstance(moduleId, opt, initInst);
+                return $this._createInstance(moduleId, opt, initInst);
             };
         })(this));
     };
@@ -1522,7 +1535,7 @@ GUI = (function($) {
      * @param opt {object} - optional options object to be accessed in plugin 
      * @return this {object}
     **/
-    GUI.prototype.use = function(plugin, opt) {
+    GUI.prototype.use = function (plugin, opt) {
         var i, len, p;
 
         if (utils.isArr(plugin)) {
@@ -1563,15 +1576,15 @@ GUI = (function($) {
      * @param callback {function} - optional callback to run when module stopped
      * @return this {object}
     **/
-    GUI.prototype.stop = function(id, callback) {
+    GUI.prototype.stop = function (id, callback) {
         var instance;
 
         if (cb === null) {
-            cb = function() {};
+            cb = function () {};
         }
 
         if (arguments.length === 0 || typeof id === "function") {
-            utils.run.all((function() {
+            utils.run.all((function () {
                 var results = [], x;
 
                 for (x in this._instances) {
@@ -1580,9 +1593,9 @@ GUI = (function($) {
 
                 return results;
 
-            }).call(this), ((function(_this) {
-                return function() {
-                    return _this.stop.apply(_this, arguments);
+            }).call(this), ((function ($this) {
+                return function () {
+                    return $this.stop.apply($this, arguments);
                 };
             })(this)), id, true);
 
@@ -1595,12 +1608,12 @@ GUI = (function($) {
             this._broker.off(instance);
 
             // run unload method in stopped modules
-            this._runSandboxPlugins('unload', this._sandboxes[id], (function(_this) {
-                return function(err) {
+            this._runSandboxPlugins('unload', this._sandboxes[id], (function ($this) {
+                return function (err) {
                     if (utils.hasArgs(instance.unload)) {
 
-                        return instance.unload(function(err2) {
-                            delete _this._running[id];
+                        return instance.unload(function (err2) {
+                            delete $this._running[id];
 
                             return cb(err || err2);
                         });
@@ -1610,7 +1623,7 @@ GUI = (function($) {
                             instance.unload();
                         }
 
-                        delete _this._running[id];
+                        delete $this._running[id];
 
                         return cb(err);
                     }
@@ -1628,12 +1641,12 @@ GUI = (function($) {
      * @param module {string} - identifier for jQuery plugin 
      * @return {function} - initialized jQuery plugin 
     **/
-    GUI.prototype.plugin = function(plugin, module) {
-        var _this = this;
+    GUI.prototype.plugin = function (plugin, module) {
+        var $this = this;
 
         if (plugin.fn && utils.isFunc(plugin.fn)) { 
 
-            $.fn[module.toLowerCase()] = function(options) {
+            $.fn[module.toLowerCase()] = function (options) {
 
                 return new plugin.fn(this, options);
             };
@@ -1742,9 +1755,9 @@ GUI = (function($) {
         }
 
         // self executing action
-        startAction = (function(_this) {
+        startAction = (function($this) {
             return function(m, next) {
-                return _this.start(m, _this._modules[m].options, next);
+                return $this.start(m, $this._modules[m].options, next);
             };
         })(this);
 
@@ -1833,7 +1846,7 @@ GUI = (function($) {
         }
 
         // run sandboxed instance load method
-        return this._runSandboxPlugins('load', sb, (function(_this) {
+        return this._runSandboxPlugins('load', sb, (function($this) {
             return function(err) {
                 var instance;
 
@@ -1843,15 +1856,15 @@ GUI = (function($) {
 
                     // determine if module is jQuery plugin
                     if (instance.fn && typeof instance.fn === 'function') {
-                        return _this.plugin(instance, id); 
+                        return $this.plugin(instance, id); 
                     }
 
                     return cb(new Error("module has no 'load' or 'fn' method"));
                 }
 
                 // store instance and sandbox
-                _this._instances[id] = instance;
-                _this._sandboxes[id] = sb;
+                $this._instances[id] = instance;
+                $this._sandboxes[id] = sb;
 
                 return cb(null, instance, iOpts);
             };
@@ -1922,8 +1935,9 @@ GUI = (function($) {
         if (options && options !== null) {
 
             if (utils.isArr(options)) {
-                
-                app.attach(options);
+
+                app.injector.register(arguments);
+
             } else if (utils.isObj(options)) {
                 
                 app.configure(options);
@@ -3444,591 +3458,6 @@ $.GUI().use(function(gui) {
 });
 ;/* --------------------------------------- *
 * Guerrilla UI                             *
-* @module: Lang class extending native     * 
-* types with helper methods                * 
-* ---------------------------------------- */
-$.GUI().use(function(G) {
-
-    var strDash = /([a-z\d])([A-Z])/g,
-        strUndHash = /_|-/,
-        strQuote = /"/g,
-        strColons = /\=\=/,
-        strWords = /([A-Z]+)([A-Z][a-z])/g,
-        strLowUp = /([a-z\d])([A-Z])/g,
-        strReplacer = /\{([^\}]+)\}/g,
-        strSingleQuote = /'/g,
-        strHyphenMatch = /-+(.)?/g,
-        strCamelMatch = /[a-z][A-Z]/g;
-
-    function convert(content) {
-        var invalid;
-
-        // Convert bad values into empty strings
-        invalid = content === null || content === undefined || isNaN(content) && '' + content === 'NaN';
-
-        return '' + ((invalid) ? '' : content);
-    }
-
-    function isContainer(current) {
-        return /^f|^o/.test(typeof current);
-    }
-
-    function next(obj, prop, add) {
-        var result = obj[prop];
-
-        if (result === undefined && add === true) {
-
-            result = obj[prop] = {};
-        }
-
-        return result;
-    }
-
-    function _load(api) {
-
-        api.Lang = {
-
-            undHash: strUndHash,
-
-            replacer: strReplacer,
-
-            esc: function(content) {
-                return convert(content)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(strQuote, '&#34;')
-                    .replace(strSingleQuote, '&#39;');
-            },
-
-            encode:function(string){
-                return encodeURIComponent(string);
-            },
-
-            decode:function(string){
-                return decodeURIComponent(string);
-            },
-
-            getObj: function (name, roots, add) {
-                // The parts of the name we are looking up
-                var parts = name ? name.split('.') : [],
-                    length = parts.length,
-                    current, r = 0,
-                    i, par, rootsLength;
-
-                // Make sure roots is an `array`.
-                roots = utils.isArr(roots) ? roots : [roots || window];
-                rootsLength = roots.length;
-
-                if (!length) {
-                    return roots[0];
-                }
-
-                // For each root, mark it as current.
-                for (r; r < rootsLength; r++) {
-                    current = roots[r];
-                    par = undefined;
-
-                    // Walk current to the 2nd to last object or until there
-                    // is not a container.
-                    for (i = 0; i < length && isContainer(current); i++) {
-                        par = current;
-                        current = next(par, parts[i]);
-                    }
-
-                    // If we found property break cycle
-                    if (par !== undefined && current !== undefined) {
-                        break;
-                    }
-                }
-                // Remove property from found container
-                if (add === false && current !== undefined) {
-                    delete par[parts[i - 1]];
-                }
-                // When adding property add it to the first root
-                if (add === true && current === undefined) {
-                    current = roots[0];
-
-                    for (i = 0; i < length && isContainer(current); i++) {
-                        current = next(current, parts[i], true);
-                    }
-                }
-
-                return current;
-            },
-
-            capitalize: function (s, cache) {
-                // Used to make newId.
-                return s.charAt(0).toUpperCase() + s.slice(1);
-            },
-
-            camelize: function (str) {
-                return convert(str)
-                    .replace(strHyphenMatch, function (match, chr) {
-                        return chr ? chr.toUpperCase() : '';
-                    });
-            },
-
-            hyphenate: function (str) {
-                return convert(str)
-                    .replace(strCamelMatch, function (str, offset) {
-                        return str.charAt(0) + '-' + str.charAt(1)
-                            .toLowerCase();
-                        });
-            },
-
-            underscore: function (s) {
-                return s.replace(strColons, '/')
-                    .replace(strWords, '$1_$2')
-                    .replace(strLowUp, '$1_$2')
-                    .replace(strDash, '_')
-                    .toLowerCase();
-            },
-
-            sub: function (str, data, remove) {
-                var obs = [];
-
-                str = str || '';
-
-                obs.push(str.replace(strReplacer, function (whole, inside) {
-                    // Convert inside to type.
-                    var ob = this.getObj(inside, data, remove === true ? false : undefined);
-
-                    if (ob === undefined || ob === null) {
-                        obs = null;
-                        return '';
-                    }
-
-                    // If a container, push into objs (which will return objects found).
-                    if (isContainer(ob) && obs) {
-                        obs.push(ob);
-                        return '';
-                    }
-
-                    return '' + ob;
-
-                }));
-
-                return obs === null ? obs : obs.length <= 1 ? obs[0] : obs;
-            }
-        }; 
-    }
-
-    return {
-        load: _load 
-    };
-});
-;/* --------------------------------------- *
-* Guerrilla UI                             *
-* @module: Array extended helper methods   * 
-* ---------------------------------------- */
-$.GUI().use(function(G) {
-
-    return {
-
-        load: function(api) {
-
-            api.Array = [];
-
-            /* Shorthand call to jQuery isEmptyObject */
-            api.Array.isEmpty = $.isEmptyObject;
-
-            /**
-             * Create new array instance with passed array / object 
-             *
-             * @param arr {array} - array or object to create new instance from 
-             * @return {array} - new array instance 
-            **/
-            api.Array.create = function(arr) {
-                var _ret = [];
-
-                api.each(arr, function(property, index) {
-
-                    _ret[index] = property;
-
-                });
-
-                return _ret;
-            };
-
-            /**
-             * Fallback method of Array.prototype.indexOf 
-             *
-             * @param item {string} - string to check for in array 
-             * @return {number} - +1 for found, -1 for not found 
-            **/
-            api.Array.index = function(item) {
-                var i;
-
-                for (i = 0, i = this.length; i < 1; i++) {
-                    if (i in this && this[i] === item) {
-                        return i;
-                    }
-                }
-
-                return -1;
-            };
-
-            /**
-             * Determine if passed object has array like format 
-             *
-             * @param obj {object} - object to test format 
-             * @return boolean - typeof determination of array format 
-            **/
-            api.Array.isLike = function(obj) {
-                var length = "length" in obj && obj.length;
-
-                return typeof arr !== "function" && ( length === 0 || typeof length === "number" && length > 0 && ( length - 1 ) in obj );
-
-            };
-        }
-    };
-});
-;/* --------------------------------------- *
-* Guerrilla UI                             *
-* @module: Object extended helper methods  * 
-* ---------------------------------------- */
-$.GUI().use(function(gui) {
-
-    return {
-
-        load: function(api) {
-            
-            api.Object = {};
-
-            /**
-             * Get size of object via number of keys 
-             *
-             * @param obj {object} - the object to size
-             * @return total {number} - total number of keys
-            **/
-            api.Object.size = function(obj) {
-                return api.utils.getObjectSize(obj);
-            };
-
-            /**
-             * Compare methods used to compare two objects
-            **/
-            api.Object.compare = {
-                'null': function() {
-                    return true;
-                },
-                i: function(a, b) {
-                    return ('' + a).toLowerCase() === ('' + b).toLowerCase();
-                },
-                eq: function(a, b) {
-                    return a === b;
-                },
-                eqeq: function(a, b) {
-                    return a == b;
-                },
-                similar: function(a, b) {
-                    return a == b;
-                }
-            };
-
-            /* Shorthand call to jQuery isPlainObject */
-            api.Object.isPlain = $.isPlainObject;
-
-            /* Shorthand call to jQuery isEmptyObject */
-            api.Object.isEmpty = $.isEmptyObject;
-
-            /**
-             * Shorthand method to the native hasOwnProperty call 
-             * 
-             * @param obj {object} - the object to look through
-             * @param prop {string} - the property to check for
-             * @return {boolean}
-            **/
-            api.Object.has = function(obj, prop) {
-                return Object.hasOwnProperty.call(obj, prop);
-            };
-
-            /**
-             * Returns true if an Object is a subset of another Object
-             *
-             * @param {object} subset
-             * @param {object} set
-             * @param {object} compare
-             * @returns {boolean} Whether or not subset is a subset of set
-            **/
-            api.Object.subset = function(subset, set, compare) {
-                compare = compare || {};
-
-                for (var prop in set) {
-                    if (!same(subset[prop], set[prop], compare[prop], subset, set)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            };
-
-            /**
-             * Returns the sets in 'sets' that are a subset of checkSet
-             *
-             * @param {object} check
-             * @param {object} sets
-             * @param {object} compare
-             * @return {object}
-            **/
-            api.Object.subsets = function(check, sets, compare) {
-                var len = sets.length,
-                        subsets = [];
-                for (var i = 0; i < len; i++) {
-                        //check this subset
-                        var set = sets[i];
-                        if (can.Object.subset(checkSet, set, compares)) {
-                                subsets.push(set);
-                        }
-                }
-                return subsets;
-
-            };
-
-            /**
-             * Limit the number of keys that an object can have 
-             *
-             * @param obj {object} - the object to limit keys on
-             * @param limit {number} - how many keys obj is allowed
-             * @return {object}
-            **/
-            api.Object.limit = function(obj, limit) {
-                var _ret, keys, count;
-
-                keys = Object.keys(obj);
-
-                if (keys.length < 1) return [];
-
-                _ret = {};
-                count = 0;
-
-                api.each(keys, function(key, index) {
-                    if (count >= limit) {
-                        return false;
-                    }
-
-                    _ret[key] = obj[key];
-
-                    count += 1;
-                });
-
-                return _ret;
-            };
-
-            /**
-             * Checks if two objects are the same.
-             *
-             * @param {Object} a An object to compare against `b`.
-             * @param {Object} b An object to compare against `a`.
-             * @param {Object} [compares] An object that specifies how to compare properties.
-             * @return {boolean}
-            **/
-            api.Object.same = function(a, b, compares, aParent, bParent, deep) {
-                var i, bCopy, prop, aType = typeof a,
-                    aArray = api.utils.isArr(a),
-                    comparesType = typeof compares,
-                    compare;
-
-                if (api.utils.isStr(comparesType) || compares === null) {
-
-                    compares = this.compare[compares];
-                    comparesType = 'function';
-                }
-
-                if (api.utils.isFunc(comparesType)) {
-                    return compares(a, b, aParent, bParent);
-                }
-
-                compares = compares || {};
-
-                // run compare tests
-                if (a === null || b === null) {
-                    return a === b;
-                }
-                if (a instanceof Date || b instanceof Date) {
-                    return a === b;
-                }
-                if (deep === -1) {
-                    return aType === 'object' || a === b;
-                }
-                if (aType !== typeof b || aArray !== isArray(b)) {
-                    return false;
-                }
-                if (a === b) {
-                    return true;
-                }
-                if (aArray) {
-                    if (a.length !== b.length) {
-                        return false;
-                    }
-
-                    for (i = 0; i < a.length; i++) {
-                        compare = compares[i] === undefined ? compares['*'] : compares[i];
-
-                        if (!same(a[i], b[i], a, b, compare)) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-
-                } else if (api.utils.isObj(aType) || api.utils.isFunc(aType)) {
-                    // merge b obj with new object instance
-                    bCopy = api.utils.merge({}, b);
-
-                    for (prop in a) {
-                        compare = compares[prop] === undefined ? compares['*'] : compares[prop];
-
-                        if (!same(a[prop], b[prop], compare, a, b, deep === false ? -1 : undefined)) {
-
-                            return false;
-                        }
-
-                        delete bCopy[prop];
-                    }
-
-                    // go through bCopy props ... if there is no compare .. return false
-                    for (prop in bCopy) {
-
-                        if (compares[prop] === undefined || !same(undefined, b[prop], compares[prop], a, b, deep === false ? -1 : undefined)) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-
-                return false;
-            };
-        }
-    };
-});
-;/* --------------------------------------- *
-* Guerrilla UI                             *
-* @module: Function based utility methods  * 
-* ---------------------------------------- */
-$.GUI().use(function(G) {
-
-    return {
-
-        load: function(api) {
-
-            // Extend api object
-            api.utils.merge(api.utils, {
-
-                /**
-                 * Delay a functions execution by passed amount of time 
-                 *
-                 * @param fn {function} - function to bounce 
-                 * @param time {number} - amount of time in miliseconds to wait
-                 * @param context {object} context to apply to passed function 
-                 * @return {function} - keeps from executing passed method before its ready 
-                **/
-                debounce: function(fn, time, context) {
-                    var timeout;
-
-                    return function () {
-                        var args = arguments;
-
-                        clearTimeout(timeout);
-
-                        timeout = api.timeout(utils.proxy(function () {
-                            fn.apply(this, args);
-                        }, context || this), time);
-                    };
-                },
-
-                /**
-                * Delays a method call for given milliseconds 
-                *
-                * @param time {number} - the amount of time to wait 
-                * @param callback {function} - the function to execute when time done 
-                * @return {function}
-                **/
-                delay: (function(callback,  ms) {
-                    var timer = 0;
-
-                    return function(callback, ms) {
-
-                        clearTimeout(timer);
-
-                        timer = api.timeout(callback, ms);
-                    };
-                })(),
-                
-                /**
-                 * Allow passed method to only be executed only once
-                 *
-                 * @param fn {function} - the function to execute once
-                 * @param context {object} - optional context that will be applied to passed method
-                 * @return {function}
-                **/
-                once: function(fn, context) {
-                    var result;
-                    
-                    return function() {
-                        
-                        if (fn) {
-                        
-                            result = fn.apply(context || this, arguments);
-                            
-                            fn = null;
-                        }
-                        
-                        return result;
-                    };
-                },
-
-                /**
-                 * Delay a functions execution by passed amount of time 
-                 *
-                 * @param fn {function} - function to throttle 
-                 * @param time {number} - amount of time in miliseconds to wait
-                 * @param context {object} context to apply to passed function 
-                 * @return {function} - keeps from executing passed method before its ready 
-                **/
-                throttle: function(fn, time, context) {
-                    var run;
-                    
-                    time = time || 1000;
-
-                    return function() {
-                        var args = arguments,
-                            ctx = context || this;
-
-                        if (!run) {
-                            run = true;
-
-                            api.timeout(function() {
-                                fn.apply(ctx, args);
-                                run = false;
-                            }, time);
-                        }
-                    };
-                },
-
-                /**
-                 * Attempt to defer a function call 
-                 *
-                 * @param fn {function} - function to defer 
-                 * @param context {object} context to apply to passed function 
-                 * @return void 
-                **/
-                defer: function(fn, context) {
-                    var args = arguments,
-                        ctx = context || this;
-
-                    api.timeout(function() {
-                        fn.apply(ctx, args);
-                    }, 0);
-                }
-            });
-        }
-    };
-});
-;/* --------------------------------------- *
-* Guerrilla UI                             *
 * @module: Cellar, handle local & session  * 
 * storage api's                            *
 * ---------------------------------------- */
@@ -4682,741 +4111,3 @@ $.GUI().use(function(G) {
         load: _load
     };
 });
-;/* --------------------------------------- *
-* Guerrilla UI                             *
-* @module: Background Loaded jQuery plugin * 
-* ---------------------------------------- */
-$.GUI().create('background', function(gui) {
-
-    return {
-        fn: function($el, options) {
-            var _this = this, defaults, settings;
-
-            defaults = {
-                afterLoaded: function() {
-                    this.addClass('bg-loaded');
-                }
-            };
-            settings = gui.utils.merge({}, defaults, options);
-
-            $el.each(function() {
-                var $this = gui.$(this), bgImages;
-
-                bgImages = window.getComputedStyle($this.get(0), '::before').getPropertyValue('content').replace(/'/g, "").replace(/"/g, "").split(', ');
-
-                $this.data('loaded-count', 0);
-
-                gui.each(bgImages, function(key, value) {
-                    var img = value.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-
-                    gui.$('<img/>').attr('src', img).load(function() {
-                        $(this).remove(); // prevent memory leaks
-
-                        $this.data('loaded-count', $this.data('loaded-count') + 1);
-
-                        if ($this.data('loaded-count') >= bgImages.length) {
-                            settings.afterLoaded.call($this);
-                        }
-                    });
-                });
-            });
-        }
-    };
-}).start('background');
-;/* --------------------------------------- *
-* Guerrilla UI                             *
-* @module: GUI Layer Slider jQuery plugin  * 
-* ---------------------------------------- */
-$.GUI().create('LayerSlider', function(G) {
-
-    var Layers = function($el, opts) {
-        var _this = this, slider = $el;
-        
-        // default options
-        this.defaults = {
-            debug: false,
-            text: null,
-            style: 'random',
-            brand: null,
-            image: null,
-            showing: {
-                extra: null,
-                slider: true
-            },
-            focused: true,
-            collection: [],
-            animating: true,
-            capTime: 1500,
-            brandTime: 1500,
-            layerTime: 1200,
-            slideTime: 6500,
-            animationTime: 1500,
-            slide: null,
-            start: function(){},
-            stop: function(){},
-            pause: function(){},
-            canvas: null,
-            container: $('#layerslider'),
-            selector: $('.slides > li'),
-        };
-
-        // Public Properties //
-        slider.opts = G.merge({}, _this.defaults, opts);
-
-        // Animation Library //
-        slider.animations = {
-            speacial:['hinge','rollIn','rollOut'],
-            lightspeed:['lightSpeedIn','lightSpeedOut'],
-            flip:['flip','flipInX','flipInY','flipOutX','flipOutY'],
-            texts:['lightSpeedIn','flip','rubberBand','zoomIn','rollIn','fadeInDownBig','swing'],
-            attention:['bounce','flash','wobble','pulse','shake','swing','tada','rubberBand'],
-            rotate:['rotateIn','rotateInDownLeft','rotateInDownRight','rotateInUpLeft','rotateInUpRight'],
-            fade:['fadeIn','fadeInDown','fadeInDownBig','fadeInUp','fadeInUpBig','fadeInLeft','fadeInLeftBig','fadeInRight','fadeInRightBig'],
-            zoom:['zoomIn','zoomDownIn','zoomUpIn','zoomLeftIn','zoomRightIn','zoomOut','zoomUpOut','zoomDownOut','zoomLeftOut','zoomRightOut'],
-            bounce:['bounceIn','bounceOut','bounceInDown','bounceInUp','bounceInLeft','bounceInRight','bounceOutUp','bounceOutLeft','bounceOutRight','bounceOutDown']
-        };
-
-        // Store Reference //
-        $.data($el, 'LayerSlider', slider);
-
-        // Private Methods //
-        this.methods = {
-
-            activeIndex:0,
-
-            animate: function($el, anim, time) {
-                if (time === undefined) {
-                    time = slider.opts.animationTime || 1500;
-                }
-
-                $el.show().addClass(anim);
-
-                setTimeout(function() {
-                    $el.removeClass(anim);
-                }, time);
-            },
-
-            setup: function() {
-                slider.data = slider.opts.collection || [];
-
-                return $.each($('.item', slider), function(idx, el) {
-                    slider.data.push(el);
-                });
-            },
-
-            slide_next: function() {
-                var _this = this,
-                    current = $('.item.active', slider),
-                    next = current.next().length ? current.next() : current.siblings().first(),
-                    rand = Math.floor(Math.random() * (9 - 0) + 0);
-
-                if (this.activeIndex == slider.data.length - 1) {
-
-                    this.reset();
-
-                } else {
-
-                    this.activeIndex++;
-                }
-
-                // Reset Extra Markup //
-                if (slider.opts.showing.extra) {
-                    $(slider.opts.showing.extra).css('display','none');
-                    $(slider.opts.showing.extra).children('div').css('display','none');
-                }
-
-                switch (slider.opts.style) {
-                    case 'random':
-                        current.css('display','none').removeClass('active');
-                        current.children('div').css('display','none');
-
-                        next.addClass('active');
-                        _this.animate(next, slider.animations.fade[rand]);
-                        break;
-                        
-                    case 'fade':
-                        current.fadeOut(500).removeClass('active');
-                        next.fadeIn(500).addClass('active');
-                        break;
-
-                    case 'slide':
-                        next.addClass('active');
-
-                        current.removeClass('active');
-                        current.animate({
-
-                            left: - slider.slideWidth
-
-                        }, 200, function() {
-
-                            $('.slides li:first-child').appendTo('.slides');
-                            $('slides').css('left', '0');
-                        });
-                        break;
-
-                    default:
-                        break;
-                }
-            },
-
-            slide_prev: function() {
-                var _this = this, current = $('.item.active', slider),
-                    prev = current.previous().length ? current.previous() : current.siblings().last(),
-                    rand = Math.floor(Math.random() * (9 - 0) + 0);
-
-                switch (slider.opts.style) {
-                    case 'random':
-                        current.css('display','none').removeClass('active');
-                        current.children('div').css('display','none');
-
-                        prev.addClass('active');
-                        _this.animate(prev, slider.animations.fade[rand]);
-                        break;
-
-                    case 'fade':
-                        current.fadeOut(500).removeClass('active');
-                        prev.fadeIn(500).addClass('active');
-                        break;
-
-                    case 'slide':
-                        slider.opts.selector.animate({
-
-                            left: + slider.slideWidth
-
-                        }, 400, function(){
-
-                            $('.slides li:last-child').prependTo('.slides');
-                            $('.slides').css('left', '0');
-                        });
-                        break;
-
-                    default:
-                        break;
-                }
-            },
-
-            layer: function(item) {
-                var _this = this, rand, caption, brand;
-
-                rand = Math.floor(Math.random() * (5 - 0) + 0);
-
-                brand = item.find('.brand');
-                caption = item.find('.caption');
-
-                this.animate(item, 'fadeIn', 500);
-
-                $(slider).trigger('slide');
-
-                setTimeout(function() {
-                    brand.show();
-
-                    _this.animate(
-                        brand,
-                        slider.animations.rotate[rand], 
-                        slider.opts.brandTime
-                    );
-
-                    setTimeout(function() {
-                        caption.show();
-
-                        _this.animate(
-                            caption,
-                            slider.animations.texts[rand], 
-                            slider.opts.capTime
-                        );
-
-                    }, slider.opts.layerTime);
-
-                }, slider.opts.layerTime);
-            },
-
-            cycle: function() {
-                var _this = this, length, item;
-            
-                length = slider.data.length;
-                item = $(slider.data[this.activeIndex]);
-
-                if (this.activeIndex < len && slider.opts.animating) {
-                    this.layer(item);
-
-                    setTimeout(function() {
-
-                        _this.slide_next();
-                        _this.cycle(); 
-
-                    }, slider.opts.slideTime);
-
-                } else if (slider.opts.animating) {
-
-                    this.reset();
-                    item = $(slider.data[this.activeIndex]);
-
-                    this.layer(item);
-
-                    setTimeout(function() {
-
-                        _this.slide_next();
-                        _this.cycle(); 
-
-                    }, slider.opts.slideTime);
-                }
-            },
-
-            bind_events: function() {
-                var _this = this;
-
-                // Custom Events //
-                $(slider).bind('slide', function(_e) {
-                    _e.stopPropagation();
-
-                    if (slider.opts.slide !== null) {
-                        if (typeof(slider.opts.slide) === 'function') {
-                
-                            slider.opts.slide();
-                        }
-                    } else {
-
-                        if (slider.opts.showing.extra) {
-                            $(slider.opts.showing.extra).show('slow');
-                        }
-                    }
-                });
-
-                $(slider).bind('start',function(_e) {
-                    _e.preventDefault();
-            
-                });
-
-                $(slider).bind('stop',function(_e) {
-                    _e.preventDefault();
-            
-                });
-
-                // Slider Controls //
-                $('.slider-control.right',slider).bind('click',function(_e) {
-                    _e.preventDefault();
-                    _this.slide_next();
-                });
-
-                $('.slider-control.left',slider).bind('click',function(_e) {
-                    _e.preventDefault();
-                    _this.slide_prev();
-                });
-
-                $(slider.opts.container).hover(function(_e) {
-                    _e.stopPropagation();
-                    slider.opts.animating = false;
-
-                    }, function() {
-                        slider.opts.animating = true;
-                      }
-                  );
-              },
-
-            reset: function() {
-              this.activeIndex = 0;
-            },
-
-            init: function() {
-                console.log('Layers: ', slider.opts);
-                // Markup //
-                this.setup();
-
-                // Slideshow Loop //
-                this.cycle();
-
-                // Controls //
-                this.bind_events();
-            }
-        };
-
-        // Default Callbacks //
-        slider.start = function() {};
-
-        slider.stop = function() {};
-
-        slider.pause = function() {};
-
-        slider.slide = function() {
-          if (slider.opts.showing.extra) {
-            $(slider.opts.showing.extra).show('slow');
-          }
-        };
-
-        slider.slideCount = slider.opts.selector.length;
-        slider.slideWidth = slider.opts.selector.width();
-        slider.slideHeight = slider.opts.selector.height();
-        slider.sliderUlWidth = slider.slideCount * slider.slideWidth;
-
-        // Initialize Slider //
-        this.methods.init();
-    };
-  
-    return {
-        fn: function() {
-
-        },
-    };
-});
-;/* --------------------------------------- *
-* Guerrilla UI                             *
-* @module: GUI Star jQuery plugin          * 
-* ---------------------------------------- */
-$.GUI().create('Stargaze', function(gui) {
-
-    var Stargaze = function(canvas, options) {
-
-        var $canvas = gui.$(canvas) || null,
-            context = (canvas) ? canvas.getContext('2d') : null,
-            defaults = {
-                star: {
-                    color: 'rgba(255, 255, 255, .7)',
-                    width: 1
-                },
-                line: {
-                    color: 'rgba(255, 255, 255, .7)',
-                    width: 0.2
-                },
-                position: {
-                    x: 0, 
-                    y: 0 
-                },
-                width: window.innerWidth,
-                height: window.innerHeight,
-                velocity: 0.1,
-                length: 100,
-                distance: 100,
-                radius: 150,
-                stars: []
-            },
-            config = $.extend(true, {}, defaults, options);
-
-        function Star (){
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-
-            this.vx = (config.velocity - (Math.random() * 0.5));
-            this.vy = (config.velocity - (Math.random() * 0.5));
-
-            this.radius = Math.random() * config.star.width;
-        }
-
-        Star.prototype = {
-
-            create: function(){
-                context.beginPath();
-                context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                context.fill();
-            },
-
-            animate: function(){
-                var i;
-
-                for(i = 0; i < config.length; i++){
-                    var star = config.stars[i];
-
-                    if(star.y < 0 || star.y > canvas.height){
-                        star.vx = star.vx;
-                        star.vy = - star.vy;
-
-                    }else if (star.x < 0 || star.x > canvas.width){
-                        star.vx = - star.vx;
-                        star.vy = star.vy;
-                    }
-
-                    star.x += star.vx;
-                    star.y += star.vy;
-                }
-            },
-
-            line:function(){
-                var length = config.length,
-                    iStar,
-                    jStar,
-                    i,
-                    j;
-
-                for(i = 0; i < length; i++){
-                    for(j = 0; j < length; j++){
-                        iStar = config.stars[i];
-                        jStar = config.stars[j];
-
-                        if (
-                            (iStar.x - jStar.x) < config.distance &&
-                            (iStar.y - jStar.y) < config.distance &&
-                            (iStar.x - jStar.x) > - config.distance &&
-                            (iStar.y - jStar.y) > - config.distance
-                        ) {
-                            if (
-                                (iStar.x - config.position.x) < config.radius &&
-                                (iStar.y - config.position.y) < config.radius &&
-                                (iStar.x - config.position.x) > - config.radius &&
-                                (iStar.y - config.position.y) > - config.radius
-                            ) {
-                                context.beginPath();
-                                context.moveTo(iStar.x, iStar.y);
-                                context.lineTo(jStar.x, jStar.y);
-                                context.stroke();
-                                context.closePath();
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
-        this.createStars = function(){
-            var length = config.length,
-                star, i;
-
-            context.clearRect(0, 0, canvas.width, canvas.height);
-
-            for(i = 0; i < length; i++){
-                config.stars.push(new Star());
-
-                star = config.stars[i];
-                star.create();
-            }
-
-            star.line();
-            star.animate();
-        };
-
-        this.setCanvas = function(){
-            canvas.width = config.width;
-            canvas.height = config.height;
-        };
-
-        this.setContext = function(){
-            context.fillStyle = config.star.color;
-            context.strokeStyle = config.line.color;
-            context.lineWidth = config.line.width;
-        };
-
-        this.setInitialPosition = function(){
-            if(!options || !options.hasOwnProperty('position')){
-                config.position = {
-                    x: canvas.width * 0.5,
-                    y: canvas.height * 0.5
-                };
-            }
-        };
-
-        this.loop = function(callback){
-            callback();
-
-            window.requestAnimationFrame(function(){
-                this.loop(callback);
-            }.bind(this));
-        };
-
-        this.bind = function(){
-            $(document).on('mousemove', function(e){
-                config.position.x = e.pageX - $canvas.offset().left;
-                config.position.y = e.pageY - $canvas.offset().top;
-            });
-        };
-
-        this.init = function(){
-            this.setCanvas();
-            this.setContext();
-            this.setInitialPosition();
-            this.loop(this.createStars);
-            this.bind();
-        };
-    };
-
-    return {
-        fn: function($el, options) {
-
-            return new Stargaze($el[0], options).init();
-        },
-    };
-}).start('Stargaze');
-;/* --------------------------------------- *
-* Guerrilla UI                             *
-* @module: GUI Fog jQuery plugin           * 
-* ---------------------------------------- */
-$.GUI().create('Misty', function(G) {
-
-    // Create an array to store our particles
-    var particles = [];
-
-    // The amount of particles to render
-    var particleCount = 30;
-
-    // The maximum velocity in each direction
-    var maxVelocity = 2;
-
-    // The target frames per second (how often do we want to update / redraw the scene)
-    var targetFPS = 33;
-
-    // Set the dimensions of the canvas as variables so they can be used.
-    var canvasWidth = 400;
-    var canvasHeight = 400;
-
-    // Create an image object (only need one instance)
-    var imageObj = new Image();
-
-    // Once the image has been downloaded then set the image on all of the particles
-    imageObj.onload = function() {
-        particles.forEach(function(particle) {
-                particle.setImage(imageObj);
-        });
-    };
-
-    // Once the callback is arranged then set the source of the image
-    imageObj.src = "img/fog.png";
-
-    // A function to create a particle object.
-    function Particle(context) {
-
-        // Set the initial x and y positions
-        this.x = 0;
-        this.y = 0;
-
-        // Set the initial velocity
-        this.xVelocity = 0;
-        this.yVelocity = 0;
-
-        // Set the radius
-        this.radius = 5;
-
-        // Store the context which will be used to draw the particle
-        this.context = context;
-
-        // The function to draw the particle on the canvas.
-        this.draw = function() {
-            
-            // If an image is set draw it
-            if (this.image) {
-                this.context.drawImage(this.image, this.x-128, this.y-128);         
-                // If the image is being rendered do not draw the circle so break out of the draw function                
-                return;
-            }
-            // Draw the circle as before, with the addition of using the position and the radius from this object.
-            this.context.beginPath();
-            this.context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-            this.context.fillStyle = "rgba(0, 255, 255, 0)";
-            this.context.fill();
-            this.context.closePath();
-        };
-
-        // Update the particle.
-        this.update = function() {
-            // Update the position of the particle with the addition of the velocity.
-            this.x += this.xVelocity;
-            this.y += this.yVelocity;
-
-            // Check if has crossed the right edge
-            if (this.x >= canvasWidth) {
-                this.xVelocity = -this.xVelocity;
-                this.x = canvasWidth;
-            }
-            // Check if has crossed the left edge
-            else if (this.x <= 0) {
-                this.xVelocity = -this.xVelocity;
-                this.x = 0;
-            }
-
-            // Check if has crossed the bottom edge
-            if (this.y >= canvasHeight) {
-                this.yVelocity = -this.yVelocity;
-                this.y = canvasHeight;
-            }
-            
-            // Check if has crossed the top edge
-            else if (this.y <= 0) {
-                this.yVelocity = -this.yVelocity;
-                this.y = 0;
-            }
-        };
-
-        // A function to set the position of the particle.
-        this.setPosition = function(x, y) {
-            this.x = x;
-            this.y = y;
-        };
-
-        // Function to set the velocity.
-        this.setVelocity = function(x, y) {
-            this.xVelocity = x;
-            this.yVelocity = y;
-        };
-        
-        this.setImage = function(image) {
-            this.image = image;
-        };
-    }
-
-    // A function to generate a random number between 2 values
-    function generateRandom(min, max) {
-        return Math.random() * (max - min) + min;
-    }
-
-    // The canvas context if it is defined.
-    var context;
-
-    // Initialise the scene and set the context if possible
-    function init() {
-        var i, particle, canvas;
-        
-        canvas = document.getElementById('bg-canvas');
-
-        if (canvas.getContext) {
-
-            // Set the context variable so it can be re-used
-            context = canvas.getContext('2d');
-
-            // Create the particles and set their initial positions and velocities
-            for (i = 0; i < particleCount; i++) {
-                particle = new Particle(context);
-                
-                // Set the position to be inside the canvas bounds
-                particle.setPosition(generateRandom(0, canvasWidth), generateRandom(0, canvasHeight));
-                
-                // Set the initial velocity to be either random and either negative or positive
-                particle.setVelocity(generateRandom(-maxVelocity, maxVelocity), generateRandom(-maxVelocity, maxVelocity));
-                particles.push(particle);            
-            }
-        } else {
-            gui.warn("Please use a modern browser");
-        }
-    }
-
-    // The function to draw the scene
-    function draw() {
-        // draw clear canvas 
-        context.clearRect(0,0,canvasWidth,canvasHeight);
-
-        // Go through all of the particles and draw them.
-        particles.forEach(function(particle) {
-            particle.draw();
-        });
-    }
-
-    // Update the scene
-    function update() {
-        particles.forEach(function(particle) {
-            particle.update();
-        });
-    }
-
-    return {
-        fn: function() {
-            // Initialize the scene
-            init();
-
-            // If the context is set then we can draw the scene (if not then the browser does not support canvas)
-            if (context) {
-                setInterval(function() {
-                    // Update the scene befoe drawing
-                    update();
-
-                    // Draw the scene
-                    draw();
-                }, 1000 / targetFPS);
-            }
-        },
-    };
-}).start('Misty');
