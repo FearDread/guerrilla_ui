@@ -21,6 +21,8 @@ module.exports = function(grunt){
                     'src/core/modules/utils/utils.js',
                     'src/core/modules/utils/runner.js',
                     'src/core/broker.js',
+	  	    'src/core/modules/injector/injector.js',
+		    'src/core/modules/binder/binder.js',
                     'src/core/modules/sandbox/api.js',
                     'src/core/core.js',
                     'src/core/plugin.js',
