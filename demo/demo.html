@@ -70,7 +70,7 @@
 
     <!-- Header -->
     <a name="about"></a>
-    <canvas height="600" class="canvas"></canvas>
+    <canvas height="600" class="canvas" id="bg-canvas"></canvas>
     <div class="intro-header">
         <div class="container">
 
@@ -297,8 +297,8 @@
               load: function() {
                   gui.log('load called in mod B');
 
-                  gui.$('.canvas').stargaze();
-                  // gui.$('.canvas').misty();
+                  // gui.$('.canvas').stargaze();
+                  gui.$('.canvas').misty();
 
                   gui.$('.intro').background({
                       afterLoaded: function() {
@@ -344,9 +344,6 @@
 
       // start instance of all modules
       $.GUI().start(['moduleA','moduleB']);
-
-      // starting new dependency injectoin and loading of library files.
-      // so only core is actually compiled into distro and any extra library is loaded dynamically and only when asked for
 
     </script>
 
